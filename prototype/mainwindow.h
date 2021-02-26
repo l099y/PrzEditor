@@ -11,7 +11,7 @@
 #include <QTreeView>
 #include <QLabel>
 #include <QGraphicsScene>
-#include <extendedbutton.h>
+#include <QPushButton>
 #include <QGraphicsScene>
 #include <timelinescene.h>
 
@@ -50,7 +50,7 @@ public:
 
     QLabel *params1lab = new QLabel(params1);
     QLabel *params2lab = new QLabel(params2);
-    ExtendedButton *button = new ExtendedButton(params2);
+    QPushButton *button = new QPushButton(params2);
 
     MainWindow(QWidget *parent = nullptr);
 

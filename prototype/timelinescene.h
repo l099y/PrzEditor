@@ -4,7 +4,6 @@
 #include <QGraphicsScene>
 #include <QObject>
 #include <QList>
-#include <przbox.h>
 
 class TimelineScene : public QGraphicsScene
 {
@@ -13,10 +12,11 @@ class TimelineScene : public QGraphicsScene
 
     TimelineScene(QObject* parent = nullptr);
     ~TimelineScene();
-protected:
-   void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+
 public slots:
-   void displayItems();
+   void newRect();
+   void debugItems();
+   void clearItems();
 };
 
 #endif // TIMELINESCENE_H

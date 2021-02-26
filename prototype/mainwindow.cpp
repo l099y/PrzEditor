@@ -12,8 +12,15 @@ MainWindow::MainWindow(QWidget *parent)
     initLayouts();
     QPushButton* a = new QPushButton();
     a->setText("info");
-    connect(a, SIGNAL(clicked(bool)), timeline, SLOT(displayItems()));
+    connect(a, SIGNAL(clicked(bool)), timeline, SLOT(debugItems()));
     sublayoutEditor->addWidget(a);
+    QPushButton* b = new QPushButton();
+    b->setText("clear");
+    connect(b, SIGNAL(clicked(bool)), timeline, SLOT(clearItems()));
+    QPushButton* c = new QPushButton();
+    c->setText("new");
+    connect(c, SIGNAL(clicked(bool)), timeline, SLOT(newRect()));
+    sublayoutEditor->addWidget(c);
 }
 void MainWindow ::initLayouts(){
     setupTreeItem();
