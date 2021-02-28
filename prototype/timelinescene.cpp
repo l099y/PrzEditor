@@ -4,6 +4,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QBrush>
 #include <QGraphicsRectItem>
+#include <extendedqgri.h>
 
 TimelineScene::TimelineScene(QObject* parent): QGraphicsScene(parent)
 {
@@ -53,8 +54,13 @@ void TimelineScene :: clearItems(){
 void TimelineScene :: newRect(){
     QPen pen (Qt::black);
     QBrush brush (Qt::transparent);
-    auto *rect = addRect(0,0,100,100, pen, brush);
+    ExtendedQGRI *rect = new ExtendedQGRI();
+    rect->setPen(pen);
+    rect->setBrush(brush);
     rect->setFlag(QGraphicsItem::ItemIsMovable);
     rect->setFlag(QGraphicsItem::ItemIsSelectable);
+    rect->setRect(0,0,100,100);
+    addItem(rect);
 }
+
 

@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setCentralWidget(widget);
     initLayouts();
+    timelineView->setRenderHint(QPainter::Antialiasing);
     QPushButton* a = new QPushButton();
     a->setText("info");
     connect(a, SIGNAL(clicked(bool)), timeline, SLOT(debugItems()));
