@@ -9,9 +9,6 @@
 TimelineScene::TimelineScene(QObject* parent): QGraphicsScene(parent)
 {
     setSceneRect(0,0, 1000, 100);
-    //        for (int i = 0; i <1000; i++){
-    //            addRect(i*10, 0, 10, 100);
-    //        }
 }
 
 TimelineScene::~TimelineScene(){
@@ -19,36 +16,17 @@ TimelineScene::~TimelineScene(){
 
 void TimelineScene::activatelxt()
 {
-    if (selectedItems().size() == 1){
-        auto *item = selectedItems().at(0);
-        QGraphicsRectItem* rect = (QGraphicsRectItem*)item;
-        previousxpos = selectedItems().at(0)->x();
-        previousboxwidth = rect->rect().width();
-    }
-
-    leftxtend = true;
     qDebug()<<"leftxtend activated in timeline";
 }
 
 void TimelineScene::activaterxt()
 {
-    if (selectedItems().size() == 1)
-    {
-        auto *item = selectedItems().at(0);
-        QGraphicsRectItem* rect = (QGraphicsRectItem*)item;
-        previousxpos = selectedItems().at(0)->x();
-        previousboxwidth = rect->rect().width();
-    }
-    rightxtend = true;
-    qDebug()<<"leftxtend activated in timeline";
+    qDebug()<<"right activated in timeline";
 }
 
 void TimelineScene::deactivatext()
 {
-    leftxtend = false;
-    rightxtend = false;
-    qDebug()<<"xtension mod déactivated";
-    previousxpos = -1000;
+    qDebug()<<"xtension mod deactivated";
 }
 
 
@@ -75,7 +53,6 @@ void TimelineScene::deactivatext()
 //        }
 
 void TimelineScene :: debugItems(){
-    qDebug()<<"reached diplayItems";
     foreach (const QGraphicsItem* item, items()){
         qDebug()<<item<<" x: "<<item->x()<< ", y: "<<item->y();
     }
@@ -89,50 +66,54 @@ void TimelineScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 {
     QGraphicsScene :: mouseMoveEvent (e);
     if (selectedItems().size() == 1){
-        auto *item = selectedItems().at(0);
-       ExtendedQGRI* rect = (ExtendedQGRI*)item;
-        qDebug()<< previousxpos;
-        if(leftxtend){
-            if (previousxpos - e->scenePos().x()>=0  && previousxpos> -990){
-                rect->setRect(0, 0, (previousxpos - e->scenePos().x())+previousboxwidth, 100);
-                rect->setX(e->scenePos().x());
-            }
-            else if (previousxpos - e->scenePos().x()<=0 && previousxpos +previousboxwidth - e->scenePos().x()>=0  && previousxpos> -990){
-                rect->setRect(0, 0, (previousxpos - e->scenePos().x())+previousboxwidth, 100);
-                rect->setX(e->scenePos().x());
-            }
-            else{
-                rect->setX(previousxpos + previousboxwidth - 4);
-                rect->setRect(0, 0, 4, 100);
-            }
-        }
-        else if(rightxtend)
-        {
-            if ((previousxpos+previousboxwidth)-e->scenePos().x()<=0 && previousxpos > -990){
-                rect->setRect(0, 0, (e->scenePos().x()-previousxpos), 100);
-                //rect->setX(e->scenePos().x());
-                qDebug()<<"trying to stretch from right";
-            }
-            else if (previousxpos - e->scenePos().x()+previousboxwidth>=0 &&  e->scenePos().x() >= previousxpos && previousxpos > -990){
-                rect->setRect(0, 0, (e->scenePos().x()-previousxpos), 100);
-            }
-            else{
-                rect->setX(previousxpos);
-                rect->setRect(0, 0, 4, 100);
-            }
-        }
+        handleBoxResize(e);
     }
 }
 
 void TimelineScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
 {
     QGraphicsScene :: mouseReleaseEvent(e);
-    leftxtend = false;
-    rightxtend = false;
-    previousxpos = -1000;
+}
+void TimelineScene::handleBoxResize(QGraphicsSceneMouseEvent *e){
+    auto *item = selectedItems().at(0);
+   ExtendedQGRI* rect = (ExtendedQGRI*)item;
+    if(rect->leftxtend){
+        if (rect->previousxpos - e->scenePos().x()>=0){
+            rect->setRect(0, 0, (rect->previousxpos - e->scenePos().x())+rect->previousboxwidth, 100);
+            rect->setX(e->scenePos().x());
+            rect->setY(0);
+        }
+        else if (rect->previousxpos - e->scenePos().x()<=0 && rect->previousxpos +rect->previousboxwidth - e->scenePos().x()>=0){
+            rect->setRect(0, 0, (rect->previousxpos - e->scenePos().x())+rect->previousboxwidth, 100);
+            rect->setX(e->scenePos().x());
+            rect->setY(0);
+        }
+        else{
+            rect->setX(rect->previousxpos + rect->previousboxwidth - 4);
+            rect->setY(0);
+            rect->setRect(0, 0, 4, 100);
+        }
+    }
+    else if(rect->rightxtend)
+    {
+        if ((rect->previousxpos+rect->previousboxwidth)-e->scenePos().x()<=0){
+            rect->setRect(0, 0, (e->scenePos().x()- rect->previousxpos), 100);
+            rect->setY(0);
+            rect->setX(rect->previousxpos);
+        }
+        else if (rect->previousxpos - e->scenePos().x()+rect->previousboxwidth>=0 &&  e->scenePos().x() >= rect->previousxpos){
+            rect->setRect(0, 0, (e->scenePos().x()-rect->previousxpos), 100);
+            rect->setY(0);
+            rect->setX(rect->previousxpos);
+        }
+        else{
+            rect->setRect(0, 0, 4, 100);
+            rect->setY(0);
+            rect->setX(rect->previousxpos);
+        }
+    }
 
 }
-
 void TimelineScene :: newRect(){
     QPen pen (Qt::black);
     QBrush brush (Qt::transparent);

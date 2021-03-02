@@ -13,19 +13,16 @@ ExtendedQGRI::ExtendedQGRI(): QGraphicsRectItem()
 
 ExtendedQGRI::~ExtendedQGRI()
 {
-    delete(this);
+
 }
 
 void ExtendedQGRI::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e)
 {
     QGraphicsRectItem::mouseDoubleClickEvent(e);
-    qDebug()<<e;
-    qDebug()<<boundingRect();
 }
 
 void ExtendedQGRI::hoverEnterEvent(QGraphicsSceneHoverEvent *e)
 {
-    qDebug()<<"extended hoverEnter";
     QBrush brush (Qt::red);
     setBrush(brush);
     update();
@@ -34,15 +31,14 @@ void ExtendedQGRI::hoverEnterEvent(QGraphicsSceneHoverEvent *e)
 
 void ExtendedQGRI::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
 {
-    qDebug()<<"mouse released";
+    qDebug()<<"mouse released in Rect class";
     QGraphicsItem :: mouseReleaseEvent(e);
-    if (xtendleft ||xtendright)
-        emitter->emitxtendDeactived();
-    xtendleft = false;
-    xtendright = false;
+    leftxtend = false;
+    rightxtend = false;
     if (scenePos().y()!=0){
         setPos(scenePos().x(), 0);
     }
+    setPreviousToCurrent();
 }
 
 void ExtendedQGRI::hoverLeaveEvent(QGraphicsSceneHoverEvent *e)
@@ -73,33 +69,28 @@ void ExtendedQGRI::hoverMoveEvent(QGraphicsSceneHoverEvent *e)
 
 void ExtendedQGRI::mousePressEvent(QGraphicsSceneMouseEvent *e)
 {
-    qDebug()<<e;
     if(e->pos().x()>= 0 && e->pos().x()<=3)
     {
         emitter->leftxtndactivated();
-        xtendleft = true;
+        leftxtend = true;
+        rightxtend = false;
     }
     else if(e->pos().x()>= boundingRect().width()-3 && e->pos().x()<= boundingRect().width()){
-        xtendright = true;
+        rightxtend = true;
+        leftxtend = false;
         emitter->rightxtndactivated();
     }
      QGraphicsRectItem::mousePressEvent(e);
-
-
 }
 
 void ExtendedQGRI::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 {
-    if (xtendleft){
-
-    }
-    else if (xtendright){
-
-    }
-    else{
         QGraphicsRectItem :: mouseMoveEvent(e);
-        //qDebug()<<e;
-    }
+}
+
+void ExtendedQGRI::setPreviousToCurrent(){
+    previousboxwidth = rect().width();
+    previousxpos = scenePos().x();
 }
 
 

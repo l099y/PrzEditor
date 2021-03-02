@@ -11,10 +11,6 @@ class TimelineScene : public QGraphicsScene
 {
     Q_OBJECT
     public:
-    bool leftxtend = false;
-    bool rightxtend = false;
-    float previousxpos;
-    float previousboxwidth;
     TimelineScene(QObject* parent = nullptr);
     ~TimelineScene();
 
@@ -25,6 +21,7 @@ public slots:
    void newRect();
    void debugItems();
    void clearItems();
+   void handleBoxResize(QGraphicsSceneMouseEvent *e);
 protected:
    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *e);
    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);

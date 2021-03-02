@@ -14,9 +14,12 @@ class ExtendedQGRI : public QGraphicsRectItem
 public:
     ExtendedQGRI();
     ~ExtendedQGRI();
-    bool xtendleft = false;
-    bool xtendright = false;
+    bool leftxtend = false;
+    bool rightxtend = false;
+    float previousxpos;
+    float previousboxwidth;
     Emitter *emitter = new Emitter(nullptr);
+    void setPreviousToCurrent();
 
 protected:
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e);
