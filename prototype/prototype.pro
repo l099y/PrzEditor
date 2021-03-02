@@ -12,11 +12,13 @@ SOURCES += \
     extendedqgri.cpp \
     main.cpp \
     mainwindow.cpp \
+    emitter.cpp \
     timelinescene.cpp
 
 HEADERS += \
     extendedqgri.h \
     mainwindow.h \
+    emitter.h \
     timelinescene.h
 
 FORMS += \

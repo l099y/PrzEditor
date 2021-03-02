@@ -15,7 +15,40 @@ TimelineScene::TimelineScene(QObject* parent): QGraphicsScene(parent)
 }
 
 TimelineScene::~TimelineScene(){
-    delete(this);
+}
+
+void TimelineScene::activatelxt()
+{
+    if (selectedItems().size() == 1){
+        auto *item = selectedItems().at(0);
+        QGraphicsRectItem* rect = (QGraphicsRectItem*)item;
+        previousxpos = selectedItems().at(0)->x();
+        previousboxwidth = rect->rect().width();
+    }
+
+    leftxtend = true;
+    qDebug()<<"leftxtend activated in timeline";
+}
+
+void TimelineScene::activaterxt()
+{
+    if (selectedItems().size() == 1)
+    {
+        auto *item = selectedItems().at(0);
+        QGraphicsRectItem* rect = (QGraphicsRectItem*)item;
+        previousxpos = selectedItems().at(0)->x();
+        previousboxwidth = rect->rect().width();
+    }
+    rightxtend = true;
+    qDebug()<<"leftxtend activated in timeline";
+}
+
+void TimelineScene::deactivatext()
+{
+    leftxtend = false;
+    rightxtend = false;
+    qDebug()<<"xtension mod déactivated";
+    previousxpos = -1000;
 }
 
 
@@ -51,6 +84,55 @@ void TimelineScene :: debugItems(){
 void TimelineScene :: clearItems(){
 
 }
+
+void TimelineScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
+{
+    QGraphicsScene :: mouseMoveEvent (e);
+    if (selectedItems().size() == 1){
+        auto *item = selectedItems().at(0);
+       ExtendedQGRI* rect = (ExtendedQGRI*)item;
+        qDebug()<< previousxpos;
+        if(leftxtend){
+            if (previousxpos - e->scenePos().x()>=0  && previousxpos> -990){
+                rect->setRect(0, 0, (previousxpos - e->scenePos().x())+previousboxwidth, 100);
+                rect->setX(e->scenePos().x());
+            }
+            else if (previousxpos - e->scenePos().x()<=0 && previousxpos +previousboxwidth - e->scenePos().x()>=0  && previousxpos> -990){
+                rect->setRect(0, 0, (previousxpos - e->scenePos().x())+previousboxwidth, 100);
+                rect->setX(e->scenePos().x());
+            }
+            else{
+                rect->setX(previousxpos + previousboxwidth - 4);
+                rect->setRect(0, 0, 4, 100);
+            }
+        }
+        else if(rightxtend)
+        {
+            if ((previousxpos+previousboxwidth)-e->scenePos().x()<=0 && previousxpos > -990){
+                rect->setRect(0, 0, (e->scenePos().x()-previousxpos), 100);
+                //rect->setX(e->scenePos().x());
+                qDebug()<<"trying to stretch from right";
+            }
+            else if (previousxpos - e->scenePos().x()+previousboxwidth>=0 &&  e->scenePos().x() >= previousxpos && previousxpos > -990){
+                rect->setRect(0, 0, (e->scenePos().x()-previousxpos), 100);
+            }
+            else{
+                rect->setX(previousxpos);
+                rect->setRect(0, 0, 4, 100);
+            }
+        }
+    }
+}
+
+void TimelineScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
+{
+    QGraphicsScene :: mouseReleaseEvent(e);
+    leftxtend = false;
+    rightxtend = false;
+    previousxpos = -1000;
+
+}
+
 void TimelineScene :: newRect(){
     QPen pen (Qt::black);
     QBrush brush (Qt::transparent);
@@ -60,6 +142,9 @@ void TimelineScene :: newRect(){
     rect->setFlag(QGraphicsItem::ItemIsMovable);
     rect->setFlag(QGraphicsItem::ItemIsSelectable);
     rect->setRect(0,0,100,100);
+    connect(rect->emitter, SIGNAL(leftxtndactivated()), this, SLOT(activatelxt()));
+    connect(rect->emitter, SIGNAL(rightxtndactivated()), this, SLOT(activaterxt()));
+    connect(rect->emitter, SIGNAL(xtendDeactived()), this, SLOT(deactivatext()));
     addItem(rect);
 }
 
