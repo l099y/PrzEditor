@@ -34,7 +34,7 @@ void MainWindow ::initLayouts(){
 
 }
 void MainWindow::initcontenance(){
-    layout->addWidget(tree);
+    //layout->addWidget(tree);
     layout->addWidget(rightFiller);
     sublayoutEditor->addWidget(supposedtimeslider);
     sublayoutEditor->addWidget(parameters);

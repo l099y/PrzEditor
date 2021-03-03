@@ -16,6 +16,7 @@ public:
     ~ExtendedQGRI();
     bool leftxtend = false;
     bool rightxtend = false;
+    bool modifiedOnXtend = true;
     float previousxpos;
     float previousboxwidth;
     Emitter *emitter = new Emitter(nullptr);

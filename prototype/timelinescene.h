@@ -13,6 +13,8 @@ class TimelineScene : public QGraphicsScene
     public:
     TimelineScene(QObject* parent = nullptr);
     ~TimelineScene();
+    void behaveOnLeftXtend();
+    void behaveOnRightXtend();
 
 public slots:
     void activatelxt();
