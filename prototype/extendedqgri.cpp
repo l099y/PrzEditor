@@ -21,10 +21,11 @@ void ExtendedQGRI::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e)
     QGraphicsRectItem::mouseDoubleClickEvent(e);
 }
 
-void ExtendedQGRI::hoverEnterEvent(QGraphicsSceneHoverEvent *e)
+    void ExtendedQGRI::hoverEnterEvent(QGraphicsSceneHoverEvent *e)
 {
-    QBrush brush (Qt::red);
-    setBrush(brush);
+    QColor green50= Qt::green;
+    green50.setAlphaF( 0.5 );
+    setBrush(green50);
     update();
     //QGraphicsRectItem::hoverEnterEvent(e);
 }
@@ -45,7 +46,9 @@ void ExtendedQGRI::hoverLeaveEvent(QGraphicsSceneHoverEvent *e)
 {
     qDebug()<<"extended hoverExit";
 
-    QBrush brush (Qt::transparent);
+    QColor blue70 = Qt::blue;
+    blue70.setAlphaF( 0.4 );
+    QBrush brush (blue70);
     setBrush(brush);
     update();
     //QGraphicsRectItem::hoverEnterEvent(e);
@@ -91,6 +94,12 @@ void ExtendedQGRI::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 void ExtendedQGRI::setPreviousToCurrent(){
     previousboxwidth = rect().width();
     previousxpos = scenePos().x();
+}
+
+void ExtendedQGRI::restore()
+{
+    setX(previousxpos);
+    setRect(0,0,previousboxwidth, 100);
 }
 
 

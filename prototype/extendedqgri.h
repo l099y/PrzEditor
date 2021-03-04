@@ -16,11 +16,12 @@ public:
     ~ExtendedQGRI();
     bool leftxtend = false;
     bool rightxtend = false;
-    bool modifiedOnXtend = true;
+    bool modified = false;
     float previousxpos;
     float previousboxwidth;
     Emitter *emitter = new Emitter(nullptr);
     void setPreviousToCurrent();
+    void restore();
 
 protected:
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e);
