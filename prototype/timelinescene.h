@@ -15,7 +15,8 @@ class TimelineScene : public QGraphicsScene
     ~TimelineScene();
     void behaveOnSelectionLeftXtend();
     void behaveOnSelectionRightXtend();
-    void behaveOnSelectionMove();
+    void behaveOnSelectionMove(QGraphicsSceneMouseEvent *e);
+    void behaveOnSelectionMove2(QGraphicsSceneMouseEvent *e);
 
 public slots:
     void activatelxt();
@@ -30,6 +31,8 @@ public slots:
 protected:
    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *e);
    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
+   virtual void dragEnterEven(QGraphicsSceneDragDropEvent *e);
+   virtual void dropEvent(QGraphicsSceneDragDropEvent *e);
 };
 
 #endif // TIMELINESCENE_H

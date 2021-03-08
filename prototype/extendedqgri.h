@@ -10,7 +10,7 @@
 
 class ExtendedQGRI : public QGraphicsRectItem
 {
-    Q_INTERFACES(QGraphicsRectItem);
+    //Q_INTERFACES(QGraphicsRectItem);
 public:
     ExtendedQGRI();
     ~ExtendedQGRI();

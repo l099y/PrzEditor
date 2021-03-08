@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    this->setAcceptDrops(true);
     ui->setupUi(this);
     setCentralWidget(widget);
     initLayouts();
@@ -39,10 +40,9 @@ void MainWindow::initcontenance(){
     sublayoutEditor->addWidget(supposedtimeslider);
     sublayoutEditor->addWidget(parameters);
     sublayoutsplit->addWidget(params1);
-    sublayoutsplit->addWidget(params2);
+    sublayoutsplit->addWidget(tree);
     sublayoutparams1->addWidget(params1lab);
     sublayoutparams1->addWidget(button);
-    sublayoutparams2->addWidget(params2lab);
 }
 void MainWindow::initwidgetsparams(){
     rightFiller->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -84,8 +84,10 @@ void MainWindow::inittimelinescene(){
     timelineView = new QGraphicsView(timeline);
     timelineFitIn = new QGraphicsView(timeline);
     timelineView->setScene(timeline);
+//    timelineView->setAcceptDrops(true);
+//    timelineView->setDragMode(QGraphicsView::RubberBandDrag);
     timelineFitIn->setScene(timeline);
-    timelineFitIn->fitInView(timeline->itemsBoundingRect(), Qt::KeepAspectRatio);
+    //timelineFitIn->fitInView(timeline->itemsBoundingRect(), Qt::KeepAspectRatio);
     sublayouttimeline->addWidget(timelineView);
     //sublayouttimeline->addWidget(timelineFitIn);
 }
