@@ -7,21 +7,24 @@
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>
 #include "emitter.h"
-
+enum class BoxState {REGULAR, STRETCH_LEFT, STRETCH_RIGHT, SWITCHPOS_MOVE, DISPLACE};
 class ExtendedQGRI : public QGraphicsRectItem
 {
     //Q_INTERFACES(QGraphicsRectItem);
 public:
     ExtendedQGRI();
     ~ExtendedQGRI();
-    bool leftxtend = false;
-    bool rightxtend = false;
+    BoxState mod = BoxState::REGULAR;
     bool modified = false;
     float previousxpos;
     float previousboxwidth;
     Emitter *emitter = new Emitter(nullptr);
     void setPreviousToCurrent();
     void restore();
+    void strechLeft(QGraphicsSceneMouseEvent *e);
+    void strechRight(QGraphicsSceneMouseEvent *e);
+    void setModifyingcColorSignal();
+    void setRegularColor();
 
 protected:
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e);
