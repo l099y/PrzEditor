@@ -27,7 +27,7 @@ void ExtendedQGRI::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e)
     green50.setAlphaF( 0.5 );
     setBrush(green50);
     update();
-    //QGraphicsRectItem::hoverEnterEvent(e);
+    QGraphicsRectItem::hoverEnterEvent(e);
 }
 
 void ExtendedQGRI::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
@@ -46,7 +46,7 @@ void ExtendedQGRI::hoverLeaveEvent(QGraphicsSceneHoverEvent *e)
     qDebug()<<"extended hoverExit";
     setRegularColor();
     update();
-    //QGraphicsRectItem::hoverEnterEvent(e);
+    QGraphicsRectItem::hoverEnterEvent(e);
 }
 
 void ExtendedQGRI::hoverMoveEvent(QGraphicsSceneHoverEvent *e)

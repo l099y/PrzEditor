@@ -11,32 +11,54 @@
 TimelineScene::TimelineScene(QObject* parent): QGraphicsScene(parent)
 {
     setSceneRect(0,0, 1000, 100);
-    this->
     setBackgroundBrush(Qt::gray);
 }
 
 TimelineScene::~TimelineScene(){
 }
+void TimelineScene::handleBoxResize(QGraphicsSceneMouseEvent *e){ //this functions roots to real resizing functions on the selection mod
+    ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+    switch (rect->mod){
+    case (BoxState :: STRETCH_LEFT):
+        rect->strechLeft(e);
+        behaveOnSelectionLeftXtend();
+        break;
+    case (BoxState :: STRETCH_RIGHT):
+        rect->strechRight(e);
+        behaveOnSelectionRightXtend();
+        break;
+    case (BoxState :: REGULAR):
+        behaveOnSelectionSwitchPosMove(e);
+        break;
+    case (BoxState ::SWITCHPOS_MOVE):
+        behaveOnSelectionSwitchPosMove(e);
+        break;
+    case (BoxState::DISPLACE):
+        break;
+    }
+}
 
 void TimelineScene::behaveOnSelectionLeftXtend()
 {
     ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+    float sX = selection->scenePos().x();
     foreach (QGraphicsItem* current, items()){
         ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(current);
         if (rect && rect!= selection)
         {
-            if (rect->previousboxwidth+rect->previousxpos<selection->scenePos().x() && rect->x()<selection->previousxpos && rect->modified) //restore
+            float rX = rect->scenePos().x();
+            if (rect->previousboxwidth+rect->previousxpos < sX && rX < selection->previousxpos && rect->modified) //restore
             {
                 rect->restore();
                 rect->modified=false;
             }
-            else if (selection->scenePos().x()>rect->x() && selection->scenePos().x()<= rect->x()+rect->previousboxwidth){
+            else if (sX > rX && sX <= rX+rect->previousboxwidth){
                 rect->setModifyingcColorSignal();
                 rect->setVisible(true);
                 rect->setRect(0, 0, selection->x() - rect->x() , 100);
                 rect->modified=true;
             }
-            else if (selection->scenePos().x()<rect->pos().x() && rect->x()<selection->previousxpos)
+            else if (sX < rX && rX <selection->previousxpos)
             {
                 rect->setVisible(false);
                 rect->modified=true;
@@ -48,26 +70,28 @@ void TimelineScene::behaveOnSelectionLeftXtend()
 void TimelineScene::behaveOnSelectionRightXtend()
 {
     ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+    float sX = selection->scenePos().x();
+    float sW = selection->rect().width();
     foreach (QGraphicsItem* current, items()){
         ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(current);
         if (rect && rect != selection)
         {
-            if (selection->scenePos().x() + selection->rect().width()< rect->previousxpos && rect->scenePos().x() > selection->scenePos().x() && rect->modified) // restore
+            float rX = rect->scenePos().x();
+            if (sX + sW < rect->previousxpos && rX > sX && rect->modified) // restore
             {
                 rect->restore();
                 rect->modified=false;
             }
-            else if (selection->scenePos().x()+ selection->rect().width() > rect->previousxpos //resize if needed
-                     &&  selection->scenePos().x()+ selection->rect().width() < rect->previousboxwidth+rect->previousxpos)
-
+            else if (sX+ sW > rect->previousxpos //resize if needed
+                     &&  sX + sW < rect->previousboxwidth+rect->previousxpos)
             {
                 rect->setModifyingcColorSignal();
                 rect->setVisible(true);
-                rect->setX(selection->scenePos().x()+ selection->rect().width());
-                rect->setRect(0,0,(rect->previousboxwidth+rect->previousxpos)-(selection->scenePos().x()+ selection->rect().width()), 100);
+                rect->setX(sX + sW);
+                rect->setRect(0,0,(rect->previousboxwidth+rect->previousxpos)-(sX + sW), 100);
                 rect->modified=true;
             }
-            else if (selection->scenePos().x()+ selection->rect().width() > rect->previousboxwidth+rect->previousxpos && rect->scenePos().x() > selection->scenePos().x()) //prepare to erase
+            else if (sX + sW > rect->previousboxwidth+rect->previousxpos && rX > sX) //prepare to erase
             {
                 rect->setVisible(false);
                 rect->modified=true;
@@ -79,41 +103,43 @@ void TimelineScene::behaveOnSelectionRightXtend()
 void TimelineScene::behaveOnSelectionMove(QGraphicsSceneMouseEvent *e)
 {
     ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+    float sX = selection->scenePos().x();
+    float sW = selection->rect().width();
     foreach (QGraphicsItem* current, items()){
         ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(current);
         if (rect != selection)
         {
-            if ((selection->scenePos().x()>rect->previousxpos && selection->scenePos().x()<rect->previousboxwidth+rect->previousxpos)||(
-                        (selection->scenePos().x()+selection->rect().width()>rect->previousxpos && selection->scenePos().x()+selection->rect().width()<rect->previousboxwidth+rect->previousxpos)||
-                        (selection->scenePos().x()<rect->previousxpos && selection->scenePos().x()+selection->rect().width()>rect->previousboxwidth+rect->previousxpos)))
+            if ((sX > rect->previousxpos && sX < rect->previousboxwidth+rect->previousxpos)||(
+                        (sX + sW >rect->previousxpos && sX + sW < rect->previousboxwidth+rect->previousxpos)||
+                        (sX < rect->previousxpos && sX + sW > rect->previousboxwidth+rect->previousxpos)))
             {
                 rect->setVisible(true);
                 rect->setModifyingcColorSignal();
-                if ((selection->scenePos().x()+selection->rect().width()>rect->previousxpos && selection->scenePos().x()+selection->rect().width()<rect->previousboxwidth+rect->previousxpos)&&
-                        (selection->scenePos().x()>rect->previousxpos && selection->scenePos().x()<rect->previousboxwidth+rect->previousxpos)){
-                    if (selection->scenePos().x()-rect->previousxpos < (rect->previousboxwidth+rect->previousxpos) - (selection->rect().width()+selection->scenePos().x())){
-                        qDebug()<<selection->scenePos().x()-rect->previousxpos;
-                        rect->setX(selection->scenePos().x()+selection->rect().width());
-                        rect->setRect(0,0,(rect->previousboxwidth+rect->previousxpos)-(selection->scenePos().x()+selection->rect().width()),100);
+                if ((sX + sW > rect->previousxpos && sX + sW < rect->previousboxwidth+rect->previousxpos) &&
+                        (sX > rect->previousxpos && sX < rect->previousboxwidth+rect->previousxpos))
+                    {
+                    if (sX - rect->previousxpos < (rect->previousboxwidth+rect->previousxpos) - (sX + sW)){
+                        rect->setX(sX+sW);
+                        rect->setRect(0,0,(rect->previousboxwidth+rect->previousxpos)-(sX + sW),100);
                     }
                     else
                     {
                         rect->setX(rect->previousxpos);
-                        rect->setRect(0,0,(selection->scenePos().x()-rect->previousxpos),100);
+                        rect->setRect(0,0,(sX - rect->previousxpos),100);
                     }
 
                 }
-                else if (selection->scenePos().x()+selection->rect().width()>rect->previousxpos && selection->scenePos().x()+selection->rect().width()<rect->previousboxwidth+rect->previousxpos)
+                else if (sX + sW >rect->previousxpos && sX + sW < rect->previousboxwidth+rect->previousxpos)
                 {
-                    rect->setX(selection->scenePos().x()+selection->rect().width());
-                    rect->setRect(0,0,(rect->previousboxwidth+rect->previousxpos)-(selection->scenePos().x()+selection->rect().width()),100);
+                    rect->setX(sX+sW);
+                    rect->setRect(0,0,(rect->previousboxwidth+rect->previousxpos)-(sX + sW),100);
                 }
-                else if (selection->scenePos().x()>rect->previousxpos && selection->scenePos().x()<rect->previousboxwidth+rect->previousxpos)
+                else if (sX > rect->previousxpos && sX <rect->previousboxwidth+rect->previousxpos)
                 {
                     rect->setX(rect->previousxpos);
-                    rect->setRect(0,0,(selection->scenePos().x()-rect->previousxpos),100);
+                    rect->setRect(0,0,(sX - rect->previousxpos),100);
                 }
-                else if (selection->scenePos().x()<rect->previousxpos && selection->scenePos().x()+selection->rect().width()>rect->previousboxwidth+rect->previousxpos)
+                else if (sX < rect->previousxpos && sX + sW >rect->previousboxwidth+rect->previousxpos)
                 {
                     rect->setVisible(false);
                 }
@@ -157,7 +183,7 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(QGraphicsSceneMouseEvent *e)
 
             }
             selection->collidesWithItem(rect)?
-                rect->setModifyingcColorSignal():rect->setRegularColor();
+                        rect->setModifyingcColorSignal():rect->setRegularColor();
         }
     }
 }
@@ -226,27 +252,7 @@ void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
 {
     QGraphicsScene :: dropEvent(e);
 }
-void TimelineScene::handleBoxResize(QGraphicsSceneMouseEvent *e){ //this functions roots to real resizing functions on the selection mod
-    ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
-    switch (rect->mod){
-    case (BoxState :: STRETCH_LEFT):
-        rect->strechLeft(e);
-        behaveOnSelectionLeftXtend();
-        break;
 
-    case (BoxState :: STRETCH_RIGHT):
-        rect->strechRight(e);
-        behaveOnSelectionRightXtend();
-        break;
-
-    case (BoxState :: REGULAR):
-        behaveOnSelectionSwitchPosMove(e);
-        break;
-    case (BoxState ::SWITCHPOS_MOVE):
-        behaveOnSelectionSwitchPosMove(e);
-        break;
-    }
-}
 
 void TimelineScene::moveAllToLeft(float from, float distance)
 {
