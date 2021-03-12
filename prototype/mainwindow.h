@@ -25,21 +25,24 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    QWidget *widget = new QWidget;
-    QWidget *rightFiller = new QWidget(widget);
+    float currentTimelineScaling = 1;
 
+    QWidget *widget = new QWidget;
+    QWidget *timelineNutils = new QWidget(widget);
     QWidget *parameters = new QWidget(widget);
+    QWidget *timelineButtons = new QWidget(parameters);
     QWidget *supposedtimeslider = new QWidget(parameters);
     QWidget *params1 = new QWidget(parameters);
     QWidget *params2 = new QWidget(parameters);
 
     TimelineScene *timeline = new TimelineScene(this);
     QGraphicsView *timelineView;
-    QGraphicsView *timelineFitIn;
 
     QHBoxLayout *layout = new QHBoxLayout(this);
     QVBoxLayout *sublayoutEditor = new QVBoxLayout(widget);
+    QVBoxLayout *sublayoutbutton = new QVBoxLayout(widget);
     QVBoxLayout *sublayouttimeline = new QVBoxLayout(parameters);
+    QHBoxLayout *sublayoutsplit0 = new QHBoxLayout(parameters);
     QHBoxLayout *sublayoutsplit = new QHBoxLayout(parameters);
     QHBoxLayout *sublayoutparams1 = new QHBoxLayout(params1);
     QHBoxLayout *sublayoutparams2 = new QHBoxLayout(params2);
@@ -48,18 +51,25 @@ public:
     QModelIndex idx = TreeModel->index("");
     QTreeView *tree = new QTreeView(widget);
 
-    QLabel *params1lab = new QLabel(params1);
-    QLabel *params2lab = new QLabel(params2);
-    QPushButton *button = new QPushButton(params2);
+    QPushButton* allignbutton = new QPushButton();
+    QPushButton* clearbutton = new QPushButton();
+    QPushButton* newboxbutton = new QPushButton();
+    QPushButton* mod2button = new QPushButton();
+    QPushButton* dispbutton = new QPushButton();
+    QPushButton* delbutton = new QPushButton();
 
     MainWindow(QWidget *parent = nullptr);
+
 
 
     ~MainWindow();
 public slots:
     void changeButtonTxt();
+    void scaleUpView();
+    void scaleDownView();
 
 private:
+    void initButtons();
     void inittimelinescene();
     void initLayouts();
     void bindLayoutsToWidgets();

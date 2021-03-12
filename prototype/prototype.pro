@@ -13,12 +13,14 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     emitter.cpp \
+    ruler.cpp \
     timelinescene.cpp
 
 HEADERS += \
     extendedqgri.h \
     mainwindow.h \
     emitter.h \
+    ruler.h \
     timelinescene.h
 
 FORMS += \

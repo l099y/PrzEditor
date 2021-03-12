@@ -1,11 +1,11 @@
 # NAVIGATIONSHEET
 
 ## Plans pour la semaine à venir (8 au 12 de 03/21)
-- changer certains comportement dans le dynamisme des blocs 
-- implémenter d'autres "mods" de déplacement : magnet, displace.
-- implémenter la graduation
+- changer certains comportement dans le dynamisme des blocs v
+- implémenter d'autres "mods" de déplacement : magnet, displace. v
+- implémenter la graduation v
 - implémenter le multiboxage
-- gérer l'insertion de nouveaux blocs
+- gérer l'insertion de nouveaux blocs v
 - commencer à gérer le filesystem (certainement pas cette semaine)
 
 

@@ -6,7 +6,7 @@ Emitter::Emitter(QObject *parent) : QObject(parent)
 }
 Emitter::~Emitter()
 {
-    delete(this);
+
 }
 
 void Emitter::emitleftxtndactivated()

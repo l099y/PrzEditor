@@ -11,60 +11,82 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setCentralWidget(widget);
     initLayouts();
+    timelineView->setMinimumHeight(300);
     timelineView->setRenderHint(QPainter::Antialiasing);
-    QPushButton* a = new QPushButton();
-    a->setText("info");
-    connect(a, SIGNAL(clicked(bool)), timeline, SLOT(debugItems()));
-    sublayoutEditor->addWidget(a);
-    QPushButton* b = new QPushButton();
-    b->setText("clear");
-    connect(b, SIGNAL(clicked(bool)), timeline, SLOT(clearItems()));
-    QPushButton* c = new QPushButton();
-    c->setText("new");
-    connect(c, SIGNAL(clicked(bool)), timeline, SLOT(newRect()));
-    sublayoutEditor->addWidget(c);
+    tree->setVisible(false);
+    setGeometry(100,100,370,1800);
+    this->setMaximumHeight(370);
+
+}
+void MainWindow :: initButtons(){
+
+    allignbutton->setText("allign");
+    allignbutton->setMinimumSize(QSize(40,40));
+    connect(allignbutton, SIGNAL(clicked(bool)), timeline, SLOT(debugItems()));
+    clearbutton->setText("clear");
+    clearbutton->setMinimumSize(QSize(40,40));
+    connect(clearbutton, SIGNAL(clicked(bool)), timeline, SLOT(clearItems()));
+    newboxbutton->setMinimumSize(QSize(40,40));
+    newboxbutton->setText("new");
+    connect(newboxbutton, SIGNAL(clicked(bool)), timeline, SLOT(newRect()));
+    mod2button->setText("mod2");
+    mod2button->setMinimumSize(QSize(40,40));
+    connect(mod2button, SIGNAL(clicked(bool)), timeline, SLOT(setmod2()));
+    dispbutton->setText("disp");
+    dispbutton->setMinimumSize(QSize(40,40));
+    connect(dispbutton, SIGNAL(clicked(bool)), timeline, SLOT(setdisp()));
+    delbutton->setText("disp");
+    delbutton->setMinimumSize(QSize(40,40));
+    connect(delbutton, SIGNAL(clicked(bool)), timeline, SLOT(deleteSelection()));
+
 }
 void MainWindow ::initLayouts(){
     setupTreeItem();
     initwidgetsparams();
-    initlabs();
     initcontenance();
     bindLayoutsToWidgets();
     inittimelinescene();
-    connect(button, SIGNAL(clicked(bool)), this, SLOT(changeButtonTxt()));
-
+    initButtons();
 }
 void MainWindow::initcontenance(){
-    //layout->addWidget(tree);
-    layout->addWidget(rightFiller);
-    sublayoutEditor->addWidget(supposedtimeslider);
-    sublayoutEditor->addWidget(parameters);
-    sublayoutsplit->addWidget(params1);
-    sublayoutsplit->addWidget(tree);
-    sublayoutparams1->addWidget(params1lab);
-    sublayoutparams1->addWidget(button);
+    layout->addWidget(tree);
+    sublayoutsplit0->addWidget(timelineButtons);
+    sublayoutsplit0->addWidget(supposedtimeslider);
+    sublayoutEditor->addWidget(timelineNutils);
+    //sublayoutEditor->addWidget(parameters);
+    //sublayoutsplit->addWidget(params1);
+    //sublayoutsplit->addWidget(tree);
+    //sublayoutparams1->addWidget(params1lab);
+    sublayoutbutton->addWidget(newboxbutton);
+    sublayoutbutton->addWidget(clearbutton);
+    sublayoutbutton->addWidget(allignbutton);
+     sublayoutbutton->addWidget(dispbutton);
+      sublayoutbutton->addWidget(mod2button);
+      sublayoutbutton->addWidget(delbutton);
 }
 void MainWindow::initwidgetsparams(){
-    rightFiller->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    widget->setMinimumWidth(1200);
+
+    widget->setMinimumWidth(1600);
     sublayoutsplit->setMargin(0);
     sublayoutEditor->setMargin(0);
     QPalette pal = palette();
     pal.setColor(QPalette::Background, Qt::white);
     params1->setAutoFillBackground(true);
     params1->setPalette(pal);
+    params1->setVisible(false);
+
     params2->setAutoFillBackground(true);
     params2->setPalette(pal);
-    button->setText("will i change?");
-    supposedtimeslider->setMaximumHeight(500);
+    params2->setVisible(false);
 }
 void MainWindow :: bindLayoutsToWidgets(){
-    rightFiller->setLayout(sublayoutEditor);
+    timelineNutils->setLayout(sublayoutsplit0);
     supposedtimeslider->setLayout(sublayouttimeline);
+    timelineButtons->setLayout(sublayoutbutton);
     parameters->setLayout(sublayoutsplit);
     params1->setLayout(sublayoutparams1);
     params2->setLayout(sublayoutparams2);
-    widget->setLayout(layout);
+    //widget->setLayout(layout);
 }
 void MainWindow::setupTreeItem(){
     TreeModel->setRootPath("");
@@ -75,26 +97,49 @@ void MainWindow::setupTreeItem(){
     tree->setColumnHidden(2, true);
     tree->setColumnHidden(3, true);
     tree->setHeaderHidden(true);
+    tree->setMaximumHeight(400);
 }
-void MainWindow::initlabs(){
-    params1lab->setText("parameters area");
-    params2lab->setText("another parameters area");
-}
+
 void MainWindow::inittimelinescene(){
     timelineView = new QGraphicsView(timeline);
-    timelineFitIn = new QGraphicsView(timeline);
     timelineView->setScene(timeline);
+    timelineView->setStyleSheet(QString("QScrollBar:horizontal { border: 2px solid grey; background: #505050; height: 15px; margin: 1px; }"));
 //    timelineView->setAcceptDrops(true);
 //    timelineView->setDragMode(QGraphicsView::RubberBandDrag);
-    timelineFitIn->setScene(timeline);
-    //timelineFitIn->fitInView(timeline->itemsBoundingRect(), Qt::KeepAspectRatio);
+    timelineView->setAlignment(Qt::AlignLeft);
+    timelineView->setMaximumHeight(300);
+    connect(timeline, SIGNAL(scaleUp()), this, SLOT(scaleUpView()));
+    connect(timeline, SIGNAL(scaleDown()),this, SLOT(scaleDownView()));
     sublayouttimeline->addWidget(timelineView);
-    //sublayouttimeline->addWidget(timelineFitIn);
+    sublayouttimeline->setAlignment(Qt::AlignTop);
+    sublayoutbutton->setAlignment(Qt::AlignTop);
+
+
+
 }
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 void MainWindow::changeButtonTxt(){
-    button->setText("button");
+
+}
+
+void MainWindow::scaleUpView()
+{
+     if (currentTimelineScaling * 1.1 < 1 ){
+         timelineView->scale(1.1 , 1);
+         currentTimelineScaling *= 1.1;
+         timeline->ruler.scale *=1.1;
+     }
+
+}
+
+void MainWindow::scaleDownView()
+{
+    if (currentTimelineScaling * 0.9 > 0.01 ){
+         timelineView->scale(0.9 , 1);
+         currentTimelineScaling *= 0.9;
+         timeline->ruler.scale *=0.9;
+    }
 }

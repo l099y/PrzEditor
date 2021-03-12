@@ -15,6 +15,7 @@ public:
     void emitleftxtndactivated();
     void emitrightxtndactivated();
     void emitxtendDeactived();
+    void emitAnimationEnd();
 signals:
      void leftxtndactivated();
      void rightxtndactivated();

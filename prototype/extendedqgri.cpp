@@ -2,6 +2,9 @@
 #include <QDebug>
 #include <QGraphicsRectItem>
 #include <QPropertyAnimation>
+#include <QTimeline>
+#include <QGraphicsItemAnimation>
+#include <QObject>
 
 
 ExtendedQGRI::ExtendedQGRI(): QGraphicsRectItem()
@@ -13,7 +16,7 @@ ExtendedQGRI::ExtendedQGRI(): QGraphicsRectItem()
 
 ExtendedQGRI::~ExtendedQGRI()
 {
-
+    qDebug()<<"deleted";
 }
 
 void ExtendedQGRI::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e)
@@ -21,11 +24,9 @@ void ExtendedQGRI::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e)
     QGraphicsRectItem::mouseDoubleClickEvent(e);
 }
 
-    void ExtendedQGRI::hoverEnterEvent(QGraphicsSceneHoverEvent *e)
+void ExtendedQGRI::hoverEnterEvent(QGraphicsSceneHoverEvent *e)
 {
-    QColor green50= Qt::green;
-    green50.setAlphaF( 0.5 );
-    setBrush(green50);
+    setBrush(QColor(180,200,240));
     update();
     QGraphicsRectItem::hoverEnterEvent(e);
 }
@@ -44,24 +45,25 @@ void ExtendedQGRI::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
 void ExtendedQGRI::hoverLeaveEvent(QGraphicsSceneHoverEvent *e)
 {
     qDebug()<<"extended hoverExit";
-    setRegularColor();
+    if (!isSelected())
+        setRegularColor();
     update();
-    QGraphicsRectItem::hoverEnterEvent(e);
+    QGraphicsRectItem::hoverLeaveEvent(e);
 }
 
 void ExtendedQGRI::hoverMoveEvent(QGraphicsSceneHoverEvent *e)
 {
-   if(e->pos().x()>= 0 && e->pos().x()<=3)
-   {
-       setCursor(Qt::SizeHorCursor);
-       //setMode extend to left
-   }
-   else if(e->pos().x()>= boundingRect().width()-3 && e->pos().x()<= boundingRect().width()){
-       setCursor(Qt::SizeHorCursor);
-   }
-   else{
-       setCursor(Qt::ArrowCursor);
-   }
+    if(e->pos().x()>= 0 && e->pos().x()<=3)
+    {
+        setCursor(Qt::SplitHCursor);
+        //setMode extend to left
+    }
+    else if(e->pos().x()>= boundingRect().width()-3 && e->pos().x()<= boundingRect().width()){
+        setCursor(Qt::SplitHCursor);
+    }
+    else{
+        setCursor(Qt::ArrowCursor);
+    }
 
 }
 
@@ -76,12 +78,17 @@ void ExtendedQGRI::mousePressEvent(QGraphicsSceneMouseEvent *e)
         mod = BoxState::STRETCH_RIGHT;
         emitter->rightxtndactivated();
     }
-     QGraphicsRectItem::mousePressEvent(e);
+    QGraphicsRectItem::mousePressEvent(e);
+    if (isSelected())
+    {
+        setBrush((QColor(255,200,0)));
+    }
+
 }
 
 void ExtendedQGRI::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 {
-        QGraphicsRectItem :: mouseMoveEvent(e);
+    QGraphicsRectItem :: mouseMoveEvent(e);
 }
 
 void ExtendedQGRI::setPreviousToCurrent(){
@@ -133,18 +140,47 @@ void ExtendedQGRI::strechRight(QGraphicsSceneMouseEvent *e)
 
 void ExtendedQGRI::setModifyingcColorSignal()
 {
-     QColor cyan30 = (Qt::cyan);
-     cyan30.setAlpha(60);
+    QColor cyan30 = (Qt::cyan);
+    cyan30.setAlpha(60);
     QBrush brush (cyan30);
     setBrush(brush);
 }
 
 void ExtendedQGRI::setRegularColor()
 {
-    QColor blue70 = Qt::blue;
-    blue70.setAlphaF( 0.4 );
-    QBrush brush(blue70);
+    QBrush brush(QColor(200,240,200));
     setBrush(brush);
+}
+
+void ExtendedQGRI::animatedMove(float pos)
+{
+    float prev = scenePos().x();
+    float dist = pos-scenePos().x();
+    animated=true;
+
+        timer->setFrameRange(0, 15);
+
+
+        animation->setItem(this);
+        animation->setTimeLine(timer);
+
+        for (int i = 0; i < 15; ++i)
+            animation->setPosAt(i / 15.0, QPointF(prev+=(dist/15), 0));
+        timer->start();
+        connect(timer, SIGNAL(finished()), this, SLOT(setAnimatedFalse()));
+}
+
+void ExtendedQGRI::setAnimatedFalse()
+{
+    animated=false;
+}
+
+void ExtendedQGRI::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    painter->setBrush(this->brush());
+    painter->setPen(this->pen());
+    painter->drawRoundedRect(rect(),5,5);
+    isSelected()?setZValue(1):setZValue(-1);
 }
 
 

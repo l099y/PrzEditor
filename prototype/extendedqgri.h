@@ -7,26 +7,37 @@
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>
 #include "emitter.h"
+#include <QTimeLine>
+#include <QGraphicsItemAnimation>
 enum class BoxState {REGULAR, STRETCH_LEFT, STRETCH_RIGHT, SWITCHPOS_MOVE, DISPLACE};
-class ExtendedQGRI : public QGraphicsRectItem
+class ExtendedQGRI : public QObject, public QGraphicsRectItem
 {
-    //Q_INTERFACES(QGraphicsRectItem);
+    Q_OBJECT
 public:
     ExtendedQGRI();
     ~ExtendedQGRI();
+    QTimeLine *timer = new QTimeLine(110);
+    QGraphicsItemAnimation *animation = new QGraphicsItemAnimation;
     BoxState mod = BoxState::REGULAR;
     bool modified = false;
+    bool animated = false;
     float previousxpos;
     float previousboxwidth;
-    Emitter *emitter = new Emitter(nullptr);
+
+
+    Emitter *emitter = new Emitter(this);
     void setPreviousToCurrent();
     void restore();
     void strechLeft(QGraphicsSceneMouseEvent *e);
     void strechRight(QGraphicsSceneMouseEvent *e);
     void setModifyingcColorSignal();
     void setRegularColor();
+    void animatedMove(float pos);
+public slots:
+    void setAnimatedFalse();
 
 protected:
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e);
     virtual void hoverEnterEvent(QGraphicsSceneHoverEvent *e);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
