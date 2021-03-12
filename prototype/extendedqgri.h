@@ -23,9 +23,9 @@ public:
     bool animated = false;
     float previousxpos;
     float previousboxwidth;
-
-
     Emitter *emitter = new Emitter(this);
+
+
     void setPreviousToCurrent();
     void restore();
     void strechLeft(QGraphicsSceneMouseEvent *e);

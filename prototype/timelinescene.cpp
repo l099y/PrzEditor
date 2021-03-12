@@ -266,7 +266,8 @@ void TimelineScene :: clearItems(){
     ruler.setSize(20000);
 
     addItem(&ruler);
-    qDebug()<<"clear items"<<items();
+    update();
+    newRect();
 }
 
 void TimelineScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
@@ -358,37 +359,23 @@ void TimelineScene::ExtendSceneWidth(float f)
 
 void TimelineScene::allign() // sadly n² still didnt find a way to sort that collection
 {
-    float previousmin = -1;
-    float min = items().at(0)->x();
-    int minPos = 0;
+    QVector<QGraphicsItem*> sortedlist;
+    foreach (QGraphicsItem *current, items()){
+        ExtendedQGRI *rec = dynamic_cast<ExtendedQGRI *>(current);
+        if (rec)
+        sortedlist.append(current);
+    }
+    std::sort(sortedlist.begin(), sortedlist.end(), [](QGraphicsItem *a, QGraphicsItem *b){
+        return a->scenePos().x()<b->scenePos().x();
+    });
     float widthsum = 0;
-    qDebug()<<items();
-    for (int i = 0; i < items().length()-1; i++)
-    {
-        for (int j = 0; j < items().length()-1; j++){
-            ExtendedQGRI *rec = dynamic_cast<ExtendedQGRI *>(items().at(j));
-            if (rec){
-                float currentobjectx = rec->previousxpos;
-                if (currentobjectx < min && currentobjectx > previousmin){
-                    min = currentobjectx;
-                    minPos = j;
-                }
-            }
-        }
-        ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(items().at(minPos));
-        rect->setX(widthsum);
-        widthsum += (rect->rect().width());
-        previousmin = min;
-        min = 1000000000;
+    foreach (QGraphicsItem *current, sortedlist)
+        {
+        ExtendedQGRI *rec = dynamic_cast<ExtendedQGRI *>(current);
+        rec->setX(widthsum);
+        widthsum+=rec->rect().width();
+        rec->setPreviousToCurrent();
     }
-
-    for (int i = 0; i < items().length(); i++){
-        ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(items().at(i));
-        if (rect)
-            rect->setPreviousToCurrent();
-    }
-
-
 }
 
 void TimelineScene::setmod2()

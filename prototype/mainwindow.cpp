@@ -13,9 +13,9 @@ MainWindow::MainWindow(QWidget *parent)
     initLayouts();
     timelineView->setMinimumHeight(300);
     timelineView->setRenderHint(QPainter::Antialiasing);
-    tree->setVisible(false);
-    setGeometry(100,100,370,1800);
-    this->setMaximumHeight(370);
+    //tree->setVisible(false);
+    //setGeometry(100,100,370,1800);
+    //this->setMaximumHeight(370);
 
 }
 void MainWindow :: initButtons(){
@@ -53,10 +53,11 @@ void MainWindow::initcontenance(){
     sublayoutsplit0->addWidget(timelineButtons);
     sublayoutsplit0->addWidget(supposedtimeslider);
     sublayoutEditor->addWidget(timelineNutils);
-    //sublayoutEditor->addWidget(parameters);
-    //sublayoutsplit->addWidget(params1);
-    //sublayoutsplit->addWidget(tree);
-    //sublayoutparams1->addWidget(params1lab);
+    sublayoutEditor->addWidget(parameters);
+    sublayoutsplit->addWidget(params1);
+    sublayoutsplit->addWidget(tree);
+    sublayoutsplit->setMargin(20);
+    sublayoutparams1->addWidget(paramlabel);
     sublayoutbutton->addWidget(newboxbutton);
     sublayoutbutton->addWidget(clearbutton);
     sublayoutbutton->addWidget(allignbutton);
@@ -73,7 +74,8 @@ void MainWindow::initwidgetsparams(){
     pal.setColor(QPalette::Background, Qt::white);
     params1->setAutoFillBackground(true);
     params1->setPalette(pal);
-    params1->setVisible(false);
+    //params1->setVisible(false);
+    params1->setMinimumWidth(400);
 
     params2->setAutoFillBackground(true);
     params2->setPalette(pal);
@@ -81,6 +83,7 @@ void MainWindow::initwidgetsparams(){
 }
 void MainWindow :: bindLayoutsToWidgets(){
     timelineNutils->setLayout(sublayoutsplit0);
+    timelineNutils->setMaximumHeight(350);
     supposedtimeslider->setLayout(sublayouttimeline);
     timelineButtons->setLayout(sublayoutbutton);
     parameters->setLayout(sublayoutsplit);
@@ -97,7 +100,6 @@ void MainWindow::setupTreeItem(){
     tree->setColumnHidden(2, true);
     tree->setColumnHidden(3, true);
     tree->setHeaderHidden(true);
-    tree->setMaximumHeight(400);
 }
 
 void MainWindow::inittimelinescene(){
@@ -131,6 +133,11 @@ void MainWindow::scaleUpView()
          timelineView->scale(1.1 , 1);
          currentTimelineScaling *= 1.1;
          timeline->ruler.scale *=1.1;
+     }
+     else{
+         timelineView->resetMatrix();
+         currentTimelineScaling = 1;
+         timeline->ruler.scale =1;
      }
 
 }

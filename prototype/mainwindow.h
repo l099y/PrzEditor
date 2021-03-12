@@ -34,6 +34,7 @@ public:
     QWidget *supposedtimeslider = new QWidget(parameters);
     QWidget *params1 = new QWidget(parameters);
     QWidget *params2 = new QWidget(parameters);
+    QLabel *paramlabel = new QLabel("parameters");
 
     TimelineScene *timeline = new TimelineScene(this);
     QGraphicsView *timelineView;
