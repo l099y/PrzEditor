@@ -172,6 +172,10 @@ void ExtendedQGRI::animatedMove(float pos)
 
 void ExtendedQGRI::setAnimatedFalse()
 {
+    if (prevposresetrequested){
+        prevposresetrequested =false;
+        setPreviousToCurrent();
+    }
     animated=false;
 }
 
@@ -179,6 +183,8 @@ void ExtendedQGRI::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 {
     painter->setBrush(this->brush());
     painter->setPen(this->pen());
+    int sx = (int)scenePos().x();
+    setX( sx % 10 > 5? sx + (10-sx%10): sx - sx%10);
     painter->drawRoundedRect(rect(),5,5);
     isSelected()?setZValue(1):setZValue(-1);
 }

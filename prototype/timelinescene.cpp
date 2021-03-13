@@ -297,7 +297,12 @@ void TimelineScene::resetBoxStates(){
                 delete(rect);
             }
             else{
+
+                if (rect->animated)
+                rect->prevposresetrequested = true;
+                else{
                 rect->setPreviousToCurrent();
+                }
                 rect->modified =false;
             }
         }
@@ -372,10 +377,10 @@ void TimelineScene::allign() // sadly n² still didnt find a way to sort that co
     foreach (QGraphicsItem *current, sortedlist)
         {
         ExtendedQGRI *rec = dynamic_cast<ExtendedQGRI *>(current);
-        rec->setX(widthsum);
+        rec->animatedMove(widthsum);
         widthsum+=rec->rect().width();
-        rec->setPreviousToCurrent();
     }
+    resetBoxStates();
 }
 
 void TimelineScene::setmod2()
@@ -408,14 +413,13 @@ void TimelineScene::setdisp()
 void TimelineScene::deleteSelection()
 {
     if(!selectedItems().isEmpty()){
-        ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
-        selection->animatedMove(500);
-        //    if (!selectedItems().isEmpty())
-        //    {
-        //        foreach (QGraphicsItem *current, selectedItems()){
-        //        this->removeItem(current);
-        //        }
-        //    }
+        ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));   
+            if (!selectedItems().isEmpty())
+            {
+                foreach (QGraphicsItem *current, selectedItems()){
+                this->removeItem(current);
+                }
+            }
     }
 }
 void TimelineScene :: newRect(){

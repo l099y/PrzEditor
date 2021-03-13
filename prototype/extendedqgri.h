@@ -21,8 +21,10 @@ public:
     BoxState mod = BoxState::REGULAR;
     bool modified = false;
     bool animated = false;
+    bool prevposresetrequested = false;
     float previousxpos;
     float previousboxwidth;
+
     Emitter *emitter = new Emitter(this);
 
 

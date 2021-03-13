@@ -13,9 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     initLayouts();
     timelineView->setMinimumHeight(300);
     timelineView->setRenderHint(QPainter::Antialiasing);
-    //tree->setVisible(false);
-    //setGeometry(100,100,370,1800);
-    //this->setMaximumHeight(370);
+
 
 }
 void MainWindow :: initButtons(){
