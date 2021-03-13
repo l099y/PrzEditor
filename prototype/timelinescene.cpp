@@ -37,7 +37,6 @@ void TimelineScene::handleBoxResize(QGraphicsSceneMouseEvent *e){ //this functio
         behaveOnSelectionRightXtend();
         break;
     case (BoxState :: REGULAR):
-        //behaveOnSelectionDisplace();
         behaveOnSelectionSwitchPosMove(e);
         break;
     case (BoxState ::SWITCHPOS_MOVE):
@@ -167,6 +166,7 @@ void TimelineScene::behaveOnSelectionMove(QGraphicsSceneMouseEvent *e)
 void TimelineScene::behaveOnSelectionSwitchPosMove(QGraphicsSceneMouseEvent *e)
 {
     ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+    selection->setX(selection->roundedTo10(selection->scenePos().x()));
     float sX = selection->scenePos().x();
     float sW = selection->rect().width();
     foreach (QGraphicsItem* current, items()){
@@ -176,9 +176,10 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(QGraphicsSceneMouseEvent *e)
 
 
             if (selection->previousxpos<rect->previousxpos){
-                if  (sX+sW > rect->previousxpos && sX+sW < rect->previousxpos+(rect->previousboxwidth/2))
+
+                if  (sX+sW > rect->previousxpos && sX+sW <= rect->previousxpos+(rect->previousboxwidth/2))
                 {
-                    selection->setX(rect->previousxpos-sW) ;
+                    selection->setXToFrame(rect->previousxpos-sW) ;
                     if(!rect->animated)
                     rect->animatedMove(rect->previousxpos);
                 }
@@ -187,29 +188,33 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(QGraphicsSceneMouseEvent *e)
                     rect->animatedMove(rect->previousxpos-sW);
 
                     if (sW+sX<rect->previousboxwidth+rect->previousxpos)
-                       selection->setX(rect->previousboxwidth+rect->previousxpos-sW);
+                       selection->setXToFrame(rect->previousboxwidth+rect->previousxpos-sW);
 
                 }
                 else
+                    //if(!rect->animated)
+
                     rect->restore();
             }
             else
             {
+
                 if (sX>rect->previousxpos+rect->previousboxwidth-(rect->previousboxwidth/2) && sX<rect->previousxpos+rect->previousboxwidth)
                 {
-                    selection->setX(rect->previousboxwidth+rect->previousxpos);
+                    selection->setXToFrame(rect->previousboxwidth+rect->previousxpos);
                     if(!rect->animated)
                     rect->animatedMove(rect->previousxpos);
                 }
-                if (sX <rect->previousxpos+rect->previousboxwidth-(rect->previousboxwidth/2)-1)
+                if (sX <=rect->previousxpos+rect->previousboxwidth-(rect->previousboxwidth/2))
                 {
                     if(!rect->animated)
                     rect->animatedMove(rect->previousxpos+sW);
-                    if (sX>rect->previousxpos)
-                        selection->setX(rect->previousxpos);
+                    if (sX>=rect->previousxpos)
+                        selection->setXToFrame(rect->previousxpos);
                 }
                 else
-                    if(!rect->animated)
+                    //if(!rect->animated)
+
                     rect->restore();
 
             }
@@ -412,6 +417,7 @@ void TimelineScene::setdisp()
 
 void TimelineScene::deleteSelection()
 {
+    qDebug()<<items();
     if(!selectedItems().isEmpty()){
         ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));   
             if (!selectedItems().isEmpty())
@@ -423,7 +429,6 @@ void TimelineScene::deleteSelection()
     }
 }
 void TimelineScene :: newRect(){
-    for (int cd = 0; cd <1; cd++){
         QPen pen (Qt::gray);
         QBrush brush (QColor(200,240,200));
         ExtendedQGRI *rect = new ExtendedQGRI();
@@ -431,15 +436,30 @@ void TimelineScene :: newRect(){
         rect->setBrush(brush);
         rect->setFlag(QGraphicsItem::ItemIsMovable);
         rect->setFlag(QGraphicsItem::ItemIsSelectable);
-        rect->setRect(0,0,100,100);
+        rect->setRect(0,0,250,100);
         rect->setPreviousToCurrent();
         connect(rect->emitter, SIGNAL(leftxtndactivated()), this, SLOT(activatelxt()));
         connect(rect->emitter, SIGNAL(rightxtndactivated()), this, SLOT(activaterxt()));
         connect(rect->emitter, SIGNAL(xtendDeactived()), this, SLOT(deactivatext()));
-        moveAllFrom(0,100);
-
+        moveAllFrom(0,250);
         addItem(rect);
         resetBoxStates();
-    }
-    ExtendSceneWidth(101*1);
+        ExtendSceneWidth(250);
+
+
+
+        rect = new ExtendedQGRI();
+        rect->setPen(pen);
+        rect->setBrush(brush);
+        rect->setFlag(QGraphicsItem::ItemIsMovable);
+        rect->setFlag(QGraphicsItem::ItemIsSelectable);
+        rect->setRect(0,0,750,100);
+        rect->setPreviousToCurrent();
+        connect(rect->emitter, SIGNAL(leftxtndactivated()), this, SLOT(activatelxt()));
+        connect(rect->emitter, SIGNAL(rightxtndactivated()), this, SLOT(activaterxt()));
+        connect(rect->emitter, SIGNAL(xtendDeactived()), this, SLOT(deactivatext()));
+        moveAllFrom(0,750);
+        addItem(rect);
+        resetBoxStates();
+        ExtendSceneWidth(750);
 }

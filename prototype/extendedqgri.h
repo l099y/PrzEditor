@@ -16,7 +16,7 @@ class ExtendedQGRI : public QObject, public QGraphicsRectItem
 public:
     ExtendedQGRI();
     ~ExtendedQGRI();
-    QTimeLine *timer = new QTimeLine(110);
+    QTimeLine *timer = new QTimeLine(80);
     QGraphicsItemAnimation *animation = new QGraphicsItemAnimation;
     BoxState mod = BoxState::REGULAR;
     bool modified = false;
@@ -27,7 +27,7 @@ public:
 
     Emitter *emitter = new Emitter(this);
 
-
+    void setXToFrame(float x);
     void setPreviousToCurrent();
     void restore();
     void strechLeft(QGraphicsSceneMouseEvent *e);
@@ -35,6 +35,7 @@ public:
     void setModifyingcColorSignal();
     void setRegularColor();
     void animatedMove(float pos);
+    int roundedTo10(float x);
 public slots:
     void setAnimatedFalse();
 

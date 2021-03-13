@@ -19,6 +19,12 @@ ExtendedQGRI::~ExtendedQGRI()
     qDebug()<<"deleted";
 }
 
+void ExtendedQGRI::setXToFrame(float x)
+{
+
+    setX(roundedTo10(x));
+}
+
 void ExtendedQGRI::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e)
 {
     QGraphicsRectItem::mouseDoubleClickEvent(e);
@@ -64,6 +70,7 @@ void ExtendedQGRI::hoverMoveEvent(QGraphicsSceneHoverEvent *e)
     else{
         setCursor(Qt::ArrowCursor);
     }
+
 
 }
 
@@ -117,23 +124,23 @@ void ExtendedQGRI::strechLeft(QGraphicsSceneMouseEvent *e)
     }
     else{
         setX(previousxpos + previousboxwidth - 4);
-        setRect(0, 0, 4, 100);
+        setRect(0, 0, 10, 100);
     }
 }
 
 void ExtendedQGRI::strechRight(QGraphicsSceneMouseEvent *e)
 {
     if (e->scenePos().x()>(previousxpos+previousboxwidth)){
-        setRect(0, 0, (e->scenePos().x()- previousxpos), 100);
+        setRect(0, 0, (roundedTo10(e->scenePos().x()- previousxpos)), 100);
         setX(previousxpos);
     }
     else if (e->scenePos().x() >previousxpos &&  e->scenePos().x()<previousboxwidth+previousxpos){
         setX(previousxpos);
-        setRect(0, 0, (e->scenePos().x()-previousxpos), 100);
+        setRect(0, 0, roundedTo10(e->scenePos().x()-previousxpos), 100);
 
     }
     else{
-        setRect(0, 0, 4, 100);
+        setRect(0, 0, 10, 100);
         setX(previousxpos);
     }
 }
@@ -157,17 +164,24 @@ void ExtendedQGRI::animatedMove(float pos)
     float prev = scenePos().x();
     float dist = pos-scenePos().x();
     animated=true;
+    timer->setFrameRange(0, 15);
 
-        timer->setFrameRange(0, 15);
 
+    animation->setItem(this);
+    animation->setTimeLine(timer);
 
-        animation->setItem(this);
-        animation->setTimeLine(timer);
+    for (int i = 0; i < 15; ++i)
+        animation->setPosAt(i / 15.0, QPointF(prev+=(dist/15), 0));
+    timer->start();
+    connect(timer, SIGNAL(finished()), this, SLOT(setAnimatedFalse()));
+}
 
-        for (int i = 0; i < 15; ++i)
-            animation->setPosAt(i / 15.0, QPointF(prev+=(dist/15), 0));
-        timer->start();
-        connect(timer, SIGNAL(finished()), this, SLOT(setAnimatedFalse()));
+int ExtendedQGRI::roundedTo10(float xf)
+{
+    int x = (int)xf;
+    x = x % 10 > 5? x + (10-x%10): x - x%10;
+    return x % 10 > 5? x + (10-x%10): x - x%10;
+
 }
 
 void ExtendedQGRI::setAnimatedFalse()
@@ -181,12 +195,18 @@ void ExtendedQGRI::setAnimatedFalse()
 
 void ExtendedQGRI::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    painter->setBrush(this->brush());
+    if (isSelected()){
+        setZValue(1);
+
+        painter->setBrush(QColor(100,255,255));
+    }
+    else{
+        setZValue(-1);
+        painter->setBrush(QColor(255,200,100));
+    }
+
     painter->setPen(this->pen());
-    int sx = (int)scenePos().x();
-    setX( sx % 10 > 5? sx + (10-sx%10): sx - sx%10);
     painter->drawRoundedRect(rect(),5,5);
-    isSelected()?setZValue(1):setZValue(-1);
 }
 
 
