@@ -16,7 +16,7 @@ class ExtendedQGRI : public QObject, public QGraphicsRectItem
 public:
     ExtendedQGRI();
     ~ExtendedQGRI();
-    QTimeLine *timer = new QTimeLine(80);
+    QTimeLine *timer = new QTimeLine(70);
     QGraphicsItemAnimation *animation = new QGraphicsItemAnimation;
     BoxState mod = BoxState::REGULAR;
     bool modified = false;
@@ -24,7 +24,7 @@ public:
     bool prevposresetrequested = false;
     float previousxpos;
     float previousboxwidth;
-
+    float mousePosXonClick;
     Emitter *emitter = new Emitter(this);
 
     void setXToFrame(float x);

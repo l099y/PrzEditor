@@ -2,7 +2,6 @@
 #include <QDebug>
 #include <QGraphicsRectItem>
 #include <QPropertyAnimation>
-#include <QTimeline>
 #include <QGraphicsItemAnimation>
 #include <QObject>
 
@@ -16,7 +15,7 @@ ExtendedQGRI::ExtendedQGRI(): QGraphicsRectItem()
 
 ExtendedQGRI::~ExtendedQGRI()
 {
-    qDebug()<<"deleted";
+
 }
 
 void ExtendedQGRI::setXToFrame(float x)
@@ -39,7 +38,6 @@ void ExtendedQGRI::hoverEnterEvent(QGraphicsSceneHoverEvent *e)
 
 void ExtendedQGRI::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
 {
-    qDebug()<<"mouse released in Rect class";
     QGraphicsItem :: mouseReleaseEvent(e);
     mod = BoxState::REGULAR;
     if (scenePos().y()!=0){
@@ -50,7 +48,6 @@ void ExtendedQGRI::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
 
 void ExtendedQGRI::hoverLeaveEvent(QGraphicsSceneHoverEvent *e)
 {
-    qDebug()<<"extended hoverExit";
     if (!isSelected())
         setRegularColor();
     update();
@@ -85,6 +82,7 @@ void ExtendedQGRI::mousePressEvent(QGraphicsSceneMouseEvent *e)
         mod = BoxState::STRETCH_RIGHT;
         emitter->rightxtndactivated();
     }
+    mousePosXonClick = e->pos().x();
     QGraphicsRectItem::mousePressEvent(e);
     if (isSelected())
     {
@@ -161,6 +159,7 @@ void ExtendedQGRI::setRegularColor()
 
 void ExtendedQGRI::animatedMove(float pos)
 {
+    qDebug()<<"create animation to "<<pos;
     float prev = scenePos().x();
     float dist = pos-scenePos().x();
     animated=true;
@@ -198,7 +197,7 @@ void ExtendedQGRI::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     if (isSelected()){
         setZValue(1);
 
-        painter->setBrush(QColor(100,255,255));
+        painter->setBrush(QColor(100,255,200));
     }
     else{
         setZValue(-1);

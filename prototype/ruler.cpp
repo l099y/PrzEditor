@@ -34,7 +34,6 @@ QRectF ruler::boundingRect() const
 
 void ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    qDebug()<<scale;
     painter->fillRect(*  background, QColor(230,240,200));
     double scaleValue =1/painter->transform().m11();
     painter->save();
