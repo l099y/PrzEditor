@@ -16,7 +16,7 @@ class ExtendedQGRI : public QObject, public QGraphicsRectItem
 public:
     ExtendedQGRI();
     ~ExtendedQGRI();
-    QTimeLine *timer = new QTimeLine(70);
+    QTimeLine *timer = new QTimeLine(150);
     QGraphicsItemAnimation *animation = new QGraphicsItemAnimation;
     BoxState mod = BoxState::REGULAR;
     bool modified = false;
@@ -35,9 +35,36 @@ public:
     void setModifyingcColorSignal();
     void setRegularColor();
     void animatedMove(float pos);
-    int roundedTo10(float x);
+inline int roundedTo10(float x);
+
+inline bool wasLeftOf(ExtendedQGRI* OtherCube)
+    {
+        return  previousxpos<OtherCube->previousxpos;
+    }
+inline bool rightSideIsInFirstHalfOf (ExtendedQGRI* OtherCube)
+    {
+        return  scenePos().x() + rect().width() >= OtherCube->previousxpos &&
+                scenePos().x() + rect().width() < OtherCube->previousxpos+(OtherCube->previousboxwidth/2);
+    }
+inline bool rightSideIsAfterSecondHalfOf (ExtendedQGRI* OtherCube)
+    {
+        return  scenePos().x() + rect().width() >= OtherCube->previousxpos+(OtherCube->previousboxwidth/2);
+    }
+
+inline bool leftSideIsAfterFirstHalfOf (ExtendedQGRI* OtherCube)
+    {
+        return scenePos().x()< OtherCube->previousxpos+(OtherCube->previousboxwidth/2);
+    }
+inline bool leftSideIsInSecondHalfOf (ExtendedQGRI* OtherCube)
+    {
+        return  scenePos().x()>= OtherCube->previousxpos+(OtherCube->previousboxwidth/2) &&
+                scenePos().x()< OtherCube->previousxpos+OtherCube->previousboxwidth;
+    }
+
 public slots:
     void setAnimatedFalse();
+
+
 
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

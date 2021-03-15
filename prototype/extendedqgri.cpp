@@ -159,8 +159,9 @@ void ExtendedQGRI::setRegularColor()
 
 void ExtendedQGRI::animatedMove(float pos)
 {
+
     qDebug()<<"create animation to "<<pos;
-    float prev = scenePos().x();
+    float prev = roundedTo10(scenePos().x());
     float dist = pos-scenePos().x();
     animated=true;
     timer->setFrameRange(0, 15);
@@ -173,6 +174,7 @@ void ExtendedQGRI::animatedMove(float pos)
         animation->setPosAt(i / 15.0, QPointF(prev+=(dist/15), 0));
     timer->start();
     connect(timer, SIGNAL(finished()), this, SLOT(setAnimatedFalse()));
+
 }
 
 int ExtendedQGRI::roundedTo10(float xf)

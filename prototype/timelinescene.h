@@ -19,8 +19,8 @@ class TimelineScene : public QGraphicsScene
     void resetBoxStates();
     void behaveOnSelectionLeftXtend();
     void behaveOnSelectionRightXtend();
-    void behaveOnSelectionMove(QGraphicsSceneMouseEvent *e);
-    void behaveOnSelectionSwitchPosMove(QGraphicsSceneMouseEvent *e);
+    void behaveOnSelectionMove();
+    void behaveOnSelectionSwitchPosMove();
     void behaveOnSelectionDisplace();
 
 public slots:
@@ -30,13 +30,14 @@ public slots:
    void newRect();
    void debugItems();
    void clearItems();
-   void handleBoxResize(QGraphicsSceneMouseEvent *e);
+   void handleBoxResize();
    void moveAllFrom(float from, float distance);
    void ExtendSceneWidth(float f);
    void allign();
    void setmod2();
    void setdisp();
    void deleteSelection();
+   void displaceSelection(int newPos);
 
 signals:
    void scaleUp();

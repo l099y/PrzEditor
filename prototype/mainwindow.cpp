@@ -36,6 +36,8 @@ void MainWindow :: initButtons(){
     delbutton->setText("disp");
     delbutton->setMinimumSize(QSize(40,40));
     connect(delbutton, SIGNAL(clicked(bool)), timeline, SLOT(deleteSelection()));
+    displaceSelectionButton->setText("displace selection");
+    connect(displaceSelectionButton, SIGNAL(clicked(bool)), this, SLOT(displaceSelectionInTimeline()));
 
 }
 void MainWindow ::initLayouts(){
@@ -62,6 +64,8 @@ void MainWindow::initcontenance(){
      sublayoutbutton->addWidget(dispbutton);
       sublayoutbutton->addWidget(mod2button);
       sublayoutbutton->addWidget(delbutton);
+    sublayoutparams1->addWidget(displaceSelectionButton);
+    sublayoutparams1->addWidget(framePositionInput);
 }
 void MainWindow::initwidgetsparams(){
 
@@ -146,5 +150,29 @@ void MainWindow::scaleDownView()
          timelineView->scale(0.9 , 1);
          currentTimelineScaling *= 0.9;
          timeline->ruler.scale *=0.9;
+    }
+}
+
+void MainWindow::displaceSelectionInTimeline()
+{
+    qDebug()<<framePositionInput->text();
+
+    if (framePositionInput->text() != "")
+    {
+        try
+          {
+              int i = std::stoi(framePositionInput->text().toStdString());
+              qDebug()<<i;
+              timeline->displaceSelection(i);
+
+          }
+          catch (std::invalid_argument const &e)
+          {
+              qDebug() << "Bad input: std::invalid_argument thrown";
+          }
+          catch (std::out_of_range const &e)
+          {
+              qDebug() << "Integer overflow: std::out_of_range thrown";
+          }
     }
 }

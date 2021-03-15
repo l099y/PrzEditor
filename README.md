@@ -1,6 +1,6 @@
 # NAVIGATIONSHEET
 
-## Plans pour la semaine à venir (8 au 12 de 03/21)
+## Plans pour la semaine à venir (15 au 19 de 03/21)
 
 - lors du déplacement d'un bloc: d'abord il y a une résistance et il reste collé à l'autre bloc, puis il passe au dessus et il s'inverse avec une animation V
 - Ne pas changer la longueur d'un bloc dans l’interface timeline: c'est dans l'interface de propriété d'un bloc qu'on le fait

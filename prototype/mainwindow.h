@@ -14,7 +14,7 @@
 #include <QPushButton>
 #include <QGraphicsScene>
 #include <timelinescene.h>
-
+#include <QLineEdit>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -58,6 +58,8 @@ public:
     QPushButton* mod2button = new QPushButton();
     QPushButton* dispbutton = new QPushButton();
     QPushButton* delbutton = new QPushButton();
+    QPushButton* displaceSelectionButton = new QPushButton();
+    QLineEdit* framePositionInput = new QLineEdit(this);
 
     MainWindow(QWidget *parent = nullptr);
 
@@ -68,6 +70,7 @@ public slots:
     void changeButtonTxt();
     void scaleUpView();
     void scaleDownView();
+    void displaceSelectionInTimeline();
 
 private:
     void initButtons();
