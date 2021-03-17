@@ -35,6 +35,7 @@ public:
     void setModifyingcColorSignal();
     void setRegularColor();
     void animatedMove(float pos);
+    void setSize(int realsize);
 inline int roundedTo10(float x);
 
 inline bool wasLeftOf(ExtendedQGRI* OtherCube)

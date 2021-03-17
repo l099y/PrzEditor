@@ -11,11 +11,14 @@ ExtendedQGRI::ExtendedQGRI(): QGraphicsRectItem()
     setAcceptHoverEvents(true);
     setFlag(QGraphicsItem :: ItemIsMovable);
     setFlag(QGraphicsItem :: ItemIsSelectable);
+    connect(timer, SIGNAL(finished()), this, SLOT(setAnimatedFalse()));
 }
 
 ExtendedQGRI::~ExtendedQGRI()
 {
-
+ delete(animation);
+ delete(timer);
+ delete(emitter);
 }
 
 void ExtendedQGRI::setXToFrame(float x)
@@ -56,17 +59,17 @@ void ExtendedQGRI::hoverLeaveEvent(QGraphicsSceneHoverEvent *e)
 
 void ExtendedQGRI::hoverMoveEvent(QGraphicsSceneHoverEvent *e)
 {
-    if(e->pos().x()>= 0 && e->pos().x()<=3)
-    {
-        setCursor(Qt::SplitHCursor);
-        //setMode extend to left
-    }
-    else if(e->pos().x()>= boundingRect().width()-3 && e->pos().x()<= boundingRect().width()){
-        setCursor(Qt::SplitHCursor);
-    }
-    else{
-        setCursor(Qt::ArrowCursor);
-    }
+//    if(e->pos().x()>= 0 && e->pos().x()<=3)
+//    {
+//        setCursor(Qt::SplitHCursor);
+//        //setMode extend to left
+//    }
+//    else if(e->pos().x()>= boundingRect().width()-3 && e->pos().x()<= boundingRect().width()){
+//        setCursor(Qt::SplitHCursor);
+//    }
+//    else{
+//        setCursor(Qt::ArrowCursor);
+//    }
 
 
 }
@@ -160,21 +163,25 @@ void ExtendedQGRI::setRegularColor()
 void ExtendedQGRI::animatedMove(float pos)
 {
 
-    qDebug()<<"create animation to "<<pos;
+
+
+    if(!animated){
+         qDebug()<<"create animation to "<<pos;
     float prev = roundedTo10(scenePos().x());
     float dist = pos-scenePos().x();
     animated=true;
     timer->setFrameRange(0, 15);
-
-
     animation->setItem(this);
     animation->setTimeLine(timer);
-
     for (int i = 0; i < 15; ++i)
-        animation->setPosAt(i / 15.0, QPointF(prev+=(dist/15), 0));
+    animation->setPosAt(i / 15.0, QPointF(prev+=(dist/15), 0));
     timer->start();
-    connect(timer, SIGNAL(finished()), this, SLOT(setAnimatedFalse()));
+    }
+}
 
+void ExtendedQGRI::setSize(int realsize)
+{
+    setRect(0,0,realsize, 100);
 }
 
 int ExtendedQGRI::roundedTo10(float xf)
@@ -190,6 +197,7 @@ void ExtendedQGRI::setAnimatedFalse()
     if (prevposresetrequested){
         prevposresetrequested =false;
         setPreviousToCurrent();
+        update();
     }
     animated=false;
 }

@@ -45,7 +45,7 @@ public:
     QVBoxLayout *sublayouttimeline = new QVBoxLayout(parameters);
     QHBoxLayout *sublayoutsplit0 = new QHBoxLayout(parameters);
     QHBoxLayout *sublayoutsplit = new QHBoxLayout(parameters);
-    QHBoxLayout *sublayoutparams1 = new QHBoxLayout(params1);
+    QVBoxLayout *sublayoutparams1 = new QVBoxLayout(params1);
     QHBoxLayout *sublayoutparams2 = new QHBoxLayout(params2);
 
     QFileSystemModel *TreeModel = new QFileSystemModel();
@@ -59,7 +59,9 @@ public:
     QPushButton* dispbutton = new QPushButton();
     QPushButton* delbutton = new QPushButton();
     QPushButton* displaceSelectionButton = new QPushButton();
+    QPushButton* changeSelectionSizeButton = new QPushButton();
     QLineEdit* framePositionInput = new QLineEdit(this);
+    QLineEdit* boxSizeInput = new QLineEdit(this);
 
     MainWindow(QWidget *parent = nullptr);
 
@@ -71,6 +73,7 @@ public slots:
     void scaleUpView();
     void scaleDownView();
     void displaceSelectionInTimeline();
+    void changeSelectionSizeInTimeline();
 
 private:
     void initButtons();

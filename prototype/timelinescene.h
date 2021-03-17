@@ -12,6 +12,7 @@ class TimelineScene : public QGraphicsScene
 {
     Q_OBJECT
     public:
+    bool isPastLimit = false;
     TimelineScene(QObject* parent = nullptr);
     ~TimelineScene();
     ruler ruler;
@@ -22,6 +23,7 @@ class TimelineScene : public QGraphicsScene
     void behaveOnSelectionMove();
     void behaveOnSelectionSwitchPosMove();
     void behaveOnSelectionDisplace();
+    float rectXAndWBefore(ExtendedQGRI *rect);
 
 public slots:
     void activatelxt();
@@ -38,6 +40,7 @@ public slots:
    void setdisp();
    void deleteSelection();
    void displaceSelection(int newPos);
+   void changeSelectionSize(int newSize);
 
 signals:
    void scaleUp();
