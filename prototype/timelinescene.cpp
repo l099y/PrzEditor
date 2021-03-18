@@ -374,7 +374,7 @@ void TimelineScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
     if (!selectedItems().isEmpty() && e->buttons()==Qt::LeftButton){
         ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
         handleBoxResize();
-        selectedItems().at(0)->setY(0);
+        selectedItems().at(0)->setY(-10);
     }
 }
 

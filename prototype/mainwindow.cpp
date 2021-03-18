@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     initLayouts();
     timelineView->setMinimumHeight(300);
     timelineView->setRenderHint(QPainter::Antialiasing);
+    paramlabel->setMaximumHeight(100);
 
 
 }
@@ -70,7 +71,7 @@ void MainWindow::initcontenance(){
     sublayoutparams1->addWidget(framePositionInput);
     sublayoutparams1->addWidget(changeSelectionSizeButton);
     sublayoutparams1->addWidget(boxSizeInput);
-    sublayoutparams1->setAlignment(sublayoutparams1, Qt::AlignTop);
+    sublayoutparams1->setAlignment(Qt::AlignTop);
 
 }
 void MainWindow::initwidgetsparams(){

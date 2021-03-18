@@ -16,7 +16,7 @@ class ExtendedQGRI : public QObject, public QGraphicsRectItem
 public:
     ExtendedQGRI();
     ~ExtendedQGRI();
-    QTimeLine *timer = new QTimeLine(150);
+    QTimeLine *timer = new QTimeLine(130);
     QGraphicsItemAnimation *animation = new QGraphicsItemAnimation;
     BoxState mod = BoxState::REGULAR;
     bool modified = false;

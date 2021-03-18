@@ -1,6 +1,16 @@
 # NAVIGATIONSHEET
 
-## Plans pour la semaine à venir (15 au 19 de 03/21)
+## Plans pour la semaine à venir (23 au 27 de 03/21)
+
+- les fichiers prz: il me faut détecter des séquences de prz au sein de dossiers
+en créer une représentation comme un fichier etendu pointant vers des adresses.
+- mettre en place la dynamique de l'interface parametre et saisie d'information, qui doit se déclancher sur enter, sur esc annulé la valeur modifiée mais pas validée.
+- commencer à apprendre les mécaniques du registre d'action intégré à Qt (damn je pensais que j'allais écrire ce registre d'action moi même, where is the fun). 
+
+
+## Résumé d'activité par semaine
+
+### semaine 5(15 au 19 de 03/21)
 
 - lors du déplacement d'un bloc: d'abord il y a une résistance et il reste collé à l'autre bloc, puis il passe au dessus et il s'inverse avec une animation V
 - Ne pas changer la longueur d'un bloc dans l’interface timeline: c'est dans l'interface de propriété d'un bloc qu'on le fait
@@ -9,9 +19,8 @@
 - commencer la gestion des fichiers
 - commencer la gestion du multiboxage
 
-## Résumé d'activité par semaine
-
 ### semaine 4(8 au 12 de 03/21)
+
 - changer certains comportement dans le dynamisme des blocs v
 - implémenter d'autres "mods" de déplacement : magnet, displace. v
 - implémenter la graduation v
