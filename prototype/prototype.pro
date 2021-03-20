@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     extendedqgri.cpp \
+    extendedqtreeview.cpp \
     main.cpp \
     mainwindow.cpp \
     emitter.cpp \
@@ -18,6 +19,7 @@ SOURCES += \
 
 HEADERS += \
     extendedqgri.h \
+    extendedqtreeview.h \
     mainwindow.h \
     emitter.h \
     ruler.h \

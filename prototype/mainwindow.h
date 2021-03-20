@@ -15,6 +15,7 @@
 #include <QGraphicsScene>
 #include <timelinescene.h>
 #include <QLineEdit>
+#include <extendedqtreeview.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -50,7 +51,7 @@ public:
 
     QFileSystemModel *TreeModel = new QFileSystemModel();
     QModelIndex idx = TreeModel->index("");
-    QTreeView *tree = new QTreeView(widget);
+    ExtendedQTreeView *tree = new ExtendedQTreeView(widget);
 
     QPushButton* allignbutton = new QPushButton();
     QPushButton* clearbutton = new QPushButton();

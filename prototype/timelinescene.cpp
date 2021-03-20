@@ -397,20 +397,11 @@ void TimelineScene::resetBoxStates(){
         ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(current);
         if (rect)
         {
-            if (!rect->isVisible() && rect->modified){
-
-                this->removeItem(rect);
-                delete(rect);
-            }
-            else{
-
                 if (rect->animated)
                     rect->prevposresetrequested = true;
                 else{
                     rect->setPreviousToCurrent();
                 }
-                rect->modified =false;
-            }
         }
     }
 }
