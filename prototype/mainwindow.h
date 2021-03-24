@@ -16,6 +16,7 @@
 #include <timelinescene.h>
 #include <QLineEdit>
 #include <extendedqtreeview.h>
+#include <QSortFilterProxyModel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -49,9 +50,10 @@ public:
     QVBoxLayout *sublayoutparams1 = new QVBoxLayout(params1);
     QHBoxLayout *sublayoutparams2 = new QHBoxLayout(params2);
 
-    QFileSystemModel *TreeModel = new QFileSystemModel();
+    QFileSystemModel *TreeModel = new QFileSystemModel(this);
     QModelIndex idx = TreeModel->index("");
     ExtendedQTreeView *tree = new ExtendedQTreeView(widget);
+    QSortFilterProxyModel *fileFilter = new QSortFilterProxyModel(this);
 
     QPushButton* allignbutton = new QPushButton();
     QPushButton* clearbutton = new QPushButton();

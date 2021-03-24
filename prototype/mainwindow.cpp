@@ -102,13 +102,18 @@ void MainWindow :: bindLayoutsToWidgets(){
 }
 void MainWindow::setupTreeItem(){
     TreeModel->setRootPath("");
+    fileFilter->setSourceModel(TreeModel);
     tree->setModel(TreeModel);
+    fileFilter->setFilterRegularExpression("^.*(?<!\\.pdf)$");
+           fileFilter->setFilterKeyColumn(1);
+    fileFilter->setDynamicSortFilter(true);
     tree->setRootIndex(idx);
+
     tree->setMinimumWidth(400);
-    tree->setColumnHidden(1, true);
-    tree->setColumnHidden(2, true);
-    tree->setColumnHidden(3, true);
-    tree->setHeaderHidden(true);
+//    tree    ->setColumnHidden(1, true);
+//    tree->setColumnHidden(2, true);
+//    tree->setColumnHidden(3, true);
+//    tree->setHeaderHidden(true);
 }
 
 void MainWindow::inittimelinescene(){
@@ -118,7 +123,8 @@ void MainWindow::inittimelinescene(){
 //    timelineView->setAcceptDrops(true);
 //    timelineView->setDragMode(QGraphicsView::RubberBandDrag);
     timelineView->setAlignment(Qt::AlignLeft);
-    timelineView->setMaximumHeight(300);
+      timelineView->setMaximumHeight(300);
+
     connect(timeline, SIGNAL(scaleUp()), this, SLOT(scaleUpView()));
     connect(timeline, SIGNAL(scaleDown()),this, SLOT(scaleDownView()));
     sublayouttimeline->addWidget(timelineView);
@@ -144,10 +150,11 @@ void MainWindow::scaleUpView()
          timeline->ruler.scale *=1.1;
      }
      else{
-         timelineView->resetMatrix();
+         timelineView->resetTransform();
          currentTimelineScaling = 1;
          timeline->ruler.scale =1;
      }
+     qDebug()<<currentTimelineScaling;
 
 }
 
@@ -158,6 +165,7 @@ void MainWindow::scaleDownView()
          currentTimelineScaling *= 0.9;
          timeline->ruler.scale *=0.9;
     }
+    qDebug()<<currentTimelineScaling;
 }
 
 void MainWindow::displaceSelectionInTimeline()

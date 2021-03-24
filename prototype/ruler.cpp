@@ -42,15 +42,15 @@ void ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     {
         if (i % framesize == 0){
             QLineF* l = new QLineF (i*scale, -60, i*scale, i%(framesize*10) == 0 ? -75 : -65);
-            if (scale >0.5 || i%(framesize*10) == 0)
+            if (scale >0.5 || (i%(framesize*10) == 0 && scale > 0.05)|| i%(framesize*100)==0)
                 painter->drawLine(*l);
             delete(l);
         }
 
         if (i%(framesize*10)==0){
-            if (scale > 0.3 || i%(framesize*50)==0){
+            if (scale > 0.3 || (i%(framesize*50)==0 && scale >  0.05) || i%(framesize*500)==0 ){
             QString t = QVariant(i/framesize).toString();
-            painter->drawText((i-((3.8*t.length())))*scale, -78, t);
+            painter->drawText((i-((5.5*t.length())/2/scale))*scale, -78, t);
             }
         }
     }

@@ -121,8 +121,8 @@ void TimelineScene::behaveOnSelectionMove()
         if (rect && rect != selection)
         {
             if ((sX > rect->previousxpos && sX < rect->previousboxwidth+rect->previousxpos)||( // si le bord gauche du rectangle est plus grand que la position précédente du rectangle observer et et est plus
-                                                                                               (sX + sW >rect->previousxpos && sX + sW < rect->previousboxwidth+rect->previousxpos)||
-                                                                                               (sX < rect->previousxpos && sX + sW > rect->previousboxwidth+rect->previousxpos)))
+            (sX + sW >rect->previousxpos && sX + sW < rect->previousboxwidth+rect->previousxpos)||
+            (sX < rect->previousxpos && sX + sW > rect->previousboxwidth+rect->previousxpos)))
             {
                 rect->setVisible(true);
                 rect->setModifyingcColorSignal();
@@ -397,11 +397,11 @@ void TimelineScene::resetBoxStates(){
         ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(current);
         if (rect)
         {
-                if (rect->animated)
-                    rect->prevposresetrequested = true;
-                else{
-                    rect->setPreviousToCurrent();
-                }
+            if (rect->animated)
+                rect->prevposresetrequested = true;
+            else{
+                rect->setPreviousToCurrent();
+            }
         }
     }
 }
