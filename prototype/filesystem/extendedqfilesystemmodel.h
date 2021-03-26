@@ -20,9 +20,6 @@ public slots:
 private:
     QSet<QString> filteredSet;
     void generatePdflist(QModelIndex idx);
-    void populateFilteredSet(int sizeLimit);
-    void addAllParentalPaths(const QString& filePath);
-
 };
 
 #endif // EXTENDEDQFILESYSTEMMODEL_H

@@ -1,10 +1,11 @@
 #include <QHashIterator>
 #include "extendedqfilesystemmodel.h"
 #include <QDebug>
+#include <QStandardItem>
 
 ExtendedQFileSystemModel::ExtendedQFileSystemModel(QObject* parent): QFileSystemModel(parent)
 {
-    setReadOnly(true);
+    setReadOnly(false);
 }
 
 ExtendedQFileSystemModel::~ExtendedQFileSystemModel()
@@ -21,6 +22,7 @@ void ExtendedQFileSystemModel::parseExpandedDir(QModelIndex idx){
         if (fInfo.suffix()=="pdf"){
             filteredSet.insert(fInfo.absolutePath());
             containsPdf = true;
+            break;
         }
     }
     if (containsPdf)
@@ -46,52 +48,20 @@ QVariant ExtendedQFileSystemModel::data(const QModelIndex &index,
     return QFileSystemModel::data(index, role);
 }
 
-//void ExtendedQTreeView::mouseDoubleClickEvent(QMouseEvent *e)
-//{
-//    QSortFilterProxyModel *filter = (QSortFilterProxyModel*)this->model();
-//    auto fileinfo = filter->itemData(this->selectedIndexes().first());
-//    qDebug()<<filter->data(this->selectedIndexes().first());
-
-////    QTreeView :: mouseDoubleClickEvent(e);
-////    QFileSystemModel *modl = (QFileSystemModel*)this->model();
-////    if (selectedIndexes().first().isValid()){
-////        auto fileInf = modl->fileInfo(this->selectedIndexes().first());
-////        if (fileInf.isDir())
-////        {
-
-////            QDir currentDir (fileInf.absoluteFilePath());
-////            QStringList paths = currentDir.entryList(QStringList()<<"*.pdf" << "*.PDF", QDir::Files);
-////            //            qDebug()<< fileInf.absoluteFilePath();
-////            //            for (int i = 0; i<paths.length()-2;i++){
-////            //                qDebug()<<selectedIndexes().first().row();
-////            //                qDebug()<<modl->fileInfo(selectedIndexes().first().child(i, 0)).fileName() << "filename";
-
-////            //            }
-////        }
-////    }
-//}
 
 void ExtendedQFileSystemModel::generatePdflist(QModelIndex idx)
 {
     auto fileInf = fileInfo(idx);
     QDir currentDir (fileInf.filePath());
+    insertRow(0,idx);
     QStringList paths = currentDir.entryList(QStringList()<<"*.pdf" << "*.PDF", QDir::Files);
     QString path =currentDir.absolutePath();
-    QFile file(path+"/listofPdf.pdflist");
+
     if (paths.size()!=0){
-        if (file.open(QIODevice::ReadWrite))
-        {
-            qDebug()<<"file now exists";
-            QTextStream stream(&file);
-            foreach (QString str, paths){
-                stream << str <<'\n';
-            }
-            file.close();
-            qDebug() << "Writing finished";
-            filteredSet.insert(path+"/listofPdf.pdflist");
-        }
+
     }
 }
+
 
 
 

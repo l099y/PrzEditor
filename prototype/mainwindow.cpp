@@ -102,18 +102,16 @@ void MainWindow :: bindLayoutsToWidgets(){
 }
 void MainWindow::setupTreeItem(){
     TreeModel->setRootPath("");
-    fileFilter->setSourceModel(TreeModel);
-    tree->setModel(TreeModel);
-    fileFilter->setFilterRegularExpression("^.*(?<!\\.pdf)$");
-           fileFilter->setFilterKeyColumn(1);
-    fileFilter->setDynamicSortFilter(true);
+    TreeModel->setNameFilterDisables(false);
+    TreeModel->setFilter(QDir::AllDirs|QDir::NoDotAndDotDot);
     tree->setRootIndex(idx);
-
     tree->setMinimumWidth(400);
-//    tree    ->setColumnHidden(1, true);
-//    tree->setColumnHidden(2, true);
-//    tree->setColumnHidden(3, true);
-//    tree->setHeaderHidden(true);
+    tree->setModel(TreeModel);
+    tree    ->setColumnHidden(1, true);
+    tree->setColumnHidden(2, true);
+    tree->setColumnHidden(3, true);
+    tree->setHeaderHidden(true);
+    connect (tree, SIGNAL(expanded(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
 }
 
 void MainWindow::inittimelinescene(){

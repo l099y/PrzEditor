@@ -9,21 +9,21 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    extendedqgri.cpp \
-    extendedqtreeview.cpp \
+    filesystem/extendedqfilesystemmodel.cpp \
+    sequence_elements\extendedqgri.cpp \
     main.cpp \
     mainwindow.cpp \
     emitter.cpp \
-    ruler.cpp \
-    timelinescene.cpp
+    sequence_elements\ruler.cpp \
+    sequence_elements\timelinescene.cpp
 
 HEADERS += \
-    extendedqgri.h \
-    extendedqtreeview.h \
+    filesystem/extendedqfilesystemmodel.h \
+    sequence_elements\extendedqgri.h \
     mainwindow.h \
     emitter.h \
-    ruler.h \
-    timelinescene.h
+    sequence_elements\ruler.h \
+    sequence_elements\timelinescene.h
 
 FORMS += \
     mainwindow.ui

@@ -13,10 +13,10 @@
 #include <QGraphicsScene>
 #include <QPushButton>
 #include <QGraphicsScene>
-#include <timelinescene.h>
+#include <sequence_elements/timelinescene.h>
 #include <QLineEdit>
-#include <extendedqtreeview.h>
 #include <QSortFilterProxyModel>
+#include <filesystem/extendedqfilesystemmodel.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -50,10 +50,9 @@ public:
     QVBoxLayout *sublayoutparams1 = new QVBoxLayout(params1);
     QHBoxLayout *sublayoutparams2 = new QHBoxLayout(params2);
 
-    QFileSystemModel *TreeModel = new QFileSystemModel(this);
+    ExtendedQFileSystemModel *TreeModel = new ExtendedQFileSystemModel(this);
     QModelIndex idx = TreeModel->index("");
-    ExtendedQTreeView *tree = new ExtendedQTreeView(widget);
-    QSortFilterProxyModel *fileFilter = new QSortFilterProxyModel(this);
+    QTreeView *tree = new QTreeView(widget);
 
     QPushButton* allignbutton = new QPushButton();
     QPushButton* clearbutton = new QPushButton();
