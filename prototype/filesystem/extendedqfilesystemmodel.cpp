@@ -3,9 +3,10 @@
 #include <QDebug>
 #include <QStandardItem>
 
-ExtendedQFileSystemModel::ExtendedQFileSystemModel(QObject* parent): QFileSystemModel(parent)
+ExtendedQFileSystemModel::ExtendedQFileSystemModel(SequenceRegister* reg, QObject* parent): QFileSystemModel(parent)
 {
-    setReadOnly(false);
+    przreg = reg;
+    setReadOnly(true);
 }
 
 ExtendedQFileSystemModel::~ExtendedQFileSystemModel()
@@ -19,47 +20,45 @@ void ExtendedQFileSystemModel::parseExpandedDir(QModelIndex idx){
     while (it.hasNext()) {
         it.next();
         const QFileInfo& fInfo = it.fileInfo();
-        if (fInfo.suffix()=="pdf"){
+        if (fInfo.suffix()=="prz"){
             filteredSet.insert(fInfo.absolutePath());
             containsPdf = true;
             break;
         }
     }
     if (containsPdf)
-        generatePdflist(idx);
+        generatePrzlist(idx);
 }
 
 QVariant ExtendedQFileSystemModel::data(const QModelIndex &index,
                                         int role) const {
+    const QFileInfo& fInfo = fileInfo(index);
     if(role == Qt::TextColorRole){
-        const QFileInfo& fInfo = fileInfo(index);
         if(filteredSet.contains(fInfo.filePath()))
-            return QColor(Qt::blue);
+            return QColor(100,200,255);
     }
     else if( role == Qt::DecorationRole )
     {
-        const QFileInfo& info = fileInfo(index);
-        if(info.isFile() && info.suffix() == "pdflist" && index.column()==0){
-            QPixmap logo(20,20);
-            logo.fill(QColor(100,170,255));
-            return logo;//I pick the icon depending on the extension
+        if(filteredSet.contains(fInfo.filePath())){
+            QPixmap logo(15,15);
+            logo.fill(QColor(100,200,255));
+            return logo;
         }
     }
     return QFileSystemModel::data(index, role);
 }
 
 
-void ExtendedQFileSystemModel::generatePdflist(QModelIndex idx)
+void ExtendedQFileSystemModel::generatePrzlist(QModelIndex idx)
 {
     auto fileInf = fileInfo(idx);
     QDir currentDir (fileInf.filePath());
-    insertRow(0,idx);
-    QStringList paths = currentDir.entryList(QStringList()<<"*.pdf" << "*.PDF", QDir::Files);
-    QString path =currentDir.absolutePath();
-
-    if (paths.size()!=0){
+    auto test = przreg->GenerateSequencesFromDir(&currentDir);
+    foreach (SequenceData* current, test){
+        qDebug()<< current->name <<" - "<<current->files;
 
     }
+
 }
 
 

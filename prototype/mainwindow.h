@@ -50,7 +50,9 @@ public:
     QVBoxLayout *sublayoutparams1 = new QVBoxLayout(params1);
     QHBoxLayout *sublayoutparams2 = new QHBoxLayout(params2);
 
-    ExtendedQFileSystemModel *TreeModel = new ExtendedQFileSystemModel(this);
+
+    SequenceRegister* reg = new SequenceRegister (this);
+    ExtendedQFileSystemModel *TreeModel = new ExtendedQFileSystemModel(reg, this);
     QModelIndex idx = TreeModel->index("");
     QTreeView *tree = new QTreeView(widget);
 

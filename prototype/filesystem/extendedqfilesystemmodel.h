@@ -4,12 +4,14 @@
 #include <QFileSystemModel>
 #include <QObject>
 #include <QtCore>
+#include <filesystem/sequenceregister.h>
 
 class ExtendedQFileSystemModel : public QFileSystemModel
 {
     Q_OBJECT
 public:
-    ExtendedQFileSystemModel(QObject* parent);
+    SequenceRegister* przreg;
+    ExtendedQFileSystemModel(SequenceRegister* reg, QObject* parent);
     ~ExtendedQFileSystemModel();
     QVariant data(const QModelIndex& index,
                   int role = Qt::DisplayRole) const;
@@ -19,7 +21,7 @@ public slots:
 
 private:
     QSet<QString> filteredSet;
-    void generatePdflist(QModelIndex idx);
+    void generatePrzlist(QModelIndex idx);
 };
 
 #endif // EXTENDEDQFILESYSTEMMODEL_H

@@ -10,6 +10,8 @@ CONFIG += c++11
 
 SOURCES += \
     filesystem/extendedqfilesystemmodel.cpp \
+    filesystem/sequencedata.cpp \
+    filesystem/sequenceregister.cpp \
     sequence_elements\extendedqgri.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -19,6 +21,8 @@ SOURCES += \
 
 HEADERS += \
     filesystem/extendedqfilesystemmodel.h \
+    filesystem/sequencedata.h \
+    filesystem/sequenceregister.h \
     sequence_elements\extendedqgri.h \
     mainwindow.h \
     emitter.h \
