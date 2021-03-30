@@ -16,6 +16,8 @@ public:
     int endIdx;
 
     bool corrupted = false;
+    inline int lenght();
+    bool CheckIntegrity();
 };
 
 #endif // SEQUENCEDATA_H

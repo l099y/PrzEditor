@@ -17,10 +17,12 @@ class SequenceRegister : public QObject
     Q_OBJECT
 public:
     SequenceRegister(QObject* parent);
-    QHash<QString, SequenceData>* storedSequences = new QHash<QString, SequenceData>();
-    QSet<QString>* corruptedSequences = new QSet<QString>();
+    QHash<QString, QList<SequenceData*>>* storedSequences = new QHash<QString, QList<SequenceData*>>();
+    QSet<QString> corruptedSequences;
+    QSet<QString> usedSequences;
     QList<SequenceData*> GenerateSequencesFromDir(QDir* dir);
     inline fileInf getReleventInfo(QString* path);
+    void printStoredSequences();
 };
 
 #endif // SEQUENCEREGISTER_H

@@ -26,7 +26,7 @@ void ExtendedQFileSystemModel::parseExpandedDir(QModelIndex idx){
             break;
         }
     }
-    if (containsPdf)
+    if (containsPdf && !przreg->storedSequences->contains(fileInfo(idx).absoluteFilePath()))
         generatePrzlist(idx);
 }
 
@@ -53,12 +53,7 @@ void ExtendedQFileSystemModel::generatePrzlist(QModelIndex idx)
 {
     auto fileInf = fileInfo(idx);
     QDir currentDir (fileInf.filePath());
-    auto test = przreg->GenerateSequencesFromDir(&currentDir);
-    foreach (SequenceData* current, test){
-        qDebug()<< current->name <<" - "<<current->files;
-
-    }
-
+    przreg->GenerateSequencesFromDir(&currentDir);
 }
 
 

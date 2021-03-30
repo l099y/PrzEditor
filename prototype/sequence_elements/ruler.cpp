@@ -38,13 +38,16 @@ void ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     double scaleValue =1/painter->transform().m11();
     painter->save();
     painter->scale(scaleValue, 1);
+    int lineCount = 0;
     for (int i = 0; i < background->width() ; i++)
     {
         if (i % framesize == 0){
-            QLineF* l = new QLineF (i*scale, -60, i*scale, i%(framesize*10) == 0 ? -75 : -65);
-            if (scale >0.5 || (i%(framesize*10) == 0 && scale > 0.05)|| i%(framesize*100)==0)
+            if (scale >0.5 || (i%(framesize*10) == 0 && scale > 0.05)|| i%(framesize*100)==0){
+                QLineF* l = new QLineF (i*scale, -60, i*scale, lineCount%(5) == 0 ? -70 : -65);
                 painter->drawLine(*l);
-            delete(l);
+                delete(l);
+                lineCount++;
+            }
         }
 
         if (i%(framesize*10)==0){

@@ -1,10 +1,13 @@
 #include "sequenceregister.h"
 #include "QDebug"
 
+
 SequenceRegister::SequenceRegister(QObject* parent): QObject(parent)
 {
 
 }
+
+
 
 QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir) // this function will be long... i need to evaluate the hole content of the dir and make the proper cuts in the sequences
 {
@@ -46,6 +49,9 @@ QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir) // th
     temp->endIdx = sequenceCurrentIdx;
     temp->name = temp->name.append(".%1-%2").arg(temp->startIdx).arg(temp->endIdx);
     ret.append(temp);
+
+    storedSequences->insert(dir->absolutePath(), ret);
+    printStoredSequences();
     return ret;
 }
 
@@ -71,5 +77,18 @@ inline fileInf SequenceRegister::getReleventInfo(QString* path)
         bool ok;
         ret.idx= idxString.toUInt(&ok, 10);
         return ret;
+    }
+}
+
+void SequenceRegister::printStoredSequences()
+{
+    QHash<QString, QList<SequenceData*>>::const_iterator i = storedSequences->constBegin();
+    while (i != storedSequences->constEnd()) {
+        foreach (SequenceData* data, i.value())
+            {
+            qDebug()<< data->name<<" integrity is "<< data->CheckIntegrity();
+        }
+        qDebug() << i.key() << ": " << i.value();
+        ++i;
     }
 }
