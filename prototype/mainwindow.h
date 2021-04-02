@@ -17,6 +17,7 @@
 #include <QLineEdit>
 #include <QSortFilterProxyModel>
 #include <filesystem/extendedqfilesystemmodel.h>
+#include <sequence_elements/Storage/sequenceroom.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -56,6 +57,9 @@ public:
     QModelIndex idx = TreeModel->index("");
     QTreeView *tree = new QTreeView(widget);
 
+    SequenceRoom *storageScene = new SequenceRoom(this, reg);
+    QGraphicsView *storageView;
+
     QPushButton* allignbutton = new QPushButton();
     QPushButton* clearbutton = new QPushButton();
     QPushButton* newboxbutton = new QPushButton();
@@ -68,10 +72,9 @@ public:
     QLineEdit* boxSizeInput = new QLineEdit(this);
 
     MainWindow(QWidget *parent = nullptr);
-
-
-
     ~MainWindow();
+
+    void changeEvent(QEvent *event);
 public slots:
     void changeButtonTxt();
     void scaleUpView();

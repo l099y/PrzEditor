@@ -15,13 +15,10 @@ public:
     ~ExtendedQFileSystemModel();
     QVariant data(const QModelIndex& index,
                   int role = Qt::DisplayRole) const;
-
+signals:
+    void displaySequences(QString path);
 public slots:
     void parseExpandedDir(QModelIndex);
-
-private:
-    QSet<QString> filteredSet;
-    void generatePrzlist(QModelIndex idx);
 };
 
 #endif // EXTENDEDQFILESYSTEMMODEL_H

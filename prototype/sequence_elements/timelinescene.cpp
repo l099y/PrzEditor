@@ -4,12 +4,12 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QBrush>
 #include <QGraphicsRectItem>
-#include <extendedqgri.h>
+#include <sequence_elements/extendedqgri.h>
 #include <QMimeData>
 #include <QGraphicsSceneDragDropEvent>
 #include <QList>
 #include <QKeyEvent>
-#include <ruler.h>
+#include <sequence_elements/ruler.h>
 
 TimelineScene::TimelineScene(QObject* parent): QGraphicsScene(parent), ruler(0)
 {

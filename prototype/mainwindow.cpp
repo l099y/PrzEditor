@@ -1,7 +1,8 @@
-    #include "mainwindow.h"
+#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include <QGraphicsView>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -14,8 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     timelineView->setMinimumHeight(300);
     timelineView->setRenderHint(QPainter::Antialiasing);
     paramlabel->setMaximumHeight(100);
-
-
+    // trial for focus restore
 }
 void MainWindow :: initButtons(){
 
@@ -52,21 +52,23 @@ void MainWindow ::initLayouts(){
     initButtons();
 }
 void MainWindow::initcontenance(){
-    layout->addWidget(tree);
+
+
     sublayoutsplit0->addWidget(timelineButtons);
     sublayoutsplit0->addWidget(supposedtimeslider);
     sublayoutEditor->addWidget(timelineNutils);
     sublayoutEditor->addWidget(parameters);
     sublayoutsplit->addWidget(params1);
+    sublayoutsplit->addWidget(storageView);
     sublayoutsplit->addWidget(tree);
     sublayoutsplit->setMargin(20);
     sublayoutparams1->addWidget(paramlabel);
     sublayoutbutton->addWidget(newboxbutton);
     sublayoutbutton->addWidget(clearbutton);
     sublayoutbutton->addWidget(allignbutton);
-     sublayoutbutton->addWidget(dispbutton);
-      sublayoutbutton->addWidget(mod2button);
-      sublayoutbutton->addWidget(delbutton);
+    sublayoutbutton->addWidget(dispbutton);
+    sublayoutbutton->addWidget(mod2button);
+    sublayoutbutton->addWidget(delbutton);
     sublayoutparams1->addWidget(displaceSelectionButton);
     sublayoutparams1->addWidget(framePositionInput);
     sublayoutparams1->addWidget(changeSelectionSizeButton);
@@ -101,6 +103,9 @@ void MainWindow :: bindLayoutsToWidgets(){
     //widget->setLayout(layout);
 }
 void MainWindow::setupTreeItem(){
+    storageView = new QGraphicsView(this);
+    storageView->setScene(storageScene);
+    storageView->setMaximumWidth(140);
     TreeModel->setRootPath("");
     TreeModel->setNameFilterDisables(false);
     TreeModel->setFilter(QDir::AllDirs|QDir::NoDotAndDotDot);
@@ -111,6 +116,7 @@ void MainWindow::setupTreeItem(){
     tree->setColumnHidden(2, true);
     tree->setColumnHidden(3, true);
     tree->setHeaderHidden(true);
+    connect (TreeModel, SIGNAL(displaySequences(QString)), storageScene, SLOT(displaySequences(QString)));
     connect (tree, SIGNAL(expanded(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
 }
 
@@ -136,6 +142,15 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::changeEvent(QEvent *event)
+{
+    if(event->type() == QEvent::ActivationChange && this->isActiveWindow()) {
+           qDebug()<<"retrieve the focus";
+        }
+    QWidget :: changeEvent(event);
+}
+
 void MainWindow::changeButtonTxt(){
 
 }

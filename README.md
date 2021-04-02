@@ -1,14 +1,22 @@
 # NAVIGATIONSHEET
 
-## Plans pour la semaine à venir (23 au 27 de 03/21)
+## Plans pour la semaine à venir
+
+- Donner à l'explorateur de fichier les comportements précisé pendant la dernière réunion, implémenter le drag and drop des séquences détectées vers la timeline
+- mettre en place la dynamique de l'interface parametre et saisie d'information, qui doit se déclancher sur enter, sur esc annulé la valeur modifiée mais pas validée.
+
+## Résumé d'activité par semaine
+
+### semaine 7(29 au 02 de 04/21)
 
 - les fichiers prz: il me faut détecter des séquences de prz au sein de dossiers
 en créer une représentation comme un fichier etendu pointant vers des adresses.
 - mettre en place la dynamique de l'interface parametre et saisie d'information, qui doit se déclancher sur enter, sur esc annulé la valeur modifiée mais pas validée.
 - commencer à apprendre les mécaniques du registre d'action intégré à Qt (damn je pensais que j'allais écrire ce registre d'action moi même, where is the fun). 
 
+### semaine 6(23 au 27 de 03/21)
 
-## Résumé d'activité par semaine
+- grippé
 
 ### semaine 5(15 au 19 de 03/21)
 

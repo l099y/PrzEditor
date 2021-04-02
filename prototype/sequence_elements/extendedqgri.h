@@ -9,7 +9,9 @@
 #include "emitter.h"
 #include <QTimeLine>
 #include <QGraphicsItemAnimation>
+
 enum class BoxState {REGULAR, STRETCH_LEFT, STRETCH_RIGHT, SWITCHPOS_MOVE, DISPLACE};
+
 class ExtendedQGRI : public QObject, public QGraphicsRectItem
 {
     Q_OBJECT
