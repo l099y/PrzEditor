@@ -61,6 +61,7 @@ void MainWindow::initcontenance(){
     sublayoutsplit->addWidget(params1);
     sublayoutsplit->addWidget(storageView);
     sublayoutsplit->addWidget(tree);
+    sublayoutsplit->addWidget(sequencesStorageView);
     sublayoutsplit->setMargin(20);
     sublayoutparams1->addWidget(paramlabel);
     sublayoutbutton->addWidget(newboxbutton);
@@ -103,6 +104,10 @@ void MainWindow :: bindLayoutsToWidgets(){
     //widget->setLayout(layout);
 }
 void MainWindow::setupTreeItem(){
+    sequencesStorageView = new QTreeView(this);
+    sequencesStorageView->setModel(sequencesModel);
+    sequencesStorageView->setMinimumWidth(150);
+    sequencesStorageView->setDragEnabled(true);
     storageView = new QGraphicsView(this);
     storageView->setScene(storageScene);
     storageView->setMaximumWidth(140);
@@ -118,16 +123,17 @@ void MainWindow::setupTreeItem(){
     tree->setHeaderHidden(true);
     connect (TreeModel, SIGNAL(displaySequences(QString)), storageScene, SLOT(displaySequences(QString)));
     connect (tree, SIGNAL(expanded(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
+    connect (TreeModel, SIGNAL(displaySequences(QString)), this, SLOT(displaySequences(QString)));
 }
 
 void MainWindow::inittimelinescene(){
     timelineView = new QGraphicsView(timeline);
     timelineView->setScene(timeline);
     timelineView->setStyleSheet(QString("QScrollBar:horizontal { border: 2px solid grey; background: #505050; height: 15px; margin: 1px; }"));
-//    timelineView->setAcceptDrops(true);
-//    timelineView->setDragMode(QGraphicsView::RubberBandDrag);
+    //    timelineView->setAcceptDrops(true);
+    //    timelineView->setDragMode(QGraphicsView::RubberBandDrag);
     timelineView->setAlignment(Qt::AlignLeft);
-      timelineView->setMaximumHeight(300);
+    timelineView->setMaximumHeight(300);
 
     connect(timeline, SIGNAL(scaleUp()), this, SLOT(scaleUpView()));
     connect(timeline, SIGNAL(scaleDown()),this, SLOT(scaleDownView()));
@@ -146,8 +152,8 @@ MainWindow::~MainWindow()
 void MainWindow::changeEvent(QEvent *event)
 {
     if(event->type() == QEvent::ActivationChange && this->isActiveWindow()) {
-           qDebug()<<"retrieve the focus";
-        }
+        qDebug()<<"retrieve the focus";
+    }
     QWidget :: changeEvent(event);
 }
 
@@ -157,26 +163,26 @@ void MainWindow::changeButtonTxt(){
 
 void MainWindow::scaleUpView()
 {
-     if (currentTimelineScaling * 1.1 < 1 ){
-         timelineView->scale(1.1 , 1);
-         currentTimelineScaling *= 1.1;
-         timeline->ruler.scale *=1.1;
-     }
-     else{
-         timelineView->resetTransform();
-         currentTimelineScaling = 1;
-         timeline->ruler.scale =1;
-     }
-     qDebug()<<currentTimelineScaling;
+    if (currentTimelineScaling * 1.1 < 1 ){
+        timelineView->scale(1.1 , 1);
+        currentTimelineScaling *= 1.1;
+        timeline->ruler.scale *=1.1;
+    }
+    else{
+        timelineView->resetTransform();
+        currentTimelineScaling = 1;
+        timeline->ruler.scale =1;
+    }
+    qDebug()<<currentTimelineScaling;
 
 }
 
 void MainWindow::scaleDownView()
 {
     if (currentTimelineScaling * 0.9 > 0.01 ){
-         timelineView->scale(0.9 , 1);
-         currentTimelineScaling *= 0.9;
-         timeline->ruler.scale *=0.9;
+        timelineView->scale(0.9 , 1);
+        currentTimelineScaling *= 0.9;
+        timeline->ruler.scale *=0.9;
     }
     qDebug()<<currentTimelineScaling;
 }
@@ -188,20 +194,20 @@ void MainWindow::displaceSelectionInTimeline()
     if (framePositionInput->text() != "")
     {
         try
-          {
-              int i = std::stoi(framePositionInput->text().toStdString());
-              qDebug()<<i;
-              timeline->displaceSelection(i);
+        {
+            int i = std::stoi(framePositionInput->text().toStdString());
+            qDebug()<<i;
+            timeline->displaceSelection(i);
 
-          }
-          catch (std::invalid_argument const &e)
-          {
-              qDebug() << "Bad input: std::invalid_argument thrown";
-          }
-          catch (std::out_of_range const &e)
-          {
-              qDebug() << "Integer overflow: std::out_of_range thrown";
-          }
+        }
+        catch (std::invalid_argument const &e)
+        {
+            qDebug() << "Bad input: std::invalid_argument thrown";
+        }
+        catch (std::out_of_range const &e)
+        {
+            qDebug() << "Integer overflow: std::out_of_range thrown";
+        }
     }
 }
 
@@ -210,20 +216,36 @@ void MainWindow::changeSelectionSizeInTimeline()
     if (boxSizeInput->text() != "")
     {
         try
-          {
-              int i = std::stoi(boxSizeInput->text().toStdString());
-              qDebug()<<i;
-              timeline->changeSelectionSize(i);
+        {
+            int i = std::stoi(boxSizeInput->text().toStdString());
+            qDebug()<<i;
+            timeline->changeSelectionSize(i);
 
-          }
-          catch (std::invalid_argument const &e)
-          {
-              qDebug() << "Bad input: std::invalid_argument thrown";
-          }
-          catch (std::out_of_range const &e)
-          {
-              qDebug() << "Integer overflow: std::out_of_range thrown";
-          }
+        }
+        catch (std::invalid_argument const &e)
+        {
+            qDebug() << "Bad input: std::invalid_argument thrown";
+        }
+        catch (std::out_of_range const &e)
+        {
+            qDebug() << "Integer overflow: std::out_of_range thrown";
+        }
     }
 
+}
+
+void MainWindow::displaySequences(QString path)
+{
+    qDebug()<< sequencesModel->item(0,0);
+    if (reg->storedSequences->contains(path))
+    {
+        sequencesModel->clear();
+        QList<SequenceData *> list = reg->storedSequences->value(path);
+        QStandardItem root (path);
+        int i = 0;
+
+        foreach (SequenceData* current, list){
+            sequencesModel->insertRow(i, new QStandardItem(current->name));
+        }
+    }
 }

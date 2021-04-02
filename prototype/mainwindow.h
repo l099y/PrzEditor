@@ -18,6 +18,8 @@
 #include <QSortFilterProxyModel>
 #include <filesystem/extendedqfilesystemmodel.h>
 #include <sequence_elements/Storage/sequenceroom.h>
+#include <QStandardItem>
+#include <QStandardItemModel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -60,6 +62,9 @@ public:
     SequenceRoom *storageScene = new SequenceRoom(this, reg);
     QGraphicsView *storageView;
 
+    QStandardItemModel* sequencesModel = new QStandardItemModel(this);
+    QTreeView* sequencesStorageView;
+
     QPushButton* allignbutton = new QPushButton();
     QPushButton* clearbutton = new QPushButton();
     QPushButton* newboxbutton = new QPushButton();
@@ -81,6 +86,7 @@ public slots:
     void scaleDownView();
     void displaceSelectionInTimeline();
     void changeSelectionSizeInTimeline();
+    void displaySequences(QString);
 
 private:
     void initButtons();
