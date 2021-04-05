@@ -41,8 +41,7 @@ public:
     QWidget *params2 = new QWidget(parameters);
     QLabel *paramlabel = new QLabel("parameters");
 
-    TimelineScene *timeline = new TimelineScene(this);
-    QGraphicsView *timelineView;
+
 
     QHBoxLayout *layout = new QHBoxLayout(this);
     QVBoxLayout *sublayoutEditor = new QVBoxLayout(widget);
@@ -59,8 +58,8 @@ public:
     QModelIndex idx = TreeModel->index("");
     QTreeView *tree = new QTreeView(widget);
 
-    SequenceRoom *storageScene = new SequenceRoom(this, reg);
-    QGraphicsView *storageView;
+    TimelineScene *timeline = new TimelineScene(reg, this);
+    QGraphicsView *timelineView;
 
     QStandardItemModel* sequencesModel = new QStandardItemModel(this);
     QTreeView* sequencesStorageView;
@@ -87,6 +86,9 @@ public slots:
     void displaceSelectionInTimeline();
     void changeSelectionSizeInTimeline();
     void displaySequences(QString);
+    void clearSequences(QModelIndex);
+    void collapseChildrens(QModelIndex);
+    void collapseAllAndExpand(QModelIndex);
 
 private:
     void initButtons();

@@ -17,7 +17,7 @@ class SequenceRegister : public QObject
     Q_OBJECT
 public:
     SequenceRegister(QObject* parent);
-    QHash<QString, QList<SequenceData*>>* storedSequences = new QHash<QString, QList<SequenceData*>>();
+    QHash<QString, QList<SequenceData*>>* currentExpandedFolderSequences = new QHash<QString, QList<SequenceData*>>();
     QSet<QString> corruptedSequences;
     QSet<QString> usedSequences;
     QList<SequenceData*> GenerateSequencesFromDir(QDir* dir);

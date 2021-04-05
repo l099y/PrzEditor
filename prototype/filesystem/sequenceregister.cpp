@@ -50,7 +50,7 @@ QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir) // th
     temp->name = temp->name.append(".%1-%2").arg(temp->startIdx).arg(temp->endIdx);
     ret.append(temp);
 
-    storedSequences->insert(dir->absolutePath(), ret);
+    currentExpandedFolderSequences->insert(dir->absolutePath(), ret);
     printStoredSequences();
     return ret;
 }
@@ -82,8 +82,8 @@ inline fileInf SequenceRegister::getReleventInfo(QString* path)
 
 void SequenceRegister::printStoredSequences()
 {
-    QHash<QString, QList<SequenceData*>>::const_iterator i = storedSequences->constBegin();
-    while (i != storedSequences->constEnd()) {
+    QHash<QString, QList<SequenceData*>>::const_iterator i = currentExpandedFolderSequences->constBegin();
+    while (i != currentExpandedFolderSequences->constEnd()) {
         foreach (SequenceData* data, i.value())
             {
             qDebug()<< data->name<<" integrity is "<< data->CheckIntegrity();

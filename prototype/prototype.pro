@@ -12,8 +12,6 @@ SOURCES += \
     filesystem/extendedqfilesystemmodel.cpp \
     filesystem/sequencedata.cpp \
     filesystem/sequenceregister.cpp \
-    sequence_elements/storage/graphicsequence.cpp \
-    sequence_elements/storage/sequenceroom.cpp \
     sequence_elements\extendedqgri.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -25,8 +23,6 @@ HEADERS += \
     filesystem/extendedqfilesystemmodel.h \
     filesystem/sequencedata.h \
     filesystem/sequenceregister.h \
-    sequence_elements/storage/graphicsequence.h \
-    sequence_elements/storage/sequenceroom.h \
     sequence_elements\extendedqgri.h \
     mainwindow.h \
     emitter.h \

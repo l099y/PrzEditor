@@ -2,12 +2,15 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include <QGraphicsView>
+#include <QPixmap>
+#include <QHeaderView>
 
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    this->move(0,0);
     this->setAcceptDrops(true);
     ui->setupUi(this);
     setCentralWidget(widget);
@@ -58,10 +61,10 @@ void MainWindow::initcontenance(){
     sublayoutsplit0->addWidget(supposedtimeslider);
     sublayoutEditor->addWidget(timelineNutils);
     sublayoutEditor->addWidget(parameters);
-    sublayoutsplit->addWidget(params1);
-    sublayoutsplit->addWidget(storageView);
+
     sublayoutsplit->addWidget(tree);
     sublayoutsplit->addWidget(sequencesStorageView);
+    sublayoutsplit->addWidget(params1);
     sublayoutsplit->setMargin(20);
     sublayoutparams1->addWidget(paramlabel);
     sublayoutbutton->addWidget(newboxbutton);
@@ -106,22 +109,26 @@ void MainWindow :: bindLayoutsToWidgets(){
 void MainWindow::setupTreeItem(){
     sequencesStorageView = new QTreeView(this);
     sequencesStorageView->setModel(sequencesModel);
-    sequencesStorageView->setMinimumWidth(150);
+    sequencesStorageView->setMaximumWidth(200);
     sequencesStorageView->setDragEnabled(true);
-    storageView = new QGraphicsView(this);
-    storageView->setScene(storageScene);
-    storageView->setMaximumWidth(140);
+    sequencesStorageView->setEditTriggers(nullptr);
+    sequencesModel->setHorizontalHeaderLabels(QStringList("directoryContent"));
+
+    //to link the click of the generatedsequencelist to an even that will setup for the drop
+
+    connect (sequencesStorageView, SIGNAL(pressed(QModelIndex)), this, SLOT(setHoldedItem(QModelIndex)));
+
     TreeModel->setRootPath("");
     TreeModel->setNameFilterDisables(false);
     TreeModel->setFilter(QDir::AllDirs|QDir::NoDotAndDotDot);
     tree->setRootIndex(idx);
-    tree->setMinimumWidth(400);
+    tree->setMaximumWidth(400);
     tree->setModel(TreeModel);
-    tree    ->setColumnHidden(1, true);
+    tree->setColumnHidden(1, true);
     tree->setColumnHidden(2, true);
     tree->setColumnHidden(3, true);
     tree->setHeaderHidden(true);
-    connect (TreeModel, SIGNAL(displaySequences(QString)), storageScene, SLOT(displaySequences(QString)));
+    connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequences(QModelIndex)));
     connect (tree, SIGNAL(expanded(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
     connect (TreeModel, SIGNAL(displaySequences(QString)), this, SLOT(displaySequences(QString)));
 }
@@ -130,10 +137,10 @@ void MainWindow::inittimelinescene(){
     timelineView = new QGraphicsView(timeline);
     timelineView->setScene(timeline);
     timelineView->setStyleSheet(QString("QScrollBar:horizontal { border: 2px solid grey; background: #505050; height: 15px; margin: 1px; }"));
-    //    timelineView->setAcceptDrops(true);
-    //    timelineView->setDragMode(QGraphicsView::RubberBandDrag);
+    timelineView->setDragMode(QGraphicsView::RubberBandDrag);
     timelineView->setAlignment(Qt::AlignLeft);
     timelineView->setMaximumHeight(300);
+    timelineView->acceptDrops();
 
     connect(timeline, SIGNAL(scaleUp()), this, SLOT(scaleUpView()));
     connect(timeline, SIGNAL(scaleDown()),this, SLOT(scaleDownView()));
@@ -237,15 +244,56 @@ void MainWindow::changeSelectionSizeInTimeline()
 void MainWindow::displaySequences(QString path)
 {
     qDebug()<< sequencesModel->item(0,0);
-    if (reg->storedSequences->contains(path))
+    if (reg->currentExpandedFolderSequences->contains(path))
     {
         sequencesModel->clear();
-        QList<SequenceData *> list = reg->storedSequences->value(path);
+        QList<SequenceData *> list = reg->currentExpandedFolderSequences->value(path);
         QStandardItem root (path);
         int i = 0;
 
         foreach (SequenceData* current, list){
             sequencesModel->insertRow(i, new QStandardItem(current->name));
+            QPixmap logo (10,10);
+            logo.fill(QColor(100,150,255));
+            sequencesModel->item(i,0)->setData(logo, Qt::DecorationRole);
         }
+        QStringList a;
+        a.append(path);
+        sequencesModel->setHorizontalHeaderLabels(a);
     }
+}
+
+
+void MainWindow::clearSequences(QModelIndex index)
+{
+    collapseChildrens(index);
+    reg->currentExpandedFolderSequences->clear();
+    sequencesModel->clear();
+}
+
+void MainWindow::collapseChildrens(QModelIndex index)
+{
+     qDebug()<<TreeModel->fileInfo(TreeModel->index(0,0));
+    if (!index.isValid()) {
+          return;
+      }
+
+      int childCount = index.model()->rowCount(index);
+      for (int i = 0; i < childCount; i++) {
+          const QModelIndex &child = index.child(i, 0);
+          // Recursively call the function for each child node.
+          collapseChildrens(child);
+      }
+
+      if (tree->isExpanded(index)) {
+          tree->collapse(index);
+      }
+}
+
+void MainWindow::collapseAllAndExpand(QModelIndex index)
+{
+    if (!index.isValid()) {
+          return;
+      }
+    collapseChildrens(TreeModel->index(0,0));
 }

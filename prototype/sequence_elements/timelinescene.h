@@ -7,13 +7,14 @@
 #include <QGraphicsRectItem>
 #include "extendedqgri.h"
 #include "ruler.h"
+#include "filesystem/sequenceregister.h"
 
 class TimelineScene : public QGraphicsScene
 {
     Q_OBJECT
     public:
     bool isPastLimit = false;
-    TimelineScene(QObject* parent = nullptr);
+    TimelineScene(SequenceRegister*, QObject* parent = nullptr);
     ~TimelineScene();
     ruler ruler;
     float previousSceneWidth;
@@ -24,6 +25,8 @@ class TimelineScene : public QGraphicsScene
     void behaveOnSelectionSwitchPosMove();
     void behaveOnSelectionDisplace();
     float rectXAndWBefore(ExtendedQGRI *rect);
+    QGraphicsRectItem* dropRepresentation;
+    SequenceRegister* przreg;
 
 public slots:
     void activatelxt();
@@ -42,6 +45,7 @@ public slots:
    void displaceSelection(int newPos);
    void changeSelectionSize(int newSize);
 
+
 signals:
    void scaleUp();
    void scaleDown();
@@ -49,10 +53,13 @@ signals:
 protected:
    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *e);
    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
-   virtual void dragEnterEven(QGraphicsSceneDragDropEvent *e);
-   virtual void dropEvent(QGraphicsSceneDragDropEvent *e);
+   virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *e);
+   virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *e);
    virtual void wheelEvent(QGraphicsSceneWheelEvent *e);
    virtual void keyPressEvent(QKeyEvent *keyEvent);
+   virtual void dropEvent(QGraphicsSceneDragDropEvent*);
+   virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent* e);
+
 };
 
 #endif // TIMELINESCENE_H

@@ -10,10 +10,12 @@
 #include <QList>
 #include <QKeyEvent>
 #include <sequence_elements/ruler.h>
+#include <QModelIndex>
+#include <QTreeView>
 
-TimelineScene::TimelineScene(QObject* parent): QGraphicsScene(parent), ruler(0)
+TimelineScene::TimelineScene(SequenceRegister* reg, QObject* parent): QGraphicsScene(parent), ruler(0)
 {
-
+    przreg = reg;
     ruler.setSize(200000);
     setSceneRect(0,0, 20000, 300);
     QBrush brush(QColor(50,150,200));
@@ -405,15 +407,43 @@ void TimelineScene::resetBoxStates(){
         }
     }
 }
-void TimelineScene::dragEnterEven(QGraphicsSceneDragDropEvent *e)
+void TimelineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *e)
 {
+    auto parent = (QTreeView*)e->source();
+    qDebug()<<"detected dragenter - "<< parent->selectionModel()->selectedIndexes()[0].data().toString();
+    e->accept();
+    auto file = parent->selectionModel()->selectedIndexes()[0].data().toString();
+    auto path =  parent->model()->headerData(0, Qt::Horizontal, 0).toString();
+    qDebug()<<przreg->currentExpandedFolderSequences->contains(path);
+    auto list = przreg->currentExpandedFolderSequences->value(path);
+    foreach (SequenceData* current, list){
+        if(current->name == file){
+            qDebug()<<"found the file";
+            dropRepresentation = new QGraphicsRectItem (0,0,100,100);
+            addItem(dropRepresentation);
+        }
+    }
     QGraphicsScene :: dragEnterEvent(e);
 
 }
 
+void TimelineScene::dragMoveEvent(QGraphicsSceneDragDropEvent *e)
+{
+  dropRepresentation->setX(e->scenePos().x());
+  dropRepresentation->setY(e->scenePos().y());
+  qDebug()<<"dragmove";
+}
+
 void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
 {
+    qDebug()<< "drop happened" ;
     QGraphicsScene :: dropEvent(e);
+}
+
+void TimelineScene::dragLeaveEvent(QGraphicsSceneDragDropEvent *e)
+{
+    removeItem(dropRepresentation);
+    qDebug()<<"drag left";
 }
 
 void TimelineScene::wheelEvent(QGraphicsSceneWheelEvent *e)

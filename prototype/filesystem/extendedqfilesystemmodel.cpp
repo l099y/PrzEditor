@@ -15,9 +15,9 @@ ExtendedQFileSystemModel::~ExtendedQFileSystemModel()
 }
 
 void ExtendedQFileSystemModel::parseExpandedDir(QModelIndex idx){
+    przreg->currentExpandedFolderSequences->clear();
     auto fileInf = fileInfo(idx);
     QDir currentDir (fileInf.filePath());
-    if (!przreg->storedSequences->contains(fileInfo(idx).absoluteFilePath())){
     QDirIterator it(fileInfo(idx).filePath());
     bool containsPdf = false;
     while (it.hasNext()) {
@@ -30,21 +30,22 @@ void ExtendedQFileSystemModel::parseExpandedDir(QModelIndex idx){
     }
         if (containsPdf){
         auto list = przreg->GenerateSequencesFromDir(&currentDir);
-        }
+
     }
-    emit displaySequences(fileInf.filePath());
+    qDebug()<<fileInf.filePath();
+    emit displaySequences(currentDir.path());
 }
 
 QVariant ExtendedQFileSystemModel::data(const QModelIndex &index,
                                         int role) const {
     const QFileInfo& fInfo = fileInfo(index);
     if(role == Qt::TextColorRole){
-        if(przreg->storedSequences->contains(fInfo.filePath()))
+        if(przreg->currentExpandedFolderSequences->contains(fInfo.filePath()))
             return QColor(100,200,255);
     }
     else if( role == Qt::DecorationRole )
     {
-        if(przreg->storedSequences->contains(fInfo.filePath())){
+        if(przreg->currentExpandedFolderSequences->contains(fInfo.filePath())){
             QPixmap logo(15,15);
             logo.fill(QColor(100,200,255));
             return logo;
