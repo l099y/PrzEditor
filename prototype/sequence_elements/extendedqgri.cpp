@@ -8,6 +8,10 @@
 
 ExtendedQGRI::ExtendedQGRI(): QGraphicsRectItem()
 {
+    QPen pen (Qt::gray);
+    QBrush brush (QColor(200,240,200));
+    setPen(pen);
+    setBrush(brush);
     setAcceptHoverEvents(true);
     setFlag(QGraphicsItem :: ItemIsMovable);
     setFlag(QGraphicsItem :: ItemIsSelectable);

@@ -19,13 +19,15 @@ class TimelineScene : public QGraphicsScene
     ruler ruler;
     float previousSceneWidth;
     void resetBoxStates();
+    void resetToPrevious();
     void behaveOnSelectionLeftXtend();
     void behaveOnSelectionRightXtend();
     void behaveOnSelectionMove();
     void behaveOnSelectionSwitchPosMove();
     void behaveOnSelectionDisplace();
+    void behaveOnSelectionInsertionDisplace();
     float rectXAndWBefore(ExtendedQGRI *rect);
-    QGraphicsRectItem* dropRepresentation;
+    ExtendedQGRI* dropRepresentation;
     SequenceRegister* przreg;
 
 public slots:

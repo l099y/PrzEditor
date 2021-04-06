@@ -21,6 +21,7 @@ public:
     QTimeLine *timer = new QTimeLine(130);
     QGraphicsItemAnimation *animation = new QGraphicsItemAnimation;
     BoxState mod = BoxState::REGULAR;
+    bool inserted = false;
     bool modified = false;
     bool animated = false;
     bool prevposresetrequested = false;

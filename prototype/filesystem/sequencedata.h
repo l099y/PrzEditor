@@ -14,9 +14,9 @@ public:
     QString name;
     int startIdx;
     int endIdx;
-
     bool corrupted = false;
-    inline int lenght();
+
+    int sequencelength();
     bool CheckIntegrity();
 };
 
