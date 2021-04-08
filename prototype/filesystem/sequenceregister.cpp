@@ -35,7 +35,7 @@ QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir) // th
         else{
             if (current.idx != sequenceCurrentIdx + 1 || current.name != temp->name){
                 temp->endIdx = sequenceCurrentIdx;
-                temp->name = temp->name.append(".%1-%2").arg(temp->startIdx).arg(temp->endIdx);
+                temp->name = temp->name.append(".[%1-%2]").arg(temp->startIdx).arg(temp->endIdx);
                 ret.append(temp);
                 i--;
                 newSeq = true;
@@ -47,7 +47,7 @@ QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir) // th
         }
     }
     temp->endIdx = sequenceCurrentIdx;
-    temp->name = temp->name.append(".%1-%2").arg(temp->startIdx).arg(temp->endIdx);
+    temp->name = temp->name.append(".[%1-%2]").arg(temp->startIdx).arg(temp->endIdx);
     ret.append(temp);
 
     currentExpandedFolderSequences->insert(dir->absolutePath(), ret);

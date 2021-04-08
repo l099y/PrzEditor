@@ -23,6 +23,7 @@ TimelineScene::TimelineScene(SequenceRegister* reg, QObject* parent): QGraphicsS
     setBackgroundBrush(brush);
     newRect();
     addItem(&ruler);
+    connect (this ,SIGNAL(selectionChanged()), this, SLOT(setSingleSelectionToLast()));
 }
 
 TimelineScene::~TimelineScene(){
@@ -347,6 +348,25 @@ float TimelineScene::rectXAndWBefore(ExtendedQGRI *rect)
     qDebug()<<ret;
     return ret;
 }
+
+float TimelineScene::positionOfInsertedShot(QGraphicsSceneDragDropEvent *e)
+{
+    foreach (QGraphicsItem *current, items()){
+        ExtendedQGRI *rec = dynamic_cast<ExtendedQGRI *>(current);
+        if (rec && rec != dropRepresentation)
+        {
+        if (dropRepresentation->scenePos().x() >= rec->scenePos().x() && dropRepresentation->scenePos().x() <= rec->scenePos().x()+rec->rect().width()){
+                if (dropRepresentation->scenePos().x() < rec->scenePos().x()+(rec->rect().width()/2)){
+                    return rec->scenePos().x();
+                }
+                else{
+                    return rec->scenePos().x()+rec->rect().width();
+                }
+            }
+        }
+    }
+    return e->scenePos().x();
+}
 bool compareX(const QGraphicsItem *r1, const QGraphicsItem *r2)
 {
     return r1->pos().x() < r2->pos().x();
@@ -474,7 +494,6 @@ void TimelineScene::dragMoveEvent(QGraphicsSceneDragDropEvent *e)
 {
   if (e->scenePos().y()<-100 || e->scenePos().y()>100){
       if (dropRepresentation->inserted){
-          qDebug()<<"inserted escaped";
           dropRepresentation->inserted=false;
           resetToPrevious();
       }
@@ -487,9 +506,9 @@ void TimelineScene::dragMoveEvent(QGraphicsSceneDragDropEvent *e)
           dropRepresentation->inserted=true;
 
             // gérer cette interaction, il est certainement nécessaire de réécire des fonctions appropriées à l'UC
-          dropRepresentation->setPreviousToCurrent();
-          auto rect = this->rectXAndWBefore(dropRepresentation);
-          dropRepresentation->setX(rect);
+          auto pos = positionOfInsertedShot(e);
+          qDebug()<<pos <<"rect inserted @";
+          dropRepresentation->setXToFrame(pos);
           dropRepresentation->setPreviousToCurrent();
 //          moveAllFrom(dropRepresentation->previousxpos, dropRepresentation->rect().width());
           behaveOnSelectionInsertionDisplace();
@@ -649,6 +668,19 @@ void TimelineScene::changeSelectionSize(int newSize)
         selection->setPreviousToCurrent();
         ExtendSceneWidth(newSize*10 - selection->previousboxwidth);
     }
+}
+
+void TimelineScene::setSingleSelectionToLast()
+{
+    if (selectedItems().length()>1)
+        {
+        int i = 0;
+        foreach (QGraphicsItem* current, selectedItems()){
+            if (i!= selectedItems().length()-1)
+                current->setSelected(false);
+            current->setY(0);
+            }
+        }
 }
 void TimelineScene :: newRect(){
 

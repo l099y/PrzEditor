@@ -2,10 +2,15 @@
 
 ## Plans pour la semaine à venir
 
-- Donner à l'explorateur de fichier les comportements précisé pendant la dernière réunion, implémenter le drag and drop des séquences détectées vers la timeline
-- mettre en place la dynamique de l'interface parametre et saisie d'information, qui doit se déclancher sur enter, sur esc annulé la valeur modifiée mais pas validée.
+- finaliser les uc filesystem et insertion
+- commencer à implémenter le framework undo de Qt, et mon propre format de sauvegarde d'application.
 
 ## Résumé d'activité par semaine
+
+### semaine 8(5 au 9 de 05/21) 
+
+- Donner à l'explorateur de fichier les comportements précisé pendant la dernière réunion, implémenter le drag and drop des séquences détectées vers la timeline
+- mettre en place la dynamique de l'interface parametre et saisie d'information, qui doit se déclancher sur enter, sur esc annulé la valeur modifiée mais pas validée.
 
 ### semaine 7(29 au 02 de 04/21)
 

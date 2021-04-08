@@ -27,6 +27,7 @@ class TimelineScene : public QGraphicsScene
     void behaveOnSelectionDisplace();
     void behaveOnSelectionInsertionDisplace();
     float rectXAndWBefore(ExtendedQGRI *rect);
+    float positionOfInsertedShot(QGraphicsSceneDragDropEvent* e);
     ExtendedQGRI* dropRepresentation;
     SequenceRegister* przreg;
 
@@ -46,6 +47,7 @@ public slots:
    void deleteSelection();
    void displaceSelection(int newPos);
    void changeSelectionSize(int newSize);
+   void setSingleSelectionToLast();
 
 
 signals:

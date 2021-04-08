@@ -116,8 +116,6 @@ void MainWindow::setupTreeItem(){
 
     //to link the click of the generatedsequencelist to an even that will setup for the drop
 
-    connect (sequencesStorageView, SIGNAL(pressed(QModelIndex)), this, SLOT(setHoldedItem(QModelIndex)));
-
     TreeModel->setRootPath("");
     TreeModel->setNameFilterDisables(false);
     TreeModel->setFilter(QDir::AllDirs|QDir::NoDotAndDotDot);
