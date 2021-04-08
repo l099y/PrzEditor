@@ -17,6 +17,7 @@ public:
                   int role = Qt::DisplayRole) const;
 signals:
     void displaySequences(QString path);
+    void setOnlyCurrentFolderExpanded(QModelIndex);
 public slots:
     void parseExpandedDir(QModelIndex);
 };

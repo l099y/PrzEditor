@@ -129,6 +129,7 @@ void MainWindow::setupTreeItem(){
     connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequences(QModelIndex)));
     connect (tree, SIGNAL(expanded(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
     connect (TreeModel, SIGNAL(displaySequences(QString)), this, SLOT(displaySequences(QString)));
+    connect (TreeModel, SIGNAL(setOnlyCurrentFolderExpanded(QModelIndex)), this, SLOT(collapseAllAndExpand(QModelIndex)));
 }
 
 void MainWindow::inittimelinescene(){
@@ -241,7 +242,7 @@ void MainWindow::changeSelectionSizeInTimeline()
 
 void MainWindow::displaySequences(QString path)
 {
-    qDebug()<< sequencesModel->item(0,0);
+
     if (reg->currentExpandedFolderSequences->contains(path))
     {
         sequencesModel->clear();
@@ -271,7 +272,6 @@ void MainWindow::clearSequences(QModelIndex index)
 
 void MainWindow::collapseChildrens(QModelIndex index)
 {
-     qDebug()<<TreeModel->fileInfo(TreeModel->index(0,0));
     if (!index.isValid()) {
           return;
       }
@@ -290,8 +290,15 @@ void MainWindow::collapseChildrens(QModelIndex index)
 
 void MainWindow::collapseAllAndExpand(QModelIndex index)
 {
+    disconnect(tree, SIGNAL(expanded(QModelIndex)), 0, 0);
+    disconnect(tree, SIGNAL(collapsed(QModelIndex)), 0, 0);
+    qDebug()<<"reached collapseAllandExpand()";
     if (!index.isValid()) {
           return;
       }
     collapseChildrens(TreeModel->index(0,0));
+    tree->scrollTo(index);
+    tree->setExpanded(index, true);
+    connect (tree, SIGNAL(expanded(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
+    connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequences(QModelIndex)));
 }

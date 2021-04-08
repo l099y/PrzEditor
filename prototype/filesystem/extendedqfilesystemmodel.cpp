@@ -34,6 +34,7 @@ void ExtendedQFileSystemModel::parseExpandedDir(QModelIndex idx){
     }
     qDebug()<<fileInf.filePath();
     emit displaySequences(currentDir.path());
+    emit setOnlyCurrentFolderExpanded(idx);
 }
 
 QVariant ExtendedQFileSystemModel::data(const QModelIndex &index,
