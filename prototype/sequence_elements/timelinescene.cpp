@@ -13,12 +13,15 @@
 #include <QModelIndex>
 #include <QTreeView>
 #include <filesystem/sequencedata.h>
+#include <sequence_elements/ruler.h>
 
-TimelineScene::TimelineScene(SequenceRegister* reg, QObject* parent): QGraphicsScene(parent), ruler(0)
+TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObject* parent): QGraphicsScene(parent), ruler(0)
 {
+    ruler.view = vview;
     przreg = reg;
-    ruler.setSize(200000);
-    setSceneRect(0,0, 20000, 300);
+    view = vview;
+    ruler.setSize(10400000);
+    setSceneRect(0,0, 200000, 300);
     QBrush brush(QColor(50,150,200));
     setBackgroundBrush(brush);
     newRect();
@@ -321,7 +324,7 @@ void TimelineScene::behaveOnSelectionInsertionDisplace()
             rect->setXToFrame(selection->rect().width()+rect->previousxpos+(selection->scenePos().x()-selection->previousxpos));
 
         }
-
+        if (previousSceneWidth<previousSceneWidth+(selection->scenePos().x()-selection->previousxpos))
         this->setSceneRect(0,0,previousSceneWidth+(selection->scenePos().x()-selection->previousxpos),100);
     }
 }
@@ -345,7 +348,6 @@ float TimelineScene::rectXAndWBefore(ExtendedQGRI *rect)
         if (rect->previousxpos>current->previousxpos && current != rect )
             ret = current->previousboxwidth+current->previousxpos;
     }
-    qDebug()<<ret;
     return ret;
 }
 
@@ -401,14 +403,11 @@ void TimelineScene :: clearItems(){
         this->removeItem(current);
         delete(current);
     }
-    setSceneRect(0,0, 20000, 300);
-
-
-    ruler.setSize(20000);
-
+    setSceneRect(0,0, 200000, 300);
+    ruler.setSize(2000000);
     addItem(&ruler);
-    update();
     newRect();
+
 }
 
 void TimelineScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
@@ -463,23 +462,19 @@ void TimelineScene::resetToPrevious()
 void TimelineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *e)
 {
     auto parent = (QTreeView*)e->source();
-    qDebug()<<"detected dragenter - "<< parent->selectionModel()->selectedIndexes()[0].data().toString();
     e->accept();
     auto file = parent->selectionModel()->selectedIndexes()[0].data().toString();
     auto path =  parent->model()->headerData(0, Qt::Horizontal, 0).toString();
-    qDebug()<<przreg->currentExpandedFolderSequences->contains(path);
     auto list = przreg->currentExpandedFolderSequences->value(path);
     foreach (SequenceData* current, list){
         if(current->name == file){
-            qDebug()<<"found the file";
             dropRepresentation = new ExtendedQGRI ();
-            dropRepresentation->setRect(0,0,current->sequencelength()*100,100);
+            dropRepresentation->setRect(0,0,current->sequencelength()*10,100);
             dropRepresentation->setX(e->scenePos().x());
             if (!selectedItems().isEmpty()){
                  ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
                  selection->setSelected(false);
             }
-            qDebug()<<selectedItems();
             dropRepresentation->setSelected(true);
             dropRepresentation->setBrush(QColor(100,255,200));
             dropRepresentation->setPreviousToCurrent();
@@ -507,7 +502,6 @@ void TimelineScene::dragMoveEvent(QGraphicsSceneDragDropEvent *e)
 
             // gérer cette interaction, il est certainement nécessaire de réécire des fonctions appropriées à l'UC
           auto pos = positionOfInsertedShot(e);
-          qDebug()<<pos <<"rect inserted @";
           dropRepresentation->setXToFrame(pos);
           dropRepresentation->setPreviousToCurrent();
 //          moveAllFrom(dropRepresentation->previousxpos, dropRepresentation->rect().width());
@@ -519,7 +513,6 @@ void TimelineScene::dragMoveEvent(QGraphicsSceneDragDropEvent *e)
       behaveOnSelectionInsertionDisplace();
       }
   }
-  qDebug()<<"dragmove";
 }
 
 void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
@@ -532,7 +525,6 @@ void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
     {
         removeItem(dropRepresentation);
     }
-    qDebug()<< "drop happened" ;
     QGraphicsScene :: dropEvent(e);
 }
 
@@ -540,7 +532,6 @@ void TimelineScene::dragLeaveEvent(QGraphicsSceneDragDropEvent *e)
 {
     removeItem(dropRepresentation);
     resetToPrevious();
-    qDebug()<<"drag left";
 }
 
 void TimelineScene::wheelEvent(QGraphicsSceneWheelEvent *e)
@@ -554,7 +545,6 @@ void TimelineScene::wheelEvent(QGraphicsSceneWheelEvent *e)
 
 void TimelineScene::keyPressEvent(QKeyEvent *e)
 {
-    qDebug()<<e->key();
     if (e->key()==16777223)
     {
         deleteSelection();
@@ -683,31 +673,5 @@ void TimelineScene::setSingleSelectionToLast()
         }
 }
 void TimelineScene :: newRect(){
-
-    ExtendedQGRI *rect = new ExtendedQGRI();
-    rect->setRect(0,0,250,100);
-    rect->setPreviousToCurrent();
-    moveAllFrom(0,250);
-    addItem(rect);
-    resetBoxStates();
-    ExtendSceneWidth(250);
-
-
-
-    rect = new ExtendedQGRI();
-    rect->setRect(0,0,750,100);
-    rect->setPreviousToCurrent();
-    moveAllFrom(0,750);
-    addItem(rect);
-    resetBoxStates();
-    ExtendSceneWidth(750);
-
-    rect = new ExtendedQGRI();
-
-    rect->setRect(0,0,500,100);
-    rect->setPreviousToCurrent();
-    moveAllFrom(0,500);
-    addItem(rect);
-    resetBoxStates();
-    ExtendSceneWidth(500);
+    ExtendSceneWidth(0);
 }

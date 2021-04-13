@@ -16,6 +16,7 @@ ExtendedQFileSystemModel::~ExtendedQFileSystemModel()
 
 void ExtendedQFileSystemModel::parseExpandedDir(QModelIndex idx){
     przreg->currentExpandedFolderSequences->clear();
+    emit (clearSequences());
     auto fileInf = fileInfo(idx);
     QDir currentDir (fileInf.filePath());
     QDirIterator it(fileInfo(idx).filePath());
@@ -54,6 +55,7 @@ QVariant ExtendedQFileSystemModel::data(const QModelIndex &index,
     }
     return QFileSystemModel::data(index, role);
 }
+
 
 
 

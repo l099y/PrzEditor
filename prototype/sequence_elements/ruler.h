@@ -6,20 +6,22 @@
 #include <QLabel>
 #include <QList>
 #include <QGraphicsItem>
+#include <QGraphicsView>
 
-class ruler : public QGraphicsItem
+class Ruler : public QGraphicsItem
 {
 public:
     float scale = 1;
     QRectF *background = new QRectF(0,-100,0,0);
+    QGraphicsView* view;
 //    QList<QLineF*> grades;
 //    QList<QLabel*> gradestext;
     int frames = 0;
     int framesize = 10;
-    ruler(float rulersize);
+    Ruler(float rulersize);
     void xtand(float f);
     void setSize(float f);
-    ~ruler();
+    ~Ruler();
 
 
     // QGraphicsItem interface

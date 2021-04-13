@@ -20,6 +20,7 @@
 #include <sequence_elements/Storage/sequenceroom.h>
 #include <QStandardItem>
 #include <QStandardItemModel>
+#include <QGraphicsView>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -58,8 +59,10 @@ public:
     QModelIndex idx = TreeModel->index("");
     QTreeView *tree = new QTreeView(widget);
 
-    TimelineScene *timeline = new TimelineScene(reg, this);
-    QGraphicsView *timelineView;
+
+    QGraphicsView *timelineView = new QGraphicsView(this);
+    TimelineScene *timeline = new TimelineScene(reg, timelineView, this);
+
 
     QStandardItemModel* sequencesModel = new QStandardItemModel(this);
     QTreeView* sequencesStorageView;
@@ -79,6 +82,7 @@ public:
     ~MainWindow();
 
     void changeEvent(QEvent *event);
+    void generateData();
 public slots:
     void changeButtonTxt();
     void scaleUpView();
@@ -86,7 +90,8 @@ public slots:
     void displaceSelectionInTimeline();
     void changeSelectionSizeInTimeline();
     void displaySequences(QString);
-    void clearSequences(QModelIndex);
+    void clearSequences();
+    void clearSequencesAndCollapse(QModelIndex);
     void collapseChildrens(QModelIndex);
     void collapseAllAndExpand(QModelIndex);
 

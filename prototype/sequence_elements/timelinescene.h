@@ -14,9 +14,10 @@ class TimelineScene : public QGraphicsScene
     Q_OBJECT
     public:
     bool isPastLimit = false;
-    TimelineScene(SequenceRegister*, QObject* parent = nullptr);
+    TimelineScene(SequenceRegister*,QGraphicsView*, QObject* parent = nullptr);
     ~TimelineScene();
-    ruler ruler;
+    QGraphicsView* view;
+    Ruler ruler;
     float previousSceneWidth;
     void resetBoxStates();
     void resetToPrevious();

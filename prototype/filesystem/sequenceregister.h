@@ -23,6 +23,7 @@ public:
     QList<SequenceData*> GenerateSequencesFromDir(QDir* dir);
     inline fileInf getReleventInfo(QString* path);
     void printStoredSequences();
+    void clearSequencesInDir();
 };
 
 #endif // SEQUENCEREGISTER_H

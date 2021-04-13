@@ -18,6 +18,7 @@ public:
 signals:
     void displaySequences(QString path);
     void setOnlyCurrentFolderExpanded(QModelIndex);
+    void clearSequences();
 public slots:
     void parseExpandedDir(QModelIndex);
 };

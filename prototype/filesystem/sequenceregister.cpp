@@ -13,7 +13,6 @@ QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir) // th
 {
     QList<SequenceData*> ret;
     QStringList paths = dir->entryList(QStringList()<<"*.prz", QDir::Files);
-
     int sequenceCurrentIdx = 0;
 
     QString sequenceName;
@@ -51,7 +50,7 @@ QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir) // th
     ret.append(temp);
 
     currentExpandedFolderSequences->insert(dir->absolutePath(), ret);
-    printStoredSequences();
+    //printStoredSequences();
     return ret;
 }
 
@@ -75,6 +74,7 @@ inline fileInf SequenceRegister::getReleventInfo(QString* path)
             posInString++;
         }
         bool ok;
+
         ret.idx= idxString.toUInt(&ok, 10);
         return ret;
     }
@@ -91,4 +91,17 @@ void SequenceRegister::printStoredSequences()
         qDebug() << i.key() << ": " << i.value();
         ++i;
     }
+}
+
+void SequenceRegister::clearSequencesInDir()
+{
+    QHash<QString, QList<SequenceData*>>::const_iterator i = currentExpandedFolderSequences->constBegin();
+    while (i != currentExpandedFolderSequences->constEnd()) {
+        foreach (SequenceData* data, i.value())
+            {
+            delete(data);
+        }
+        ++i;
+    }
+    currentExpandedFolderSequences->clear();
 }
