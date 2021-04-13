@@ -121,6 +121,7 @@ public:
     void createActions();
     void createMenus();
     void createUndoView();
+    void bindUndoElements();
     void changeEvent(QEvent *event);
     void generateData();
 public slots:
@@ -134,6 +135,7 @@ public slots:
     void clearSequencesAndCollapse(QModelIndex);
     void collapseChildrens(QModelIndex);
     void collapseAllAndExpand(QModelIndex);
+    void deleteSelection();
 
 private:
     void initButtons();

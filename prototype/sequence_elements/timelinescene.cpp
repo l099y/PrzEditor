@@ -627,15 +627,18 @@ void TimelineScene::setdisp()
 void TimelineScene::deleteSelection()
 {
     qDebug()<<items();
-    if(!selectedItems().isEmpty()){
-        if (!selectedItems().isEmpty())
-        {
-            foreach (QGraphicsItem *current, selectedItems()){
-                this->removeItem(current);
-                delete(current);
-            }
-        }
-    }
+    emit (deleteSelectionSignal());
+//    if(!selectedItems().isEmpty()){
+//        if (!selectedItems().isEmpty())
+//        {
+//            foreach (QGraphicsItem *current, selectedItems()){
+
+
+////                this->removeItem(current);
+////                delete(current);
+//            }
+//        }
+//    }
 }
 
 void TimelineScene::displaceSelection(int framePos)

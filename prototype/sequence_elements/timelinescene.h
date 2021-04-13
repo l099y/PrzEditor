@@ -54,6 +54,7 @@ public slots:
 signals:
    void scaleUp();
    void scaleDown();
+   void deleteSelectionSignal();
 
 protected:
    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *e);

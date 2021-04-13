@@ -4,6 +4,7 @@
 #include <QGraphicsView>
 #include <QPixmap>
 #include <QHeaderView>
+#include "undo_framework/commands.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -22,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     createActions();
     createMenus();
     createUndoView();
+    bindUndoElements();
 
 }
 void MainWindow :: initButtons(){
@@ -189,6 +191,11 @@ void MainWindow::createUndoView()
     undoView->setAttribute(Qt::WA_QuitOnClose, false);
 }
 
+void MainWindow::bindUndoElements()
+{
+    connect (timeline, SIGNAL(deleteSelectionSignal()), this, SLOT(deleteSelection()));
+}
+
 void MainWindow::changeEvent(QEvent *event)
 {
     if(event->type() == QEvent::ActivationChange && this->isActiveWindow()) {
@@ -352,4 +359,13 @@ void MainWindow::collapseAllAndExpand(QModelIndex index)
     tree->setExpanded(index, true);
     connect (tree, SIGNAL(expanded(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
     connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequencesAndCollapse(QModelIndex)));
+}
+
+void MainWindow::deleteSelection()
+{
+    if (timeline->selectedItems().isEmpty())
+        return;
+
+    QUndoCommand *deleteCommand = new DeleteCommand(timeline);
+    undoStack->push(deleteCommand);
 }
