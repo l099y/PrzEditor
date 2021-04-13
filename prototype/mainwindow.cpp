@@ -10,14 +10,19 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+
     this->move(0,0);
-    this->setAcceptDrops(true);
     ui->setupUi(this);
     setCentralWidget(widget);
+    undoStack = new QUndoStack(this);
     initLayouts();
     setupTreeItem();
     inittimelinescene();
     initButtons();
+    createActions();
+    createMenus();
+    createUndoView();
+
 }
 void MainWindow :: initButtons(){
 
@@ -50,6 +55,7 @@ void MainWindow ::initLayouts(){
     initwidgetsparams();
     initcontenance();
     bindLayoutsToWidgets();
+
 }
 void MainWindow::initcontenance(){
     sublayoutsplit0->addWidget(timelineButtons);
@@ -83,12 +89,15 @@ void MainWindow::initwidgetsparams(){
     pal.setColor(QPalette::Background, Qt::white);
     params1->setAutoFillBackground(true);
     params1->setPalette(pal);
+    params1->setStyleSheet("background: rgb(120,120,120);");
     //params1->setVisible(false);
     params1->setMinimumWidth(400);
     paramlabel->setMaximumHeight(100);
     params2->setAutoFillBackground(true);
     params2->setPalette(pal);
     params2->setVisible(false);
+    framePositionInput->setStyleSheet("background: rgb(220,220,220);");
+    boxSizeInput->setStyleSheet("background: rgb(220,220,220);");
 }
 void MainWindow :: bindLayoutsToWidgets(){
     timelineNutils->setLayout(sublayoutsplit0);
@@ -105,7 +114,7 @@ void MainWindow::setupTreeItem(){
     sequencesStorageView->setMaximumWidth(200);
     sequencesStorageView->setDragEnabled(true);
     sequencesStorageView->setEditTriggers(nullptr); // this disable the ability to rename the current selected row;
-    sequencesModel->setHorizontalHeaderLabels(QStringList("directoryContent"));
+    sequencesStorageView->setStyleSheet("background: rgb(120,120,120);");
     TreeModel->setRootPath("");
     TreeModel->setNameFilterDisables(false);
     TreeModel->setFilter(QDir::AllDirs|QDir::NoDotAndDotDot);
@@ -116,6 +125,7 @@ void MainWindow::setupTreeItem(){
     tree->setColumnHidden(2, true);
     tree->setColumnHidden(3, true);
     tree->setHeaderHidden(true);
+    tree->setStyleSheet("background: rgb(120,120,120);");
 
     // generateData(); well you only need to do it once...
 
@@ -146,6 +156,37 @@ void MainWindow::inittimelinescene(){
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::createActions()
+{
+    undoAction = undoStack->createUndoAction(this, tr("&Undo"));
+    undoAction->setShortcuts(QKeySequence::Undo);
+
+    redoAction = undoStack->createRedoAction(this, tr("&Redo"));
+    redoAction->setShortcuts(QKeySequence::Redo);
+
+    exitAction = new QAction(tr("E&xit"), this);
+    exitAction->setShortcuts(QKeySequence::Quit);
+    connect(exitAction, &QAction::triggered, this, &QWidget::close);
+}
+
+void MainWindow::createMenus()
+{
+    fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(exitAction);
+
+    editMenu = menuBar()->addMenu(tr("&Edit"));
+    editMenu->addAction(undoAction);
+    editMenu->addAction(redoAction);
+}
+
+void MainWindow::createUndoView()
+{
+    undoView = new QUndoView(undoStack);
+    undoView->setWindowTitle(tr("Command List"));
+    undoView->show();
+    undoView->setAttribute(Qt::WA_QuitOnClose, false);
 }
 
 void MainWindow::changeEvent(QEvent *event)

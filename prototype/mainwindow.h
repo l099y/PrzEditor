@@ -13,7 +13,7 @@
 #include <QPushButton>
 #include <QLineEdit>
 
-// file Explorer and Sequences displayer items
+// file Explorer and Sequences displayer libs
 
 #include <QTreeView>
 #include <filesystem/extendedqfilesystemmodel.h>
@@ -21,7 +21,7 @@
 #include <QStandardItem>
 #include <QStandardItemModel>
 
-// Sequences elements
+// Sequences elements libs
 
 #include <sequence_elements/timelinescene.h>
 #include <QGraphicsView>
@@ -30,6 +30,13 @@
 
 #include <QUndoStack>
 #include <QUndoView>
+
+
+// the toolbar libs
+
+#include <QAction>
+#include <QToolBar>
+#include <QMenu>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -40,10 +47,13 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+
+    MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
+
     float currentTimelineScaling = 1;
 
     // containers and layout
-
 
     QWidget *widget = new QWidget;
     QWidget *timelineNutils = new QWidget(widget);
@@ -91,9 +101,26 @@ public:
     QLineEdit* framePositionInput = new QLineEdit(this);
     QLineEdit* boxSizeInput = new QLineEdit(this);
 
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
 
+    // toolbars elements
+
+    QMenu *fileMenu = nullptr;
+    QMenu *editMenu = nullptr;
+
+    QAction *undoAction = nullptr;
+    QAction *redoAction = nullptr;
+    QAction *exitAction = nullptr;
+
+
+    // Undo framework elements
+
+    QUndoStack *undoStack = nullptr;
+    QUndoView *undoView = nullptr;
+
+
+    void createActions();
+    void createMenus();
+    void createUndoView();
     void changeEvent(QEvent *event);
     void generateData();
 public slots:
