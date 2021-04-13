@@ -1,5 +1,5 @@
-#ifndef EXTENDEDQGRI_H
-#define EXTENDEDQGRI_H
+#ifndef SHOT_H
+#define SHOT_H
 
 #include <QGraphicsRectItem>
 #include <QObject>
@@ -12,12 +12,12 @@
 
 enum class BoxState {REGULAR, STRETCH_LEFT, STRETCH_RIGHT, SWITCHPOS_MOVE, DISPLACE};
 
-class ExtendedQGRI : public QObject, public QGraphicsRectItem
+class Shot : public QObject, public QGraphicsRectItem
 {
     Q_OBJECT
 public:
-    ExtendedQGRI();
-    ~ExtendedQGRI();
+    Shot();
+    ~Shot();
     QTimeLine *timer = new QTimeLine(130);
     QGraphicsItemAnimation *animation = new QGraphicsItemAnimation;
     BoxState mod = BoxState::REGULAR;
@@ -41,25 +41,25 @@ public:
     void setSize(int realsize);
 inline int roundedTo10(float x);
 
-inline bool wasLeftOf(ExtendedQGRI* OtherCube)
+inline bool wasLeftOf(Shot* OtherCube)
     {
         return  previousxpos<OtherCube->previousxpos;
     }
-inline bool rightSideIsInFirstHalfOf (ExtendedQGRI* OtherCube)
+inline bool rightSideIsInFirstHalfOf (Shot* OtherCube)
     {
         return  scenePos().x() + rect().width() >= OtherCube->previousxpos &&
                 scenePos().x() + rect().width() < OtherCube->previousxpos+(OtherCube->previousboxwidth/2);
     }
-inline bool rightSideIsAfterSecondHalfOf (ExtendedQGRI* OtherCube)
+inline bool rightSideIsAfterSecondHalfOf (Shot* OtherCube)
     {
         return  scenePos().x() + rect().width() >= OtherCube->previousxpos+(OtherCube->previousboxwidth/2);
     }
 
-inline bool leftSideIsAfterFirstHalfOf (ExtendedQGRI* OtherCube)
+inline bool leftSideIsAfterFirstHalfOf (Shot* OtherCube)
     {
         return scenePos().x()< OtherCube->previousxpos+(OtherCube->previousboxwidth/2);
     }
-inline bool leftSideIsInSecondHalfOf (ExtendedQGRI* OtherCube)
+inline bool leftSideIsInSecondHalfOf (Shot* OtherCube)
     {
         return  scenePos().x()>= OtherCube->previousxpos+(OtherCube->previousboxwidth/2) &&
                 scenePos().x()< OtherCube->previousxpos+OtherCube->previousboxwidth;
@@ -80,4 +80,4 @@ protected:
     virtual void mousePressEvent (QGraphicsSceneMouseEvent *e);
     virtual void mouseMoveEvent (QGraphicsSceneMouseEvent *e);
 };
-#endif // EXTENDEDQGRI_H
+#endif // SHOT_H

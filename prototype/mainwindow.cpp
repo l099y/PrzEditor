@@ -15,10 +15,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setCentralWidget(widget);
     initLayouts();
-    timelineView->setMinimumHeight(300);
-    timelineView->setRenderHint(QPainter::Antialiasing);
-    paramlabel->setMaximumHeight(100);
-    // trial for focus restore
+    setupTreeItem();
+    inittimelinescene();
+    initButtons();
 }
 void MainWindow :: initButtons(){
 
@@ -47,21 +46,16 @@ void MainWindow :: initButtons(){
 
 }
 void MainWindow ::initLayouts(){
-    setupTreeItem();
+
     initwidgetsparams();
     initcontenance();
     bindLayoutsToWidgets();
-    inittimelinescene();
-    initButtons();
 }
 void MainWindow::initcontenance(){
-
-
     sublayoutsplit0->addWidget(timelineButtons);
     sublayoutsplit0->addWidget(supposedtimeslider);
     sublayoutEditor->addWidget(timelineNutils);
     sublayoutEditor->addWidget(parameters);
-
     sublayoutsplit->addWidget(tree);
     sublayoutsplit->addWidget(sequencesStorageView);
     sublayoutsplit->addWidget(params1);
@@ -91,7 +85,7 @@ void MainWindow::initwidgetsparams(){
     params1->setPalette(pal);
     //params1->setVisible(false);
     params1->setMinimumWidth(400);
-
+    paramlabel->setMaximumHeight(100);
     params2->setAutoFillBackground(true);
     params2->setPalette(pal);
     params2->setVisible(false);
@@ -107,19 +101,14 @@ void MainWindow :: bindLayoutsToWidgets(){
     //widget->setLayout(layout);
 }
 void MainWindow::setupTreeItem(){
-    sequencesStorageView = new QTreeView(this);
     sequencesStorageView->setModel(sequencesModel);
     sequencesStorageView->setMaximumWidth(200);
     sequencesStorageView->setDragEnabled(true);
-    sequencesStorageView->setEditTriggers(nullptr);
+    sequencesStorageView->setEditTriggers(nullptr); // this disable the ability to rename the current selected row;
     sequencesModel->setHorizontalHeaderLabels(QStringList("directoryContent"));
-
-    //to link the click of the generatedsequencelist to an even that will setup for the drop
-
     TreeModel->setRootPath("");
     TreeModel->setNameFilterDisables(false);
     TreeModel->setFilter(QDir::AllDirs|QDir::NoDotAndDotDot);
-
     tree->setRootIndex(idx);
     tree->setMaximumWidth(400);
     tree->setModel(TreeModel);
@@ -127,7 +116,9 @@ void MainWindow::setupTreeItem(){
     tree->setColumnHidden(2, true);
     tree->setColumnHidden(3, true);
     tree->setHeaderHidden(true);
-    generateData();
+
+    // generateData(); well you only need to do it once...
+
     connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequencesAndCollapse(QModelIndex)));
     connect (tree, SIGNAL(expanded(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
     connect (TreeModel, SIGNAL(clearSequences()), this, SLOT(clearSequences()));
@@ -143,15 +134,14 @@ void MainWindow::inittimelinescene(){
     timelineView->setAlignment(Qt::AlignLeft);
     timelineView->setMaximumHeight(300);
     timelineView->acceptDrops();
-
-    connect(timeline, SIGNAL(scaleUp()), this, SLOT(scaleUpView()));
-    connect(timeline, SIGNAL(scaleDown()),this, SLOT(scaleDownView()));
     sublayouttimeline->addWidget(timelineView);
     sublayouttimeline->setAlignment(Qt::AlignTop);
     sublayoutbutton->setAlignment(Qt::AlignTop);
+    timelineView->setMinimumHeight(300);
+    timelineView->setRenderHint(QPainter::Antialiasing);
 
-
-
+    connect(timeline, SIGNAL(scaleUp()), this, SLOT(scaleUpView()));
+    connect(timeline, SIGNAL(scaleDown()),this, SLOT(scaleDownView()));
 }
 MainWindow::~MainWindow()
 {
@@ -172,7 +162,7 @@ void MainWindow::generateData()
     QString path ("c://DataTest//NestedTest/");
 
     for (int i = 0; i<3000; i++)
-        {
+    {
         QString name ("Sherlock.");
         name = name.append(i < 10 ? "00000" : i<100 ? "0000" : i<1000? "000" : i<10000? "00": "0").append("%1").arg(i).append(".prz");
         QFile file(path+name);
@@ -294,19 +284,19 @@ void MainWindow::clearSequences()
 void MainWindow::collapseChildrens(QModelIndex index)
 {
     if (!index.isValid()) {
-          return;
-      }
+        return;
+    }
 
-      int childCount = index.model()->rowCount(index);
-      for (int i = 0; i < childCount; i++) {
-          const QModelIndex &child = index.child(i, 0);
-          // Recursively call the function for each child node.
-          collapseChildrens(child);
-      }
+    int childCount = index.model()->rowCount(index);
+    for (int i = 0; i < childCount; i++) {
+        const QModelIndex &child = index.child(i, 0);
+        // Recursively call the function for each child node.
+        collapseChildrens(child);
+    }
 
-      if (tree->isExpanded(index)) {
-          tree->collapse(index);
-      }
+    if (tree->isExpanded(index)) {
+        tree->collapse(index);
+    }
 }
 
 void MainWindow::collapseAllAndExpand(QModelIndex index)
@@ -314,8 +304,8 @@ void MainWindow::collapseAllAndExpand(QModelIndex index)
     disconnect(tree, SIGNAL(expanded(QModelIndex)), 0, 0);
     disconnect(tree, SIGNAL(collapsed(QModelIndex)), 0, 0);
     if (!index.isValid()) {
-          return;
-      }
+        return;
+    }
     collapseChildrens(TreeModel->index(0,0));
     tree->scrollTo(index);
     tree->setExpanded(index, true);

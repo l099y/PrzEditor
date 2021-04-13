@@ -4,7 +4,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QBrush>
 #include <QGraphicsRectItem>
-#include <sequence_elements/extendedqgri.h>
+#include <sequence_elements/shot.h>
 #include <QMimeData>
 #include <QGraphicsSceneDragDropEvent>
 #include <QList>
@@ -34,7 +34,7 @@ TimelineScene::~TimelineScene(){
 
 void TimelineScene::handleBoxResize(){ //this functions roots to real resizing functions on the selection mod
     if (!selectedItems().isEmpty()){
-        ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+        Shot* rect= dynamic_cast<Shot*>(selectedItems().at(0));
         switch (rect->mod){
         //        case (BoxState :: STRETCH_LEFT):
         //            rect->strechLeft();
@@ -58,10 +58,10 @@ void TimelineScene::handleBoxResize(){ //this functions roots to real resizing f
 
 void TimelineScene::behaveOnSelectionLeftXtend()
 {
-    ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+    Shot* selection= dynamic_cast<Shot*>(selectedItems().at(0));
     float sX = selection->scenePos().x();
     foreach (QGraphicsItem* current, items()){
-        ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(current);
+        Shot* rect= dynamic_cast<Shot*>(current);
         if (rect && rect!= selection)
         {
             float rX = rect->scenePos().x();
@@ -87,11 +87,11 @@ void TimelineScene::behaveOnSelectionLeftXtend()
 
 void TimelineScene::behaveOnSelectionRightXtend()
 {
-    ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+    Shot* selection= dynamic_cast<Shot*>(selectedItems().at(0));
     float sX = selection->scenePos().x();
     float sW = selection->rect().width();
     foreach (QGraphicsItem* current, items()){
-        ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(current);
+        Shot* rect= dynamic_cast<Shot*>(current);
         if (rect && rect != selection)
         {
             float rX = rect->scenePos().x();
@@ -120,11 +120,11 @@ void TimelineScene::behaveOnSelectionRightXtend()
 
 void TimelineScene::behaveOnSelectionMove()
 {
-    ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+    Shot* selection= dynamic_cast<Shot*>(selectedItems().at(0));
     float sX = selection->scenePos().x();
     float sW = selection->rect().width();
     foreach (QGraphicsItem* current, items()){
-        ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(current);
+        Shot* rect= dynamic_cast<Shot*>(current);
         if (rect && rect != selection)
         {
             if ((sX > rect->previousxpos && sX < rect->previousboxwidth+rect->previousxpos)||( // si le bord gauche du rectangle est plus grand que la position précédente du rectangle observer et et est plus
@@ -175,12 +175,12 @@ void TimelineScene::behaveOnSelectionMove()
 void TimelineScene::behaveOnSelectionSwitchPosMove()
 {
     if (!selectedItems().isEmpty()){
-        ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+        Shot* selection= dynamic_cast<Shot*>(selectedItems().at(0));
         selection->setX(selection->roundedTo10(selection->scenePos().x()<0?0:selection->scenePos().x()));
         float sX = selection->scenePos().x();
         float sW = selection->rect().width();
         foreach (QGraphicsItem* current, items()){
-            ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(current);
+            Shot* rect= dynamic_cast<Shot*>(current);
             if (rect && rect != selection)
             {
                 if (selection->wasLeftOf(rect)){
@@ -239,12 +239,12 @@ void TimelineScene::behaveOnSelectionSwitchPosMove()
 //void TimelineScene::behaveOnSelectionSwitchPosMove()
 //{
 //    if (!selectedItems().isEmpty()){
-//        ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+//        Shot* selection= dynamic_cast<Shot*>(selectedItems().at(0));
 //        selection->setX(selection->roundedTo10(selection->scenePos().x()));
 //        float sX = selection->scenePos().x();
 //        float sW = selection->rect().width();
 //        foreach (QGraphicsItem* current, items()){
-//            ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(current);
+//            Shot* rect= dynamic_cast<Shot*>(current);
 //            if (rect && rect != selection)
 //            {
 //                if (selection->wasLeftOf(rect)){
@@ -296,13 +296,13 @@ void TimelineScene::behaveOnSelectionSwitchPosMove()
 
 void TimelineScene::behaveOnSelectionDisplace()
 {
-    ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+    Shot* selection= dynamic_cast<Shot*>(selectedItems().at(0));
     int limit = rectXAndWBefore(selection);
     selection->setXToFrame(selection->scenePos().x()<limit? limit : selection->scenePos().x());
 
 
     foreach (QGraphicsItem* current, items()){
-        ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(current);
+        Shot* rect= dynamic_cast<Shot*>(current);
         if (rect && rect != selection && rect->previousxpos>= selection->previousxpos){
             rect->setXToFrame(rect->previousxpos+(selection->scenePos().x()-selection->previousxpos));
 
@@ -313,13 +313,13 @@ void TimelineScene::behaveOnSelectionDisplace()
 }
 void TimelineScene::behaveOnSelectionInsertionDisplace()
 {
-    ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+    Shot* selection= dynamic_cast<Shot*>(selectedItems().at(0));
     int limit = rectXAndWBefore(selection);
     selection->setXToFrame(selection->scenePos().x()<limit? limit : selection->scenePos().x());
 
 
     foreach (QGraphicsItem* current, items()){
-        ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(current);
+        Shot* rect= dynamic_cast<Shot *>(current);
         if (rect && rect != selection && rect->previousxpos>= selection->previousxpos){
             rect->setXToFrame(selection->rect().width()+rect->previousxpos+(selection->scenePos().x()-selection->previousxpos));
 
@@ -329,21 +329,21 @@ void TimelineScene::behaveOnSelectionInsertionDisplace()
     }
 }
 
-float TimelineScene::rectXAndWBefore(ExtendedQGRI *rect)
+float TimelineScene::rectXAndWBefore(Shot *rect)
 {
-    QVector<ExtendedQGRI*> sortedlist;
+    QVector<Shot*> sortedlist;
     foreach (QGraphicsItem *current, items()){
-        ExtendedQGRI *rec = dynamic_cast<ExtendedQGRI *>(current);
+        Shot *rec = dynamic_cast<Shot*>(current);
         if (rec)
             sortedlist.append(rec);
     }
-    std::sort(sortedlist.begin(), sortedlist.end(), [](ExtendedQGRI *a, ExtendedQGRI *b){
+    std::sort(sortedlist.begin(), sortedlist.end(), [](Shot *a, Shot *b){
 
 
         return a->previousxpos<b->previousxpos;
     });
     float ret= 0;
-    foreach (ExtendedQGRI *current, sortedlist)
+    foreach (Shot *current, sortedlist)
     {
         if (rect->previousxpos>current->previousxpos && current != rect )
             ret = current->previousboxwidth+current->previousxpos;
@@ -354,7 +354,7 @@ float TimelineScene::rectXAndWBefore(ExtendedQGRI *rect)
 float TimelineScene::positionOfInsertedShot(QGraphicsSceneDragDropEvent *e)
 {
     foreach (QGraphicsItem *current, items()){
-        ExtendedQGRI *rec = dynamic_cast<ExtendedQGRI *>(current);
+        Shot *rec = dynamic_cast<Shot*>(current);
         if (rec && rec != dropRepresentation)
         {
         if (dropRepresentation->scenePos().x() >= rec->scenePos().x() && dropRepresentation->scenePos().x() <= rec->scenePos().x()+rec->rect().width()){
@@ -414,7 +414,7 @@ void TimelineScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 {
     QGraphicsScene :: mouseMoveEvent (e);
     if (!selectedItems().isEmpty() && e->buttons()==Qt::LeftButton){
-        ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+        Shot* rect= dynamic_cast<Shot*>(selectedItems().at(0));
         handleBoxResize();
         selectedItems().at(0)->setY(-10);
     }
@@ -424,7 +424,7 @@ void TimelineScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
 {
     qDebug()<<"mouseReleaseEvent";
     if (!selectedItems().isEmpty()){
-        ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+        Shot* selection= dynamic_cast<Shot*>(selectedItems().at(0));
         if (selection)
         {
             handleBoxResize();
@@ -437,7 +437,7 @@ void TimelineScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
 }
 void TimelineScene::resetBoxStates(){
     foreach (QGraphicsItem* current, items()){
-        ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(current);
+        Shot* rect= dynamic_cast<Shot*>(current);
         if (rect)
         {
             if (rect->animated)
@@ -452,7 +452,7 @@ void TimelineScene::resetBoxStates(){
 void TimelineScene::resetToPrevious()
 {
     foreach (QGraphicsItem* current, items()){
-        ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(current);
+        Shot* rect= dynamic_cast<Shot *>(current);
         if (rect)
         {
                 rect->setX(rect->previousxpos);
@@ -468,11 +468,11 @@ void TimelineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *e)
     auto list = przreg->currentExpandedFolderSequences->value(path);
     foreach (SequenceData* current, list){
         if(current->name == file){
-            dropRepresentation = new ExtendedQGRI ();
+            dropRepresentation = new Shot ();
             dropRepresentation->setRect(0,0,current->sequencelength()*10,100);
             dropRepresentation->setX(e->scenePos().x());
             if (!selectedItems().isEmpty()){
-                 ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+                 Shot* selection= dynamic_cast<Shot *>(selectedItems().at(0));
                  selection->setSelected(false);
             }
             dropRepresentation->setSelected(true);
@@ -556,7 +556,7 @@ void TimelineScene::keyPressEvent(QKeyEvent *e)
 void TimelineScene::moveAllFrom(float from, float distance)
 {
     foreach (QGraphicsItem* current, items()){
-        ExtendedQGRI* rect= dynamic_cast<ExtendedQGRI *>(current);
+        Shot* rect= dynamic_cast<Shot *>(current);
         if (rect){
             if (rect->scenePos().x()>=from){
                 rect->setX(rect->scenePos().x()+distance);
@@ -579,7 +579,7 @@ void TimelineScene::allign()
 {
     QVector<QGraphicsItem*> sortedlist;
     foreach (QGraphicsItem *current, items()){
-        ExtendedQGRI *rec = dynamic_cast<ExtendedQGRI *>(current);
+        Shot *rec = dynamic_cast<Shot *>(current);
         if (rec)
             sortedlist.append(current);
     }
@@ -589,7 +589,7 @@ void TimelineScene::allign()
     float widthsum = 0;
     foreach (QGraphicsItem *current, sortedlist)
     {
-        ExtendedQGRI *rec = dynamic_cast<ExtendedQGRI *>(current);
+        Shot *rec = dynamic_cast<Shot *>(current);
         rec->animatedMove(widthsum);
         widthsum+=rec->rect().width();
     }
@@ -601,7 +601,7 @@ void TimelineScene::setmod2()
 
     if (!selectedItems().isEmpty()){
 
-        ExtendedQGRI *rec = dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+        Shot *rec = dynamic_cast<Shot *>(selectedItems().at(0));
         if (rec){
             qDebug()<<"in setmod";
             rec->mod = BoxState::SWITCHPOS_MOVE;
@@ -615,7 +615,7 @@ void TimelineScene::setdisp()
 
     if (!selectedItems().isEmpty()){
         resetBoxStates();
-        ExtendedQGRI *rec = dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+        Shot *rec = dynamic_cast<Shot *>(selectedItems().at(0));
         if (rec){
             qDebug()<<"in setdisp";
             rec->mod = BoxState::DISPLACE;
@@ -641,7 +641,7 @@ void TimelineScene::deleteSelection()
 void TimelineScene::displaceSelection(int framePos)
 {
     if (!selectedItems().isEmpty()){
-        ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+        Shot* selection= dynamic_cast<Shot *>(selectedItems().at(0));
         selection->setX(framePos*10);
         handleBoxResize();
         resetBoxStates();
@@ -652,7 +652,7 @@ void TimelineScene::displaceSelection(int framePos)
 void TimelineScene::changeSelectionSize(int newSize)
 {
     if (!selectedItems().isEmpty()){
-        ExtendedQGRI* selection= dynamic_cast<ExtendedQGRI *>(selectedItems().at(0));
+        Shot* selection= dynamic_cast<Shot *>(selectedItems().at(0));
         selection->setSize(newSize *10);
         moveAllFrom(selection->previousxpos+1, newSize*10 - selection->previousboxwidth);
         selection->setPreviousToCurrent();

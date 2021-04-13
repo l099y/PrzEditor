@@ -1,4 +1,4 @@
-#include "extendedqgri.h"
+#include "shot.h"
 #include <QDebug>
 #include <QGraphicsRectItem>
 #include <QPropertyAnimation>
@@ -6,7 +6,7 @@
 #include <QObject>
 
 
-ExtendedQGRI::ExtendedQGRI(): QGraphicsRectItem()
+Shot::Shot(): QGraphicsRectItem()
 {
     QPen pen (Qt::gray);
     QBrush brush (QColor(200,240,200));
@@ -18,32 +18,32 @@ ExtendedQGRI::ExtendedQGRI(): QGraphicsRectItem()
     connect(timer, SIGNAL(finished()), this, SLOT(setAnimatedFalse()));
 }
 
-ExtendedQGRI::~ExtendedQGRI()
+Shot::~Shot()
 {
  delete(animation);
  delete(timer);
  delete(emitter);
 }
 
-void ExtendedQGRI::setXToFrame(float x)
+void Shot::setXToFrame(float x)
 {
 
     setX(roundedTo10(x));
 }
 
-void ExtendedQGRI::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e)
+void Shot::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e)
 {
     QGraphicsRectItem::mouseDoubleClickEvent(e);
 }
 
-void ExtendedQGRI::hoverEnterEvent(QGraphicsSceneHoverEvent *e)
+void Shot::hoverEnterEvent(QGraphicsSceneHoverEvent *e)
 {
     setBrush(QColor(180,200,240));
     update();
     QGraphicsRectItem::hoverEnterEvent(e);
 }
 
-void ExtendedQGRI::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
+void Shot::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
 {
     QGraphicsItem :: mouseReleaseEvent(e);
     mod = BoxState::REGULAR;
@@ -53,7 +53,7 @@ void ExtendedQGRI::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
     setPreviousToCurrent();
 }
 
-void ExtendedQGRI::hoverLeaveEvent(QGraphicsSceneHoverEvent *e)
+void Shot::hoverLeaveEvent(QGraphicsSceneHoverEvent *e)
 {
     if (!isSelected())
         setRegularColor();
@@ -61,7 +61,7 @@ void ExtendedQGRI::hoverLeaveEvent(QGraphicsSceneHoverEvent *e)
     QGraphicsRectItem::hoverLeaveEvent(e);
 }
 
-void ExtendedQGRI::hoverMoveEvent(QGraphicsSceneHoverEvent *e)
+void Shot::hoverMoveEvent(QGraphicsSceneHoverEvent *e)
 {
 //    if(e->pos().x()>= 0 && e->pos().x()<=3)
 //    {
@@ -78,7 +78,7 @@ void ExtendedQGRI::hoverMoveEvent(QGraphicsSceneHoverEvent *e)
 
 }
 
-void ExtendedQGRI::mousePressEvent(QGraphicsSceneMouseEvent *e)
+void Shot::mousePressEvent(QGraphicsSceneMouseEvent *e)
 {
     if(e->pos().x()>= 0 && e->pos().x()<=3)
     {
@@ -98,17 +98,17 @@ void ExtendedQGRI::mousePressEvent(QGraphicsSceneMouseEvent *e)
 
 }
 
-void ExtendedQGRI::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
+void Shot::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 {
     QGraphicsRectItem :: mouseMoveEvent(e);
 }
 
-void ExtendedQGRI::setPreviousToCurrent(){
+void Shot::setPreviousToCurrent(){
     previousboxwidth = rect().width();
     previousxpos = scenePos().x();
 }
 
-void ExtendedQGRI::restore()
+void Shot::restore()
 {
     setRegularColor();
     setX(previousxpos);
@@ -116,7 +116,7 @@ void ExtendedQGRI::restore()
     setVisible(true);
 }
 
-void ExtendedQGRI::strechLeft(QGraphicsSceneMouseEvent *e)
+void Shot::strechLeft(QGraphicsSceneMouseEvent *e)
 {
     if (previousxpos - e->scenePos().x()>=0){
         setRect(0, 0, (previousxpos - e->scenePos().x())+previousboxwidth, 100);
@@ -133,7 +133,7 @@ void ExtendedQGRI::strechLeft(QGraphicsSceneMouseEvent *e)
     }
 }
 
-void ExtendedQGRI::strechRight(QGraphicsSceneMouseEvent *e)
+void Shot::strechRight(QGraphicsSceneMouseEvent *e)
 {
     if (e->scenePos().x()>(previousxpos+previousboxwidth)){
         setRect(0, 0, (roundedTo10(e->scenePos().x()- previousxpos)), 100);
@@ -150,7 +150,7 @@ void ExtendedQGRI::strechRight(QGraphicsSceneMouseEvent *e)
     }
 }
 
-void ExtendedQGRI::setModifyingcColorSignal()
+void Shot::setModifyingcColorSignal()
 {
     QColor cyan30 = (Qt::cyan);
     cyan30.setAlpha(60);
@@ -158,13 +158,13 @@ void ExtendedQGRI::setModifyingcColorSignal()
     setBrush(brush);
 }
 
-void ExtendedQGRI::setRegularColor()
+void Shot::setRegularColor()
 {
     QBrush brush(QColor(200,240,200));
     setBrush(brush);
 }
 
-void ExtendedQGRI::animatedMove(float pos)
+void Shot::animatedMove(float pos)
 {
 
 
@@ -183,12 +183,12 @@ void ExtendedQGRI::animatedMove(float pos)
     }
 }
 
-void ExtendedQGRI::setSize(int realsize)
+void Shot::setSize(int realsize)
 {
     setRect(0,0,realsize, 100);
 }
 
-int ExtendedQGRI::roundedTo10(float xf)
+int Shot::roundedTo10(float xf)
 {
     int x = (int)xf;
     x = x % 10 > 5? x + (10-x%10): x - x%10;
@@ -196,7 +196,7 @@ int ExtendedQGRI::roundedTo10(float xf)
 
 }
 
-void ExtendedQGRI::setAnimatedFalse()
+void Shot::setAnimatedFalse()
 {
     if (prevposresetrequested){
         prevposresetrequested =false;
@@ -206,7 +206,7 @@ void ExtendedQGRI::setAnimatedFalse()
     animated=false;
 }
 
-void ExtendedQGRI::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     if (isSelected()){
         setZValue(1);

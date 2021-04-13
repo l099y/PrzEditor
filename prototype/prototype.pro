@@ -1,6 +1,7 @@
 QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+requires(qtConfig(undoview))
 
 CONFIG += c++11
 
@@ -12,22 +13,24 @@ SOURCES += \
     filesystem/extendedqfilesystemmodel.cpp \
     filesystem/sequencedata.cpp \
     filesystem/sequenceregister.cpp \
-    sequence_elements\extendedqgri.cpp \
+    sequence_elements\shot.cpp \
     main.cpp \
     mainwindow.cpp \
     emitter.cpp \
     sequence_elements\ruler.cpp \
-    sequence_elements\timelinescene.cpp
+    sequence_elements\timelinescene.cpp \
+    undo_framework/commands.cpp
 
 HEADERS += \
     filesystem/extendedqfilesystemmodel.h \
     filesystem/sequencedata.h \
     filesystem/sequenceregister.h \
-    sequence_elements\extendedqgri.h \
+    sequence_elements\shot.h \
     mainwindow.h \
     emitter.h \
     sequence_elements\ruler.h \
-    sequence_elements\timelinescene.h
+    sequence_elements\timelinescene.h \
+    undo_framework/commands.h
 
 FORMS += \
     mainwindow.ui

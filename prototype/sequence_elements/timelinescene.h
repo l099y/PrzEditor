@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QList>
 #include <QGraphicsRectItem>
-#include "extendedqgri.h"
+#include "shot.h"
 #include "ruler.h"
 #include "filesystem/sequenceregister.h"
 
@@ -27,9 +27,9 @@ class TimelineScene : public QGraphicsScene
     void behaveOnSelectionSwitchPosMove();
     void behaveOnSelectionDisplace();
     void behaveOnSelectionInsertionDisplace();
-    float rectXAndWBefore(ExtendedQGRI *rect);
+    float rectXAndWBefore(Shot *rect);
     float positionOfInsertedShot(QGraphicsSceneDragDropEvent* e);
-    ExtendedQGRI* dropRepresentation;
+    Shot* dropRepresentation;
     SequenceRegister* przreg;
 
 public slots:

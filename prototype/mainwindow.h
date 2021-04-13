@@ -1,26 +1,35 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+// regular app items
+
 #include <QMainWindow>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QFileSystemModel>
 #include <QFileIconProvider>
 #include <QScreen>
 #include <QScroller>
-#include <QTreeView>
 #include <QLabel>
-#include <QGraphicsScene>
 #include <QPushButton>
-#include <QGraphicsScene>
-#include <sequence_elements/timelinescene.h>
 #include <QLineEdit>
-#include <QSortFilterProxyModel>
+
+// file Explorer and Sequences displayer items
+
+#include <QTreeView>
 #include <filesystem/extendedqfilesystemmodel.h>
 #include <sequence_elements/Storage/sequenceroom.h>
 #include <QStandardItem>
 #include <QStandardItemModel>
+
+// Sequences elements
+
+#include <sequence_elements/timelinescene.h>
 #include <QGraphicsView>
+
+// the undo framework
+
+#include <QUndoStack>
+#include <QUndoView>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -33,6 +42,9 @@ class MainWindow : public QMainWindow
 public:
     float currentTimelineScaling = 1;
 
+    // containers and layout
+
+
     QWidget *widget = new QWidget;
     QWidget *timelineNutils = new QWidget(widget);
     QWidget *parameters = new QWidget(widget);
@@ -41,9 +53,6 @@ public:
     QWidget *params1 = new QWidget(parameters);
     QWidget *params2 = new QWidget(parameters);
     QLabel *paramlabel = new QLabel("parameters");
-
-
-
     QHBoxLayout *layout = new QHBoxLayout(this);
     QVBoxLayout *sublayoutEditor = new QVBoxLayout(widget);
     QVBoxLayout *sublayoutbutton = new QVBoxLayout(widget);
@@ -54,25 +63,29 @@ public:
     QHBoxLayout *sublayoutparams2 = new QHBoxLayout(params2);
 
 
+    // extended File Explorer
+
     SequenceRegister* reg = new SequenceRegister (this);
     ExtendedQFileSystemModel *TreeModel = new ExtendedQFileSystemModel(reg, this);
     QModelIndex idx = TreeModel->index("");
     QTreeView *tree = new QTreeView(widget);
+    QStandardItemModel* sequencesModel = new QStandardItemModel(this);
+    QTreeView* sequencesStorageView = new QTreeView(this);
 
+
+    // Sequence Representation
 
     QGraphicsView *timelineView = new QGraphicsView(this);
     TimelineScene *timeline = new TimelineScene(reg, timelineView, this);
-
-
-    QStandardItemModel* sequencesModel = new QStandardItemModel(this);
-    QTreeView* sequencesStorageView;
-
     QPushButton* allignbutton = new QPushButton();
     QPushButton* clearbutton = new QPushButton();
     QPushButton* newboxbutton = new QPushButton();
     QPushButton* mod2button = new QPushButton();
     QPushButton* dispbutton = new QPushButton();
     QPushButton* delbutton = new QPushButton();
+
+    // Parameters window elements
+
     QPushButton* displaceSelectionButton = new QPushButton();
     QPushButton* changeSelectionSizeButton = new QPushButton();
     QLineEdit* framePositionInput = new QLineEdit(this);
