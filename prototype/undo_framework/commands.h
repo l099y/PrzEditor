@@ -5,6 +5,7 @@
 #include "sequence_elements/shot.h"
 #include "filesystem/sequencedata.h"
 #include "sequence_elements/timelinescene.h"
+#include <QHash>
 
 class DeleteCommand : public QUndoCommand
 {
@@ -24,7 +25,7 @@ private:
 class AddCommand : public QUndoCommand
 {
 public:
-    AddCommand(SequenceData* seq, int xpos, int length, TimelineScene* timeline,
+    AddCommand(SequenceData* seq, int xpos, int length, TimelineScene* timeline, QVector<Shot*> movedShots,
                QUndoCommand *parent = nullptr);
     ~AddCommand();
 
@@ -33,6 +34,8 @@ public:
 
 private:
     Shot *shot;
+    QHash<Shot*, int> movedShotOldPos;
+    QHash<Shot*, int> movedShotNewPos;
     SequenceData* seq;
     TimelineScene *timeline;
     int xpos;

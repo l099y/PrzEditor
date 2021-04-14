@@ -351,6 +351,8 @@ float TimelineScene::rectXAndWBefore(Shot *rect)
     return ret;
 }
 
+
+
 float TimelineScene::positionOfInsertedShot(QGraphicsSceneDragDropEvent *e)
 {
     foreach (QGraphicsItem *current, items()){
@@ -515,6 +517,19 @@ void TimelineScene::dragMoveEvent(QGraphicsSceneDragDropEvent *e)
       }
   }
 }
+QVector<Shot *> TimelineScene::getMovedShots()
+{
+    QVector<Shot*> ret;
+    foreach (QGraphicsItem* current, items()){
+        Shot* rect= dynamic_cast<Shot*>(current);
+        if (rect && rect != dropRepresentation)
+        {
+            if (rect->scenePos().x() != rect->previousxpos)
+                ret.append(rect);
+        }
+    }
+    return ret;
+}
 
 void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
 {
@@ -522,8 +537,9 @@ void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
     {
         removeItem(dropRepresentation);
         qDebug()<<"should be created";
-        emit (createShot(dropRepresentation->seq, dropRepresentation->scenePos().x(), dropRepresentation->rect().width(), this));
-        this->resetBoxStates();
+        QList<Shot*> param;
+        auto print = getMovedShots();
+        emit (createShot(dropRepresentation->seq, dropRepresentation->scenePos().x(), dropRepresentation->rect().width(), this, print));
     }
     else
     {

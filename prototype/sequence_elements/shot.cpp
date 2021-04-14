@@ -4,6 +4,7 @@
 #include <QPropertyAnimation>
 #include <QGraphicsItemAnimation>
 #include <QObject>
+#include <QDataStream>
 
 
 Shot::Shot(): QGraphicsRectItem()

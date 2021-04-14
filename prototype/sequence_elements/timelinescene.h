@@ -28,6 +28,7 @@ class TimelineScene : public QGraphicsScene
     void behaveOnSelectionDisplace();
     void behaveOnSelectionInsertionDisplace();
     float rectXAndWBefore(Shot *rect);
+    QVector<Shot*> getMovedShots();
     float positionOfInsertedShot(QGraphicsSceneDragDropEvent* e);
     Shot* dropRepresentation;
     SequenceRegister* przreg;
@@ -56,7 +57,7 @@ signals:
    void scaleUp();
    void scaleDown();
    void deleteSelectionSignal();
-   void createShot(SequenceData* seq, int xpos, int length, TimelineScene* timeline);
+   void createShot(SequenceData* seq, int xpos, int length, TimelineScene* timeline, QVector<Shot*> movedShot);
 
 
 protected:

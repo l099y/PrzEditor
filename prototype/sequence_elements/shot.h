@@ -10,6 +10,7 @@
 #include <QTimeLine>
 #include <QGraphicsItemAnimation>
 #include <filesystem/sequencedata.h>
+#include <QDataStream>
 
 enum class BoxState {REGULAR, STRETCH_LEFT, STRETCH_RIGHT, SWITCHPOS_MOVE, DISPLACE};
 
