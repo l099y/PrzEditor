@@ -1,47 +1,46 @@
 #include "commands.h"
 #include "sequence_elements/shot.h"
 #include "sequence_elements/timelinescene.h"
+#include "filesystem/sequencedata.h"
+#include <QDebug>
 
-DeleteCommand::DeleteCommand(QGraphicsScene *scene, QUndoCommand *parent)
-    : QUndoCommand(parent), myGraphicsScene(scene)
+DeleteCommand::DeleteCommand(TimelineScene *scene, QUndoCommand *parent)
+    : QUndoCommand(parent)
 {
-    QList<QGraphicsItem *> list = myGraphicsScene->selectedItems();
+    timeline = scene;
+    QList<QGraphicsItem *> list = timeline->selectedItems();
     list.first()->setSelected(false);
     shot = static_cast<Shot *>(list.first());
     setText(QObject::tr("Delete %1")
         .arg(" created "));
 }
-//! [4]
 
-//! [5]
 void DeleteCommand::undo()
 {
-    myGraphicsScene->addItem(shot);
-    myGraphicsScene->update();
+    timeline->addItem(shot);
+    timeline->update();
 }
-//! [5]
 
-//! [6]
 void DeleteCommand::redo()
 {
-    myGraphicsScene->removeItem(shot);
+    timeline->removeItem(shot);
 }
-//! [6]
 
-//! [7]
-AddCommand::AddCommand(SequenceData seq, int xpos, int length,
-                       QGraphicsScene *scene, QUndoCommand *parent)
-    : QUndoCommand(parent), myGraphicsScene(scene)
+AddCommand::AddCommand(SequenceData* seq, int xpos, int length, TimelineScene *scene, QUndoCommand *parent)
+    : QUndoCommand(parent)
 {
-    static int itemCount = 0;
-
+    timeline = scene;
     shot = new Shot();
+
+
+    this->seq = seq;
     this->xpos = xpos;
     this->length = length;
+    shot->setRect(0, 0, length, 100);
+    shot->setX(xpos);
     scene->update();
-    ++itemCount;
     setText(QObject::tr("Add %1")
-        .arg("created"));
+        .arg(seq->name));
 }
 //! [7]
 
@@ -54,16 +53,21 @@ AddCommand::~AddCommand()
 //! [8]
 void AddCommand::undo()
 {
-    myGraphicsScene->removeItem(shot);
-    myGraphicsScene->update();
+    timeline->removeItem(shot);
+    timeline->update();
 }
 //! [8]
 
 //! [9]
 void AddCommand::redo()
 {
-    myGraphicsScene->addItem(shot);
+
+    timeline->addItem(shot);
+    qDebug()<<timeline->items();
+    timeline->przreg->usedSequences.insert(seq->name, seq);
+    qDebug()<<timeline->przreg->usedSequences;
     shot->setXToFrame(xpos);
-    myGraphicsScene->clearSelection();
-    myGraphicsScene->update();
+    shot->rect().setWidth(length);
+    timeline->clearSelection();
+    timeline->update();
 }

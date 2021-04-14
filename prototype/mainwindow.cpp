@@ -5,7 +5,7 @@
 #include <QPixmap>
 #include <QHeaderView>
 #include "undo_framework/commands.h"
-
+#include <sequence_elements/timelinescene.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -194,6 +194,7 @@ void MainWindow::createUndoView()
 void MainWindow::bindUndoElements()
 {
     connect (timeline, SIGNAL(deleteSelectionSignal()), this, SLOT(deleteSelection()));
+    connect (timeline, SIGNAL(createShot(SequenceData*, int , int , TimelineScene*)), this, SLOT(createShott(SequenceData*, int, int, TimelineScene*)));
 }
 
 void MainWindow::changeEvent(QEvent *event)
@@ -368,4 +369,10 @@ void MainWindow::deleteSelection()
 
     QUndoCommand *deleteCommand = new DeleteCommand(timeline);
     undoStack->push(deleteCommand);
+}
+
+void MainWindow::createShott(SequenceData *seq, int xpos, int length, TimelineScene *timeline)
+{
+    QUndoCommand *createCommand = new AddCommand(seq, xpos, length, timeline);
+    undoStack->push(createCommand);
 }

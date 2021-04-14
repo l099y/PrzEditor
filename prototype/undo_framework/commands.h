@@ -4,18 +4,19 @@
 #include <QUndoCommand>
 #include "sequence_elements/shot.h"
 #include "filesystem/sequencedata.h"
+#include "sequence_elements/timelinescene.h"
 
 class DeleteCommand : public QUndoCommand
 {
 public:
-    explicit DeleteCommand(QGraphicsScene *graphicsScene, QUndoCommand *parent = nullptr);
+    explicit DeleteCommand(TimelineScene *timeline, QUndoCommand *parent = nullptr);
 
     void undo() override;
     void redo() override;
 
 private:
     Shot *shot;
-    QGraphicsScene *myGraphicsScene;
+    TimelineScene *timeline;
 };
 //! [1]
 
@@ -23,7 +24,7 @@ private:
 class AddCommand : public QUndoCommand
 {
 public:
-    AddCommand(SequenceData sequence, int xpos, int length, QGraphicsScene *graphicsScene,
+    AddCommand(SequenceData* seq, int xpos, int length, TimelineScene* timeline,
                QUndoCommand *parent = nullptr);
     ~AddCommand();
 
@@ -32,7 +33,8 @@ public:
 
 private:
     Shot *shot;
-    QGraphicsScene *myGraphicsScene;
+    SequenceData* seq;
+    TimelineScene *timeline;
     int xpos;
     int length;
 };

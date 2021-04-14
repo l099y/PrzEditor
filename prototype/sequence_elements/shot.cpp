@@ -8,7 +8,7 @@
 
 Shot::Shot(): QGraphicsRectItem()
 {
-    QPen pen (Qt::gray);
+    QPen pen (Qt::white);
     QBrush brush (QColor(200,240,200));
     setPen(pen);
     setBrush(brush);

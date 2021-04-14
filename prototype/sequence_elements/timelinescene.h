@@ -52,9 +52,12 @@ public slots:
 
 
 signals:
+
    void scaleUp();
    void scaleDown();
    void deleteSelectionSignal();
+   void createShot(SequenceData* seq, int xpos, int length, TimelineScene* timeline);
+
 
 protected:
    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *e);

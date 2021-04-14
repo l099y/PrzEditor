@@ -7,6 +7,11 @@ SequenceData::SequenceData(QObject* parent): QObject(parent)
 
 }
 
+SequenceData::~SequenceData()
+{
+
+}
+
 int SequenceData::sequencelength()
 {
     return (endIdx+1)-startIdx;

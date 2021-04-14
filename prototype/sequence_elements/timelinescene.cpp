@@ -478,6 +478,7 @@ void TimelineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *e)
             dropRepresentation->setSelected(true);
             dropRepresentation->setBrush(QColor(100,255,200));
             dropRepresentation->setPreviousToCurrent();
+            dropRepresentation->seq= current;
             addItem(dropRepresentation);
         }
     }
@@ -519,6 +520,9 @@ void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
 {
     if (dropRepresentation->inserted)
     {
+        removeItem(dropRepresentation);
+        qDebug()<<"should be created";
+        emit (createShot(dropRepresentation->seq, dropRepresentation->scenePos().x(), dropRepresentation->rect().width(), this));
         this->resetBoxStates();
     }
     else
@@ -531,6 +535,7 @@ void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
 void TimelineScene::dragLeaveEvent(QGraphicsSceneDragDropEvent *e)
 {
     removeItem(dropRepresentation);
+    dropRepresentation=nullptr;
     resetToPrevious();
 }
 

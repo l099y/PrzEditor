@@ -9,6 +9,7 @@
 #include "emitter.h"
 #include <QTimeLine>
 #include <QGraphicsItemAnimation>
+#include <filesystem/sequencedata.h>
 
 enum class BoxState {REGULAR, STRETCH_LEFT, STRETCH_RIGHT, SWITCHPOS_MOVE, DISPLACE};
 
@@ -25,6 +26,7 @@ public:
     bool modified = false;
     bool animated = false;
     bool prevposresetrequested = false;
+    SequenceData* seq;
     float previousxpos;
     float previousboxwidth;
     float mousePosXonClick;
@@ -39,6 +41,7 @@ public:
     void setRegularColor();
     void animatedMove(float pos);
     void setSize(int realsize);
+
 inline int roundedTo10(float x);
 
 inline bool wasLeftOf(Shot* OtherCube)

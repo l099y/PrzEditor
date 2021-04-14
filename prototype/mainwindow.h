@@ -136,6 +136,7 @@ public slots:
     void collapseChildrens(QModelIndex);
     void collapseAllAndExpand(QModelIndex);
     void deleteSelection();
+    void createShott(SequenceData* seq, int xpos, int length, TimelineScene* timeline);
 
 private:
     void initButtons();

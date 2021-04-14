@@ -8,7 +8,7 @@ class SequenceData : public QObject
     Q_OBJECT
 public:
     SequenceData(QObject* parent);
-
+    ~SequenceData();
     QStringList files;
     QString path;
     QString name;
