@@ -73,7 +73,7 @@ void AddCommand::redo()
 {
     QHash<Shot*, int>::const_iterator i = movedShotNewPos.constBegin();
     while (i != movedShotNewPos.constEnd()) {
-        qDebug()<<i.value();
+
          auto  sh =i.key();
          sh->setXToFrame(i.value());
          sh->setPreviousToCurrent();

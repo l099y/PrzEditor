@@ -129,7 +129,7 @@ void MainWindow::setupTreeItem(){
     tree->setHeaderHidden(true);
     tree->setStyleSheet("background: rgb(120,120,120);");
 
-    // generateData(); well you only need to do it once...
+   // generateData(); //well you only need to do it once...
 
     connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequencesAndCollapse(QModelIndex)));
     connect (tree, SIGNAL(expanded(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
@@ -208,11 +208,11 @@ void MainWindow::changeEvent(QEvent *event)
 void MainWindow::generateData()
 {
     TreeModel->mkdir(TreeModel->index("c://DataTest"), "NestedTest");
-    QString path ("c://DataTest//NestedTest/");
+    QString path ("c://DataTest//");
 
     for (int i = 0; i<3000; i++)
     {
-        QString name ("Sherlock.");
+        QString name ("Davinci_workshop.");
         name = name.append(i < 10 ? "00000" : i<100 ? "0000" : i<1000? "000" : i<10000? "00": "0").append("%1").arg(i).append(".prz");
         QFile file(path+name);
         file.open(QIODevice::ReadWrite);
