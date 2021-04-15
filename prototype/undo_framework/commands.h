@@ -42,4 +42,19 @@ private:
     int length;
 };
 
+class MoveCommand : public QUndoCommand
+{
+public:
+    MoveCommand(QVector<Shot*> movedShots, int previoustimelineWidth, int timelineWidth, QUndoCommand *parent = nullptr);
+
+    void undo() override;
+    void redo() override;
+
+private:
+    QHash<Shot*, int> movedShotOldPos;
+    QHash<Shot*, int> movedShotNewPos;
+    int prevscenepos;
+    int currentscenepos;
+};
+
 #endif // COMMANDS_H

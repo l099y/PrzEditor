@@ -33,10 +33,8 @@ AddCommand::AddCommand(SequenceData* seq, int xpos, int length, TimelineScene *s
 {
     foreach(Shot* current, movedShots){
         movedShotOldPos.insert(current, current->previousxpos);
-        qDebug()<< current->previousxpos << "saved previous pos - "<< current->scenePos().x() << "saved current pos";
         movedShotNewPos.insert(current, current->scenePos().x());
     }
-    qDebug()<<movedShotNewPos.size();
     timeline = scene;
     shot = new Shot();
     this->seq = seq;
@@ -87,3 +85,39 @@ void AddCommand::redo()
     timeline->clearSelection();
     timeline->update();
 }
+
+MoveCommand::MoveCommand(QVector<Shot *> movedShots, int prevscenepos, int currentscenepos, QUndoCommand *parent) : QUndoCommand(parent)
+{
+    foreach(Shot* current, movedShots){
+        movedShotOldPos.insert(current, current->previousxpos);
+        movedShotNewPos.insert(current, current->scenePos().x());
+    }
+    this->prevscenepos = prevscenepos;
+    this->currentscenepos = currentscenepos;
+}
+
+void MoveCommand::undo()
+{
+    QHash<Shot*, int>::const_iterator i = movedShotNewPos.constBegin();
+    while (i != movedShotNewPos.constEnd()) {
+
+         auto  sh =i.key();
+         sh->setXToFrame(i.value());
+         sh->setPreviousToCurrent();
+        i++;
+    }
+}
+
+void MoveCommand::redo()
+{
+    QHash<Shot*, int>::const_iterator i = movedShotOldPos.constBegin();
+    while (i != movedShotOldPos.constEnd()) {
+
+         auto  sh =i.key();
+         sh->setX(i.value());
+         sh->setPreviousToCurrent();
+        i++;
+    }
+}
+
+

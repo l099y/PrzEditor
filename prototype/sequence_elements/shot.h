@@ -12,7 +12,7 @@
 #include <filesystem/sequencedata.h>
 #include <QDataStream>
 
-enum class BoxState {REGULAR, STRETCH_LEFT, STRETCH_RIGHT, SWITCHPOS_MOVE, DISPLACE};
+enum class BoxState {REGULAR, DISPLACE};
 
 class Shot : public QObject, public QGraphicsRectItem
 {

@@ -2,10 +2,16 @@
 
 ## Plans pour la semaine à venir
 
-- finaliser les uc filesystem et insertion
-- commencer à implémenter le framework undo de Qt, et mon propre format de sauvegarde d'application.
+- implémenter les actions QUndo non présentes
+- implémenter la sauvegarde et le chargement de l'état de la ligne du temps
+- changer le comportement des mouvements de shots une fois que le shot inséré figure dans la zone appropriée.
 
 ## Résumé d'activité par semaine
+
+## semaine 9 (12 au 16 de 05/21)
+
+- finaliser les uc filesystem et insertion
+- commencer à implémenter le framework undo de Qt, et mon propre format de sauvegarde d'application.
 
 ### semaine 8(5 au 9 de 05/21) 
 

@@ -195,6 +195,7 @@ void MainWindow::bindUndoElements()
 {
     connect (timeline, SIGNAL(deleteSelectionSignal()), this, SLOT(deleteSelection()));
     connect (timeline, SIGNAL(createShot(SequenceData*, int , int , TimelineScene*, QVector<Shot*>)), this, SLOT(createShott(SequenceData*, int, int, TimelineScene*, QVector<Shot*>)));
+    connect (timeline, SIGNAL(moveShotss(QVector<Shot*>,int, int)), this, SLOT(moveShots(QVector<Shot*>, int, int)));
 }
 
 void MainWindow::changeEvent(QEvent *event)
@@ -375,4 +376,10 @@ void MainWindow::createShott(SequenceData *seq, int xpos, int length, TimelineSc
 {
     QUndoCommand *createCommand = new AddCommand(seq, xpos, length, timeline , movedShots);
     undoStack->push(createCommand);
+}
+
+void MainWindow::moveShots(QVector<Shot *> movedShots, int prevscenesize, int currentscenesize)
+{
+    QUndoCommand *moveCommand = new MoveCommand(movedShots, prevscenesize, currentscenesize);
+    undoStack->push(moveCommand);
 }

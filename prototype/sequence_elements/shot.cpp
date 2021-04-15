@@ -81,22 +81,8 @@ void Shot::hoverMoveEvent(QGraphicsSceneHoverEvent *e)
 
 void Shot::mousePressEvent(QGraphicsSceneMouseEvent *e)
 {
-    if(e->pos().x()>= 0 && e->pos().x()<=3)
-    {
-        emitter->leftxtndactivated();
-        mod = BoxState::STRETCH_LEFT;
-    }
-    else if(e->pos().x()>= boundingRect().width()-3 && e->pos().x()<= boundingRect().width()){
-        mod = BoxState::STRETCH_RIGHT;
-        emitter->rightxtndactivated();
-    }
     mousePosXonClick = e->pos().x();
     QGraphicsRectItem::mousePressEvent(e);
-    if (isSelected())
-    {
-        setBrush((QColor(255,200,0)));
-    }
-
 }
 
 void Shot::mouseMoveEvent(QGraphicsSceneMouseEvent *e)

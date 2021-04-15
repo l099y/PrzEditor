@@ -14,16 +14,16 @@ class TimelineScene : public QGraphicsScene
     Q_OBJECT
     public:
     bool isPastLimit = false;
+
     TimelineScene(SequenceRegister*,QGraphicsView*, QObject* parent = nullptr);
     ~TimelineScene();
+
     QGraphicsView* view;
     Ruler ruler;
     float previousSceneWidth;
+
     void resetBoxStates();
     void resetToPrevious();
-    void behaveOnSelectionLeftXtend();
-    void behaveOnSelectionRightXtend();
-    void behaveOnSelectionMove();
     void behaveOnSelectionSwitchPosMove();
     void behaveOnSelectionDisplace();
     void behaveOnSelectionInsertionDisplace();
@@ -40,11 +40,10 @@ public slots:
    void newRect();
    void debugItems();
    void clearItems();
-   void handleBoxResize();
+   void handleSelectionMove();
    void moveAllFrom(float from, float distance);
    void ExtendSceneWidth(float f);
    void allign();
-   void setmod2();
    void setdisp();
    void deleteSelection();
    void displaceSelection(int newPos);
@@ -58,6 +57,7 @@ signals:
    void scaleDown();
    void deleteSelectionSignal();
    void createShot(SequenceData* seq, int xpos, int length, TimelineScene* timeline, QVector<Shot*> movedShot);
+   void moveShotss(QVector<Shot*>, int, int);
 
 
 protected:

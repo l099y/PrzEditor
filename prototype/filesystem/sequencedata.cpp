@@ -9,7 +9,7 @@ SequenceData::SequenceData(QObject* parent): QObject(parent)
 
 SequenceData::~SequenceData()
 {
-
+    files.clear();
 }
 
 int SequenceData::sequencelength()
