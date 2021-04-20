@@ -380,6 +380,7 @@ void MainWindow::createShott(SequenceData *seq, int xpos, int length, TimelineSc
 
 void MainWindow::moveShots(QVector<Shot *> movedShots, int prevscenesize, int currentscenesize)
 {
+    qDebug()<<"reached moveshots in main";
     QUndoCommand *moveCommand = new MoveCommand(movedShots, prevscenesize, currentscenesize);
     undoStack->push(moveCommand);
 }

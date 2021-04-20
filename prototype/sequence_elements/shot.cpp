@@ -16,19 +16,22 @@ Shot::Shot(): QGraphicsRectItem()
     setAcceptHoverEvents(true);
     setFlag(QGraphicsItem :: ItemIsMovable);
     setFlag(QGraphicsItem :: ItemIsSelectable);
+
     connect(timer, SIGNAL(finished()), this, SLOT(setAnimatedFalse()));
+
+    animation->setItem(this);
+    animation->setTimeLine(timer);
 }
 
 Shot::~Shot()
 {
- delete(animation);
- delete(timer);
- delete(emitter);
+    delete(animation);
+    delete(timer);
+    delete(emitter);
 }
 
 void Shot::setXToFrame(float x)
 {
-
     setX(roundedTo10(x));
 }
 
@@ -64,17 +67,17 @@ void Shot::hoverLeaveEvent(QGraphicsSceneHoverEvent *e)
 
 void Shot::hoverMoveEvent(QGraphicsSceneHoverEvent *e)
 {
-//    if(e->pos().x()>= 0 && e->pos().x()<=3)
-//    {
-//        setCursor(Qt::SplitHCursor);
-//        //setMode extend to left
-//    }
-//    else if(e->pos().x()>= boundingRect().width()-3 && e->pos().x()<= boundingRect().width()){
-//        setCursor(Qt::SplitHCursor);
-//    }
-//    else{
-//        setCursor(Qt::ArrowCursor);
-//    }
+    //    if(e->pos().x()>= 0 && e->pos().x()<=3)
+    //    {
+    //        setCursor(Qt::SplitHCursor);
+    //        //setMode extend to left
+    //    }
+    //    else if(e->pos().x()>= boundingRect().width()-3 && e->pos().x()<= boundingRect().width()){
+    //        setCursor(Qt::SplitHCursor);
+    //    }
+    //    else{
+    //        setCursor(Qt::ArrowCursor);
+    //    }
 
 
 }
@@ -153,20 +156,15 @@ void Shot::setRegularColor()
 
 void Shot::animatedMove(float pos)
 {
-
-
-
     if(!animated){
-         qDebug()<<"create animation to "<<pos;
-    float prev = roundedTo10(scenePos().x());
-    float dist = pos-scenePos().x();
-    animated=true;
-    timer->setFrameRange(0, 15);
-    animation->setItem(this);
-    animation->setTimeLine(timer);
-    for (int i = 0; i < 15; ++i)
-    animation->setPosAt(i / 15.0, QPointF(prev+=(dist/15), 0));
-    timer->start();
+        qDebug()<<"create animation to "<<pos;
+        float prev = roundedTo10(scenePos().x());
+        float dist = pos-scenePos().x();
+        animated=true;
+        timer->setFrameRange(0, 15);
+        for (int i = 0; i < 15; ++i)
+            animation->setPosAt(i / 15.0, QPointF(prev+=(dist/15), 0));
+        timer->start();
     }
 }
 
@@ -185,11 +183,6 @@ int Shot::roundedTo10(float xf)
 
 void Shot::setAnimatedFalse()
 {
-    if (prevposresetrequested){
-        prevposresetrequested =false;
-        setPreviousToCurrent();
-        update();
-    }
     animated=false;
 }
 

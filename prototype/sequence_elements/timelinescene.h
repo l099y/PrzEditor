@@ -25,6 +25,9 @@ class TimelineScene : public QGraphicsScene
     void resetBoxStates();
     void resetToPrevious();
     void behaveOnSelectionSwitchPosMove();
+    void behaveOnSelectionSwitchPosMoveFinal();
+    void handleSelectionMoveFinal();
+    void handleSelectionMove();
     void behaveOnSelectionDisplace();
     void behaveOnSelectionInsertionDisplace();
     float rectXAndWBefore(Shot *rect);
@@ -40,7 +43,7 @@ public slots:
    void newRect();
    void debugItems();
    void clearItems();
-   void handleSelectionMove();
+
    void moveAllFrom(float from, float distance);
    void ExtendSceneWidth(float f);
    void allign();

@@ -32,7 +32,9 @@ TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObjec
 TimelineScene::~TimelineScene(){
 }
 
-void TimelineScene::handleSelectionMove(){ //this functions roots to real resizing functions on the selection mod
+//this functions roots to real resizing functions on the selection mod on mouse move
+
+void TimelineScene::handleSelectionMove(){
     if (!selectedItems().isEmpty()){
         Shot* rect= dynamic_cast<Shot*>(selectedItems().at(0));
         switch (rect->mod){
@@ -43,6 +45,24 @@ void TimelineScene::handleSelectionMove(){ //this functions roots to real resizi
             behaveOnSelectionDisplace();
         }
     }
+}
+
+// on mouse release, another treatment is nessessary to settle the proper positions ( sometime the animated move creates wrong evaluation
+
+void TimelineScene::handleSelectionMoveFinal()
+{
+    if (!selectedItems().isEmpty()){
+        Shot* rect= dynamic_cast<Shot*>(selectedItems().at(0));
+        switch (rect->mod){
+        case (BoxState :: REGULAR):
+            behaveOnSelectionSwitchPosMoveFinal();
+            break;
+        case (BoxState ::DISPLACE):
+            behaveOnSelectionDisplace();
+            break;
+        }
+    }
+
 }
 
 void TimelineScene::behaveOnSelectionSwitchPosMove()
@@ -109,6 +129,78 @@ void TimelineScene::behaveOnSelectionSwitchPosMove()
         }
     }
 }
+
+void TimelineScene::behaveOnSelectionSwitchPosMoveFinal()
+{
+    qDebug()<<"rechaed posemovefinal";
+    if (!selectedItems().isEmpty()){
+        Shot* selection= dynamic_cast<Shot*>(selectedItems().at(0));
+        selection->setX(selection->roundedTo10(selection->scenePos().x()<0?0:selection->scenePos().x()));
+        float sX = selection->scenePos().x();
+        float sW = selection->rect().width();
+        foreach (QGraphicsItem* current, items()){
+            Shot* rect= dynamic_cast<Shot*>(current);
+
+            if (rect && rect != selection)
+            {
+                rect->timer->stop();
+                rect->setAnimatedFalse();
+                rect->restore();
+                if (selection->wasLeftOf(rect)){
+
+                    if  (selection->rightSideIsInFirstHalfOf(rect))
+                    {
+
+                        selection->setXToFrame(rect->previousxpos-sW) ;
+                        if(rect->scenePos().x() != rect->previousxpos){
+                            rect->setXToFrame(rect->previousxpos);
+
+                        }
+                    }
+                    else if (selection->rightSideIsAfterSecondHalfOf(rect)){
+
+                        if(rect->scenePos().x() != rect->previousxpos-sW){
+                            rect->setXToFrame(rect->previousxpos-sW);
+
+                        }
+
+                        if (sW+sX<rect->previousboxwidth+rect->previousxpos)
+                            selection->setXToFrame(rect->previousboxwidth+rect->previousxpos-sW);
+                    }
+                    else
+                            rect->restore();
+                }
+                else
+                {
+                    if (selection->leftSideIsInSecondHalfOf(rect))
+                    {
+                        selection->setXToFrame(rect->previousboxwidth+rect->previousxpos);
+                        if(rect->scenePos().x() != rect->previousxpos){
+                            rect->setXToFrame(rect->previousxpos);
+
+                        }
+                    }
+
+                    else  if (selection->leftSideIsAfterFirstHalfOf(rect))
+                    {
+                        if(rect->scenePos().x() != rect->previousxpos+sW){
+                            rect->setXToFrame(rect->previousxpos+sW);
+
+                        }
+                        if (sX>rect->previousxpos)
+                            selection->setXToFrame(rect->previousxpos);
+                    }
+                    else
+                            rect->restore();
+                }
+            }
+        }
+        if (selection->previousxpos<selection->scenePos().x())
+        this->setSceneRect(0,0,previousSceneWidth+(selection->scenePos().x()-selection->previousxpos),100);
+    }
+}
+
+
 
 void TimelineScene::behaveOnSelectionDisplace()
 {
@@ -245,14 +337,16 @@ void TimelineScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
         Shot* selection= dynamic_cast<Shot*>(selectedItems().at(0));
         if (selection)
         {
-            handleSelectionMove();
-            resetBoxStates();
+            handleSelectionMoveFinal();
+            //resetBoxStates();
+            emit (moveShotss(getMovedShots(), previousSceneWidth, this->sceneRect().width()));
             QGraphicsScene :: mouseReleaseEvent(e);
             previousSceneWidth = this->width();
         }
 
     }
 }
+
 void TimelineScene::resetBoxStates(){
     foreach (QGraphicsItem* current, items()){
         Shot* rect= dynamic_cast<Shot*>(current);
@@ -355,11 +449,14 @@ void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
         qDebug()<<"should be created";
         QList<Shot*> param;
         auto print = getMovedShots();
+
         emit (createShot(dropRepresentation->seq, dropRepresentation->scenePos().x(), dropRepresentation->rect().width(), this, print));
+        dropRepresentation =  nullptr;
     }
     else
     {
         removeItem(dropRepresentation);
+        dropRepresentation =  nullptr;
     }
     QGraphicsScene :: dropEvent(e);
 }

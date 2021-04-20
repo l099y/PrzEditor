@@ -89,11 +89,12 @@ void AddCommand::redo()
 MoveCommand::MoveCommand(QVector<Shot *> movedShots, int prevscenepos, int currentscenepos, QUndoCommand *parent) : QUndoCommand(parent)
 {
     foreach(Shot* current, movedShots){
-        movedShotOldPos.insert(current, current->previousxpos);
-        movedShotNewPos.insert(current, current->scenePos().x());
+        movedShotOldPos.insert(current, current->scenePos().x());
+        movedShotNewPos.insert(current, current->previousxpos);
     }
     this->prevscenepos = prevscenepos;
     this->currentscenepos = currentscenepos;
+    setText(QObject::tr("moved shots"));
 }
 
 void MoveCommand::undo()
