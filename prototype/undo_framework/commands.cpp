@@ -86,15 +86,16 @@ void AddCommand::redo()
     timeline->update();
 }
 
-MoveCommand::MoveCommand(QVector<Shot *> movedShots, int prevscenepos, int currentscenepos, QUndoCommand *parent) : QUndoCommand(parent)
+MoveCommand::MoveCommand(TimelineScene* timeline, QVector<Shot *> movedShots, int prevscenepos, int currentscenepos, QUndoCommand *parent) : QUndoCommand(parent)
 {
     foreach(Shot* current, movedShots){
         movedShotOldPos.insert(current, current->scenePos().x());
         movedShotNewPos.insert(current, current->previousxpos);
     }
-    this->prevscenepos = prevscenepos;
-    this->currentscenepos = currentscenepos;
-    setText(QObject::tr("moved shots"));
+    this->timeline = timeline;
+    this->prevscenesize = prevscenepos;
+    this->currentscenesize = currentscenepos;
+    setText(QObject::tr("shots movements"));
 }
 
 void MoveCommand::undo()
@@ -107,6 +108,7 @@ void MoveCommand::undo()
          sh->setPreviousToCurrent();
         i++;
     }
+    timeline->setSceneRect(0,0,prevscenesize,100);
 }
 
 void MoveCommand::redo()
@@ -119,6 +121,36 @@ void MoveCommand::redo()
          sh->setPreviousToCurrent();
         i++;
     }
+    timeline->setSceneRect(0,0,currentscenesize,100);
 }
 
 
+
+ClearCommand::ClearCommand(TimelineScene* timeline, QVector<Shot *> removedshots, int prevtimelinewidth, QUndoCommand *parent) : QUndoCommand(parent)
+{
+    this->timeline = timeline;
+    this->removedShots = removedshots;
+    this->prevtimelinesize = prevtimelinewidth;
+    setText(QObject::tr("clear command"));
+}
+
+void ClearCommand::undo()
+{
+    foreach (Shot* current, removedShots){
+        timeline->addItem(current);
+    }
+    timeline->setSceneRect(0,0,prevtimelinesize,100);
+    timeline->ruler.setSize(prevtimelinesize*10);
+}
+
+
+void ClearCommand::redo()
+{
+    foreach (Shot* current, removedShots)
+        {
+        timeline->removeItem(current);
+    }
+    timeline->setSceneRect(0,0, 200000, 300);
+    timeline->ruler.setSize(2000000);
+    timeline->newRect();
+}

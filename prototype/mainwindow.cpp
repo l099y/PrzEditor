@@ -195,7 +195,8 @@ void MainWindow::bindUndoElements()
 {
     connect (timeline, SIGNAL(deleteSelectionSignal()), this, SLOT(deleteSelection()));
     connect (timeline, SIGNAL(createShot(SequenceData*, int , int , TimelineScene*, QVector<Shot*>)), this, SLOT(createShott(SequenceData*, int, int, TimelineScene*, QVector<Shot*>)));
-    connect (timeline, SIGNAL(moveShotss(QVector<Shot*>,int, int)), this, SLOT(moveShots(QVector<Shot*>, int, int)));
+    connect (timeline, SIGNAL(moveShotss(TimelineScene*, QVector<Shot*>,int, int)), this, SLOT(moveShots(TimelineScene*, QVector<Shot*>, int, int)));
+    connect (timeline, SIGNAL(clearTimeline(TimelineScene*, QVector<Shot*>, int)), this, SLOT(clearTimelinee(TimelineScene*, QVector<Shot*>, int)));
 }
 
 void MainWindow::changeEvent(QEvent *event)
@@ -378,9 +379,15 @@ void MainWindow::createShott(SequenceData *seq, int xpos, int length, TimelineSc
     undoStack->push(createCommand);
 }
 
-void MainWindow::moveShots(QVector<Shot *> movedShots, int prevscenesize, int currentscenesize)
+void MainWindow::moveShots(TimelineScene* timeline,QVector<Shot *> movedShots, int prevscenesize, int currentscenesize)
 {
     qDebug()<<"reached moveshots in main";
-    QUndoCommand *moveCommand = new MoveCommand(movedShots, prevscenesize, currentscenesize);
+    QUndoCommand *moveCommand = new MoveCommand(timeline, movedShots, prevscenesize, currentscenesize);
     undoStack->push(moveCommand);
+}
+
+void MainWindow::clearTimelinee(TimelineScene *timeline, QVector<Shot *> removedshots, int previtimelinesize)
+{
+    QUndoCommand *clear = new ClearCommand(timeline, removedshots, previtimelinesize);
+    undoStack->push(clear);
 }

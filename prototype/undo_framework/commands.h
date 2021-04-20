@@ -45,16 +45,28 @@ private:
 class MoveCommand : public QUndoCommand
 {
 public:
-    MoveCommand(QVector<Shot*> movedShots, int previoustimelineWidth, int timelineWidth, QUndoCommand *parent = nullptr);
+    MoveCommand(TimelineScene* timeline, QVector<Shot*> movedShots, int previoustimelineWidth, int timelineWidth, QUndoCommand *parent = nullptr);
 
     void undo() override;
     void redo() override;
 
 private:
+    TimelineScene* timeline;
     QHash<Shot*, int> movedShotOldPos;
     QHash<Shot*, int> movedShotNewPos;
-    int prevscenepos;
-    int currentscenepos;
+    int prevscenesize;
+    int currentscenesize;
 };
+class ClearCommand : public QUndoCommand
+{
+public:
+    ClearCommand(TimelineScene*, QVector<Shot*> removedshots, int prevtimelinesize, QUndoCommand *parent= nullptr);
 
+    void undo() override;
+    void redo() override;
+private:
+    TimelineScene* timeline;
+    QVector<Shot*> removedShots;
+    int prevtimelinesize;
+};
 #endif // COMMANDS_H

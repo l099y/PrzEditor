@@ -60,7 +60,8 @@ signals:
    void scaleDown();
    void deleteSelectionSignal();
    void createShot(SequenceData* seq, int xpos, int length, TimelineScene* timeline, QVector<Shot*> movedShot);
-   void moveShotss(QVector<Shot*>, int, int);
+   void moveShotss(TimelineScene*, QVector<Shot*>, int, int);
+   void clearTimeline(TimelineScene*, QVector<Shot*>, int);
 
 
 protected:

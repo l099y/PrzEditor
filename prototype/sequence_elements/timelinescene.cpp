@@ -14,6 +14,8 @@
 #include <QTreeView>
 #include <filesystem/sequencedata.h>
 #include <sequence_elements/ruler.h>
+#include <QTime>
+#include <QCoreApplication>
 
 TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObject* parent): QGraphicsScene(parent), ruler(0)
 {
@@ -304,20 +306,18 @@ void TimelineScene :: debugItems(){
     allign();
 }
 void TimelineScene :: clearItems(){
-    //    foreach (QGraphicsItem* current, items()){
-    //        delete current;
-    //    }
-    if (items().contains(&ruler))
-        removeItem(&ruler);
-    foreach (QGraphicsItem *current, items()){
-        this->removeItem(current);
-        delete(current);
-    }
-    setSceneRect(0,0, 200000, 300);
-    ruler.setSize(2000000);
-    addItem(&ruler);
-    newRect();
+    QVector<Shot*> ret;
+    foreach (QGraphicsItem* current, items()){
+             Shot* shot= dynamic_cast<Shot*>(current);
+             {
+                 if (shot){
+                     qDebug()<<"shot to be removedy";
+                     ret.append(shot);
+                 }
+             }
+        }
 
+    emit (clearTimeline(this, ret, sceneRect().width()));
 }
 
 void TimelineScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
@@ -339,7 +339,7 @@ void TimelineScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
         {
             handleSelectionMoveFinal();
             //resetBoxStates();
-            emit (moveShotss(getMovedShots(), previousSceneWidth, this->sceneRect().width()));
+            emit (moveShotss(this,  getMovedShots(), previousSceneWidth, this->sceneRect().width()));
             QGraphicsScene :: mouseReleaseEvent(e);
             previousSceneWidth = this->width();
         }
@@ -527,7 +527,10 @@ void TimelineScene::allign()
         rec->animatedMove(widthsum);
         widthsum+=rec->rect().width();
     }
-    resetBoxStates();
+    QTime dieTime= QTime::currentTime().addMSecs(250);
+       while (QTime::currentTime() < dieTime)
+           QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    emit (moveShotss(this, getMovedShots(), previousSceneWidth, previousSceneWidth));
 }
 
 
@@ -549,17 +552,6 @@ void TimelineScene::deleteSelection()
 {
     qDebug()<<items();
     emit (deleteSelectionSignal());
-//    if(!selectedItems().isEmpty()){
-//        if (!selectedItems().isEmpty())
-//        {
-//            foreach (QGraphicsItem *current, selectedItems()){
-
-
-////                this->removeItem(current);
-////                delete(current);
-//            }
-//        }
-//    }
 }
 
 void TimelineScene::displaceSelection(int framePos)
