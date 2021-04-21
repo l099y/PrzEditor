@@ -68,6 +68,14 @@ inline bool leftSideIsInSecondHalfOf (Shot* OtherCube)
         return  scenePos().x()>= OtherCube->previousxpos+(OtherCube->previousboxwidth/2) &&
                 scenePos().x()< OtherCube->previousxpos+OtherCube->previousboxwidth;
     }
+inline bool leftSideIsInFirstHalfOf (Shot* OtherCube)
+    {
+        return  scenePos().x()>= OtherCube->previousxpos &&
+                scenePos().x()< OtherCube->previousxpos+(OtherCube->previousboxwidth/2);
+    }
+inline int posOfMidd(){
+    return previousxpos+(previousboxwidth/2);
+}
 
 public slots:
     void setAnimatedFalse();

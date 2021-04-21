@@ -22,6 +22,8 @@ class TimelineScene : public QGraphicsScene
     Ruler ruler;
     float previousSceneWidth;
 
+    QHash<Shot*, int> imageOfPositions;
+
     void resetBoxStates();
     void resetToPrevious();
     void behaveOnSelectionSwitchPosMove();
@@ -30,9 +32,12 @@ class TimelineScene : public QGraphicsScene
     void handleSelectionMove();
     void behaveOnSelectionDisplace();
     void behaveOnSelectionInsertionDisplace();
+    void placeInsertedShotInTimeline();
+    void resetShotDisplacedByInsertion();
+    void resetShotDisplacedFinal();
+    void generateImageOfPosition();
     float rectXAndWBefore(Shot *rect);
     QVector<Shot*> getMovedShots();
-    float positionOfInsertedShot(QGraphicsSceneDragDropEvent* e);
     Shot* dropRepresentation;
     SequenceRegister* przreg;
 

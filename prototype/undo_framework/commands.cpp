@@ -56,6 +56,7 @@ AddCommand::~AddCommand()
 void AddCommand::undo()
 {
     timeline->removeItem(shot);
+    timeline->przreg->usedSequences.remove(seq->name);
     timeline->update();
     QHash<Shot*, int>::const_iterator i = movedShotOldPos.constBegin();
     while (i != movedShotOldPos.constEnd()) {
@@ -82,6 +83,7 @@ void AddCommand::redo()
     shot->setXToFrame(xpos);
     shot->setRect(0, 0, length, 100);
     shot->setPreviousToCurrent();
+    shot->setSelected(true);
     timeline->clearSelection();
     timeline->update();
 }
