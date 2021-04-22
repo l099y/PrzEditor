@@ -1,14 +1,20 @@
 # NAVIGATIONSHEET
 
-## Plans pour la semaine à venir
+## plan pour la semaine à venir
+
+- terminer la sauvegarde de l'état et implémenter le chargement
+- changer le comportement du mouvements des shots, l'évaluation présente qui est en place depuis plus d'un mois n'est en fait pas le comportement attendu: le mouvement des shots doit être évaluer sur la position de la souris et non sur les extrémités des shots
+- implémenter les QUndo appropriés en accord avec la sauvegarde et le chargement. 
+
+## Résumé d'activité par semaine
+
+### Semaine 10 (19 - 23 de 05/21)
 
 - implémenter les actions QUndo non présentes
 - implémenter la sauvegarde et le chargement de l'état de la ligne du temps
 - changer le comportement des mouvements de shots une fois que le shot inséré figure dans la zone appropriée.
 
-## Résumé d'activité par semaine
-
-## semaine 9 (12 au 16 de 05/21)
+### semaine 9 (12 au 16 de 05/21)
 
 - finaliser les uc filesystem et insertion
 - commencer à implémenter le framework undo de Qt, et mon propre format de sauvegarde d'application.
