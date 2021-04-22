@@ -9,7 +9,7 @@ SequenceData::SequenceData(QObject* parent): QObject(parent)
 
 SequenceData::~SequenceData()
 {
-    files.clear();
+
 }
 
 int SequenceData::sequencelength()
@@ -19,10 +19,18 @@ int SequenceData::sequencelength()
 
 bool SequenceData::CheckIntegrity()
 {
-    foreach (QString currentPath, files){
-        QFile file(currentPath);
-                if (!file.open(QIODevice::ReadOnly))
-                    return false;
-    }
     return true;
+}
+
+QJsonObject SequenceData::generateJson()
+{
+    QJsonObject ret;
+
+    ret.insert("sequencefilename", sequencefilename);
+    ret.insert("path", path);
+    ret.insert("name", name);
+    ret.insert("startIdx", startIdx);
+    ret.insert("endIdx", endIdx);
+
+    return ret;
 }

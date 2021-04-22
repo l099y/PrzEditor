@@ -8,6 +8,7 @@
 #include "shot.h"
 #include "ruler.h"
 #include "filesystem/sequenceregister.h"
+#include <QJsonObject>
 
 class TimelineScene : public QGraphicsScene
 {
@@ -23,6 +24,8 @@ class TimelineScene : public QGraphicsScene
     float previousSceneWidth;
 
     QHash<Shot*, int> imageOfPositions;
+
+    QJsonObject generateJson();
 
     void resetBoxStates();
     void resetToPrevious();
@@ -64,7 +67,7 @@ signals:
    void scaleUp();
    void scaleDown();
    void deleteSelectionSignal();
-   void createShot(SequenceData* seq, int xpos, int length, TimelineScene* timeline, QVector<Shot*> movedShot);
+   void createShot(QList<SequenceData*> seq, int xpos, int length, TimelineScene* timeline, QVector<Shot*> movedShot);
    void moveShotss(TimelineScene*, QVector<Shot*>, int, int);
    void clearTimeline(TimelineScene*, QVector<Shot*>, int);
 

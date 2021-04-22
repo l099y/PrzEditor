@@ -11,6 +11,8 @@
 #include <QGraphicsItemAnimation>
 #include <filesystem/sequencedata.h>
 #include <QDataStream>
+#include <QHash>
+#include <QJsonArray>
 
 enum class BoxState {REGULAR, DISPLACE};
 
@@ -27,7 +29,7 @@ public:
     bool modified = false;
     bool animated = false;
     bool prevposresetrequested = false;
-    SequenceData* seq;
+    QList <SequenceData*> seqs;
     float previousxpos;
     float previousboxwidth;
     float mousePosXonClick;
@@ -38,10 +40,10 @@ public:
     void restore();
     void strechLeft(QGraphicsSceneMouseEvent *e);
     void strechRight(QGraphicsSceneMouseEvent *e);
-    void setModifyingcColorSignal();
-    void setRegularColor();
     void animatedMove(float pos);
     void setSize(int realsize);
+
+    QJsonObject generateJson();
 
 inline int roundedTo10(float x);
 
@@ -85,10 +87,7 @@ public slots:
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e);
-    virtual void hoverEnterEvent(QGraphicsSceneHoverEvent *e);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
-    virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent *e);
-    virtual void hoverMoveEvent(QGraphicsSceneHoverEvent *e);
     virtual void mousePressEvent (QGraphicsSceneMouseEvent *e);
     virtual void mouseMoveEvent (QGraphicsSceneMouseEvent *e);
 };

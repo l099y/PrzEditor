@@ -28,7 +28,7 @@ void DeleteCommand::redo()
     timeline->removeItem(shot);
 }
 
-AddCommand::AddCommand(SequenceData* seq, int xpos, int length, TimelineScene *scene, QVector<Shot*> movedShots ,QUndoCommand *parent)
+AddCommand::AddCommand(QList<SequenceData*> seq, int xpos, int length, TimelineScene *scene, QVector<Shot*> movedShots ,QUndoCommand *parent)
     : QUndoCommand(parent)
 {
     foreach(Shot* current, movedShots){
@@ -37,14 +37,14 @@ AddCommand::AddCommand(SequenceData* seq, int xpos, int length, TimelineScene *s
     }
     timeline = scene;
     shot = new Shot();
-    this->seq = seq;
+    this->seqs = seq;
     this->xpos = xpos;
     this->length = length;
 
 
     scene->update();
     setText(QObject::tr("Add %1")
-        .arg(seq->name));
+        .arg(seqs[0]->name));
 }
 
 AddCommand::~AddCommand()
@@ -56,7 +56,6 @@ AddCommand::~AddCommand()
 void AddCommand::undo()
 {
     timeline->removeItem(shot);
-    timeline->przreg->usedSequences.remove(seq->name);
     timeline->update();
     QHash<Shot*, int>::const_iterator i = movedShotOldPos.constBegin();
     while (i != movedShotOldPos.constEnd()) {
@@ -79,12 +78,14 @@ void AddCommand::redo()
         i++;
     }
     timeline->addItem(shot);
-    timeline->przreg->usedSequences.insert(seq->name, seq);
+    timeline->przreg->usedSequences.insert(seqs[0]->name, seqs[0]);
     shot->setXToFrame(xpos);
     shot->setRect(0, 0, length, 100);
     shot->setPreviousToCurrent();
-    shot->setSelected(true);
+
+    shot->seqs.append(seqs[0]);
     timeline->clearSelection();
+    shot->setSelected(true);
     timeline->update();
 }
 

@@ -2,6 +2,7 @@
 #define SEQUENCEDATA_H
 
 #include <QObject>
+#include <QJsonObject>
 
 class SequenceData : public QObject
 {
@@ -9,7 +10,7 @@ class SequenceData : public QObject
 public:
     SequenceData(QObject* parent);
     ~SequenceData();
-    QStringList files;
+    QString sequencefilename;
     QString path;
     QString name;
     int startIdx;
@@ -18,6 +19,7 @@ public:
 
     int sequencelength();
     bool CheckIntegrity();
-};
 
+    QJsonObject generateJson();
+};
 #endif // SEQUENCEDATA_H

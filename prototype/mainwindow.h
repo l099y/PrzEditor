@@ -12,6 +12,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QLineEdit>
+#include <filesystem/projectloader.h>
 
 // file Explorer and Sequences displayer libs
 
@@ -110,6 +111,8 @@ public:
     QAction *undoAction = nullptr;
     QAction *redoAction = nullptr;
     QAction *exitAction = nullptr;
+    QAction *saveAction = nullptr;
+    QAction *loadAction = nullptr;
 
 
     // Undo framework elements
@@ -117,6 +120,9 @@ public:
     QUndoStack *undoStack = nullptr;
     QUndoView *undoView = nullptr;
 
+    // load/save Dialog
+
+    ProjectLoader* saveDialog;
 
     void createActions();
     void createMenus();
@@ -135,10 +141,18 @@ public slots:
     void clearSequencesAndCollapse(QModelIndex);
     void collapseChildrens(QModelIndex);
     void collapseAllAndExpand(QModelIndex);
+
+    // QUndo functions allowing the stack of action to operate
+
     void deleteSelection();
-    void createShott(SequenceData* seq, int xpos, int length, TimelineScene* timeline , QVector<Shot*> movedShots);
-    void moveShots(TimelineScene*, QVector<Shot*> movedShots, int prevscenewidth, int currentscenewidth);
-    void clearTimelinee(TimelineScene*, QVector<Shot*>, int);
+    void createdShot(QList<SequenceData*> seq, int xpos, int length, TimelineScene* timeline , QVector<Shot*> movedShots);
+    void movedShots(TimelineScene*, QVector<Shot*> movedShots, int prevscenewidth, int currentscenewidth);
+    void clearedTimeline(TimelineScene*, QVector<Shot*>, int);
+
+    //Saving and Loading projet related slots
+
+    void saveActionTriggered();
+    void loadActionTriggered();
 
 private:
     void initButtons();

@@ -6,12 +6,17 @@
 #include <QHeaderView>
 #include "undo_framework/commands.h"
 #include <sequence_elements/timelinescene.h>
+#include <QJsonObject>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
 
+    QJsonObject a;
+    a.insert("key1", "value1");
+    a.insert("key2", "value2");
+    qDebug()<<a;
     this->move(0,0);
     ui->setupUi(this);
     setCentralWidget(widget);
@@ -168,6 +173,10 @@ void MainWindow::createActions()
     redoAction = undoStack->createRedoAction(this, tr("&Redo"));
     redoAction->setShortcuts(QKeySequence::Redo);
 
+    saveAction = new QAction (tr("&Save"), this);
+    connect (saveAction, SIGNAL(triggered(bool)), this, SLOT(saveActionTriggered()));
+    loadAction = new QAction (tr("&Load"), this);
+    connect (loadAction, SIGNAL(triggered(bool)), this, SLOT(loadActionTriggered()));
     exitAction = new QAction(tr("E&xit"), this);
     exitAction->setShortcuts(QKeySequence::Quit);
     connect(exitAction, &QAction::triggered, this, &QWidget::close);
@@ -176,6 +185,8 @@ void MainWindow::createActions()
 void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(saveAction);
+    fileMenu->addAction(loadAction);
     fileMenu->addAction(exitAction);
 
     editMenu = menuBar()->addMenu(tr("&Edit"));
@@ -194,9 +205,9 @@ void MainWindow::createUndoView()
 void MainWindow::bindUndoElements()
 {
     connect (timeline, SIGNAL(deleteSelectionSignal()), this, SLOT(deleteSelection()));
-    connect (timeline, SIGNAL(createShot(SequenceData*, int , int , TimelineScene*, QVector<Shot*>)), this, SLOT(createShott(SequenceData*, int, int, TimelineScene*, QVector<Shot*>)));
-    connect (timeline, SIGNAL(moveShotss(TimelineScene*, QVector<Shot*>,int, int)), this, SLOT(moveShots(TimelineScene*, QVector<Shot*>, int, int)));
-    connect (timeline, SIGNAL(clearTimeline(TimelineScene*, QVector<Shot*>, int)), this, SLOT(clearTimelinee(TimelineScene*, QVector<Shot*>, int)));
+    connect (timeline, SIGNAL(createShot(QList<SequenceData*>, int , int , TimelineScene*, QVector<Shot*>)), this, SLOT(createdShot(QList<SequenceData*>, int, int, TimelineScene*, QVector<Shot*>)));
+    connect (timeline, SIGNAL(moveShotss(TimelineScene*, QVector<Shot*>,int, int)), this, SLOT(movedShots(TimelineScene*, QVector<Shot*>, int, int)));
+    connect (timeline, SIGNAL(clearTimeline(TimelineScene*, QVector<Shot*>, int)), this, SLOT(clearedTimeline(TimelineScene*, QVector<Shot*>, int)));
 }
 
 void MainWindow::changeEvent(QEvent *event)
@@ -373,21 +384,35 @@ void MainWindow::deleteSelection()
     undoStack->push(deleteCommand);
 }
 
-void MainWindow::createShott(SequenceData *seq, int xpos, int length, TimelineScene *timeline , QVector<Shot*> movedShots)
+void MainWindow::createdShot(QList<SequenceData *> seq, int xpos, int length, TimelineScene *timeline , QVector<Shot*> movedShots)
 {
     QUndoCommand *createCommand = new AddCommand(seq, xpos, length, timeline , movedShots);
     undoStack->push(createCommand);
 }
 
-void MainWindow::moveShots(TimelineScene* timeline,QVector<Shot *> movedShots, int prevscenesize, int currentscenesize)
+void MainWindow::movedShots(TimelineScene* timeline,QVector<Shot *> movedShots, int prevscenesize, int currentscenesize)
 {
     qDebug()<<"reached moveshots in main";
     QUndoCommand *moveCommand = new MoveCommand(timeline, movedShots, prevscenesize, currentscenesize);
     undoStack->push(moveCommand);
 }
 
-void MainWindow::clearTimelinee(TimelineScene *timeline, QVector<Shot *> removedshots, int previtimelinesize)
+void MainWindow::clearedTimeline(TimelineScene *timeline, QVector<Shot *> removedshots, int previtimelinesize)
 {
     QUndoCommand *clear = new ClearCommand(timeline, removedshots, previtimelinesize);
     undoStack->push(clear);
+}
+
+void MainWindow::saveActionTriggered()
+{
+    saveDialog = new ProjectLoader(this);
+    saveDialog->setModal(true);
+    saveDialog->exec();
+
+    qDebug()<<"saveAction triggered";
+}
+
+void MainWindow::loadActionTriggered()
+{
+    qDebug()<<"loadAction triggered";
 }

@@ -24,10 +24,10 @@ QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir) // th
 
         if (newSeq){
             temp = new SequenceData(this);
+            temp->sequencefilename = current.name;
             temp->name = current.name;
             temp->startIdx = current.idx;
             temp->path = dir->path();
-            temp->files.append(dir->path().append("/").append(paths[i]));
             sequenceCurrentIdx = current.idx;
             newSeq = false;
         }
@@ -40,7 +40,6 @@ QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir) // th
                 newSeq = true;
             }
             else{
-                temp->files.append(dir->path().append("/").append(paths[i]));
                 sequenceCurrentIdx = current.idx;
             }
         }

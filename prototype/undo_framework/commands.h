@@ -25,7 +25,7 @@ private:
 class AddCommand : public QUndoCommand
 {
 public:
-    AddCommand(SequenceData* seq, int xpos, int length, TimelineScene* timeline, QVector<Shot*> movedShots,
+    AddCommand(QList<SequenceData*> seq, int xpos, int length, TimelineScene* timeline, QVector<Shot*> movedShots,
                QUndoCommand *parent = nullptr);
     ~AddCommand();
 
@@ -36,7 +36,7 @@ private:
     Shot *shot;
     QHash<Shot*, int> movedShotOldPos;
     QHash<Shot*, int> movedShotNewPos;
-    SequenceData* seq;
+    QList<SequenceData*> seqs;
     TimelineScene *timeline;
     int xpos;
     int length;

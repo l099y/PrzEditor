@@ -5,14 +5,19 @@
 #include <QGraphicsItemAnimation>
 #include <QObject>
 #include <QDataStream>
+#include <QRandomGenerator>
+#include <chrono>
+#include <ctime>
 
 
 Shot::Shot(): QGraphicsRectItem()
 {
+    QRandomGenerator rdm(std::time(0));
     QPen pen (Qt::white);
-    QBrush brush (QColor(200,240,200));
+    QColor a;
+    a.setRgb(rdm.bounded(0,74)+180,rdm.bounded(0,74)+180,150);
     setPen(pen);
-    setBrush(brush);
+    setBrush(a);
     setAcceptHoverEvents(true);
     setFlag(QGraphicsItem :: ItemIsMovable);
     setFlag(QGraphicsItem :: ItemIsSelectable);
@@ -40,13 +45,6 @@ void Shot::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e)
     QGraphicsRectItem::mouseDoubleClickEvent(e);
 }
 
-void Shot::hoverEnterEvent(QGraphicsSceneHoverEvent *e)
-{
-    setBrush(QColor(180,200,240));
-    update();
-    QGraphicsRectItem::hoverEnterEvent(e);
-}
-
 void Shot::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
 {
     QGraphicsItem :: mouseReleaseEvent(e);
@@ -55,31 +53,6 @@ void Shot::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
         setPos(scenePos().x(), 0);
     }
     setPreviousToCurrent();
-}
-
-void Shot::hoverLeaveEvent(QGraphicsSceneHoverEvent *e)
-{
-    if (!isSelected())
-        setRegularColor();
-    update();
-    QGraphicsRectItem::hoverLeaveEvent(e);
-}
-
-void Shot::hoverMoveEvent(QGraphicsSceneHoverEvent *e)
-{
-    //    if(e->pos().x()>= 0 && e->pos().x()<=3)
-    //    {
-    //        setCursor(Qt::SplitHCursor);
-    //        //setMode extend to left
-    //    }
-    //    else if(e->pos().x()>= boundingRect().width()-3 && e->pos().x()<= boundingRect().width()){
-    //        setCursor(Qt::SplitHCursor);
-    //    }
-    //    else{
-    //        setCursor(Qt::ArrowCursor);
-    //    }
-
-
 }
 
 void Shot::mousePressEvent(QGraphicsSceneMouseEvent *e)
@@ -100,7 +73,6 @@ void Shot::setPreviousToCurrent(){
 
 void Shot::restore()
 {
-    setRegularColor();
     setX(previousxpos);
     setRect(0,0,previousboxwidth, 100);
     setVisible(true);
@@ -140,20 +112,6 @@ void Shot::strechRight(QGraphicsSceneMouseEvent *e)
     }
 }
 
-void Shot::setModifyingcColorSignal()
-{
-    QColor cyan30 = (Qt::cyan);
-    cyan30.setAlpha(60);
-    QBrush brush (cyan30);
-    setBrush(brush);
-}
-
-void Shot::setRegularColor()
-{
-    QBrush brush(QColor(200,240,200));
-    setBrush(brush);
-}
-
 void Shot::animatedMove(float pos)
 {
     if(!animated){
@@ -173,6 +131,27 @@ void Shot::setSize(int realsize)
     setRect(0,0,realsize, 100);
 }
 
+QJsonObject Shot::generateJson()
+{
+    QJsonArray array;
+    foreach (SequenceData* current, seqs){
+        SequenceData* seq = dynamic_cast<SequenceData*>(current);
+        if (seq)
+        {
+
+          array.push_back(seq->generateJson());
+          qDebug()<<seq->name<<" in generatedjson in shot";
+        }
+    }
+
+    QJsonObject ret;
+
+    ret.insert("x", roundedTo10(previousxpos));
+    ret.insert("width", roundedTo10(previousxpos));
+    ret.insert("sequences", array);
+    return ret;
+}
+
 int Shot::roundedTo10(float xf)
 {
     int x = (int)xf;
@@ -190,15 +169,15 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 {
     if (isSelected()){
         setZValue(1);
+        painter->setPen(QColor(Qt::yellow));
+        painter->setBrush(QColor(100,220,255));
 
-        painter->setBrush(QColor(100,255,200));
     }
     else{
         setZValue(-1);
-        painter->setBrush(QColor(255,200,100));
+        painter->setBrush(this->brush());
+        painter->setPen(this->pen());
     }
-
-    painter->setPen(this->pen());
     painter->drawRoundedRect(rect(),5,5);
 }
 

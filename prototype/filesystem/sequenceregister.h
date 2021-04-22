@@ -22,6 +22,7 @@ public:
     QHash<QString, SequenceData*> usedSequences;
     QList<SequenceData*> GenerateSequencesFromDir(QDir* dir);
     inline fileInf getReleventInfo(QString* path);
+
     void printStoredSequences();
     void clearSequencesInDir();
 };

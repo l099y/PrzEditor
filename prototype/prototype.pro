@@ -11,6 +11,7 @@ CONFIG += c++11
 
 SOURCES += \
     filesystem/extendedqfilesystemmodel.cpp \
+    filesystem/projectloader.cpp \
     filesystem/sequencedata.cpp \
     filesystem/sequenceregister.cpp \
     sequence_elements\shot.cpp \
@@ -23,6 +24,7 @@ SOURCES += \
 
 HEADERS += \
     filesystem/extendedqfilesystemmodel.h \
+    filesystem/projectloader.h \
     filesystem/sequencedata.h \
     filesystem/sequenceregister.h \
     sequence_elements\shot.h \

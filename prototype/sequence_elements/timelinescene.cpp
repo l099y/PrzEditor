@@ -17,6 +17,7 @@
 #include <QTime>
 #include <QCoreApplication>
 #include <QHash>
+#include <QJsonArray>
 
 TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObject* parent): QGraphicsScene(parent), ruler(0)
 {
@@ -33,6 +34,23 @@ TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObjec
 }
 
 TimelineScene::~TimelineScene(){
+}
+
+QJsonObject TimelineScene::generateJson()
+{
+    QJsonArray array;
+    foreach (QGraphicsItem* current, items()){
+        Shot* sh = dynamic_cast<Shot*>(current);
+        if (sh)
+        {
+          array.push_back(sh->generateJson());
+        }
+    }
+
+    QJsonObject ret;
+    ret.insert("shots", array);
+    ret.insert("size", sceneRect().width());
+    return ret;
 }
 
 //this functions roots to real resizing functions on the selection mod on mouse move
@@ -285,6 +303,7 @@ void TimelineScene::placeInsertedShotInTimeline()
                 }
             }
             dropRepresentation->setXToFrame(maxbeforeInsertMiddle);
+
         }
         else if (dropRepresentation->previousxpos+dropRepresentation->previousboxwidth>minafterInsertMiddle){
             int decalage = minafterInsertMiddle-(dropRepresentation->previousboxwidth+dropRepresentation->previousxpos);
@@ -470,7 +489,8 @@ void TimelineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *e)
             dropRepresentation->setSelected(true);
             dropRepresentation->setBrush(QColor(100,255,200));
             dropRepresentation->setPreviousToCurrent();
-            dropRepresentation->seq= current;
+            dropRepresentation->seqs.append( current );
+            qDebug()<<current->name << "inserted in dragenter";
             addItem(dropRepresentation);
         }
     }
@@ -532,7 +552,7 @@ void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
         resetShotDisplacedFinal();
         auto print = getMovedShots();
         resetBoxStates();
-        emit (createShot(dropRepresentation->seq, dropRepresentation->scenePos().x(), dropRepresentation->rect().width(), this, print));
+        emit (createShot(dropRepresentation->seqs, dropRepresentation->scenePos().x(), dropRepresentation->rect().width(), this, print));
         dropRepresentation =  nullptr;
     }
     else
@@ -666,14 +686,21 @@ void TimelineScene::setSingleSelectionToLast()
 {
     if (selectedItems().length()>1)
     {
-        int i = 0;
         foreach (QGraphicsItem* current, selectedItems()){
-            if (i!= selectedItems().length()-1)
+            if (current != selectedItems()[0])
                 current->setSelected(false);
             current->setY(0);
         }
     }
+    foreach (QGraphicsItem* current , items())
+    {
+        Shot* sh = dynamic_cast<Shot*>(current);
+        if (sh)
+            sh->setY(0);
+    }
+
 }
 void TimelineScene :: newRect(){
     ExtendSceneWidth(0);
+    qDebug()<<generateJson();
 }
