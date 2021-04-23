@@ -40,6 +40,7 @@ AddCommand::AddCommand(QList<SequenceData*> seq, int xpos, int length, TimelineS
     this->seqs = seq;
     this->xpos = xpos;
     this->length = length;
+    shot->seqs.append(seqs[0]);
 
 
     scene->update();
@@ -82,8 +83,6 @@ void AddCommand::redo()
     shot->setXToFrame(xpos);
     shot->setRect(0, 0, length, 100);
     shot->setPreviousToCurrent();
-
-    shot->seqs.append(seqs[0]);
     timeline->clearSelection();
     shot->setSelected(true);
     timeline->update();

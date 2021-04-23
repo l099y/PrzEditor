@@ -30,6 +30,11 @@ MainWindow::MainWindow(QWidget *parent)
     createUndoView();
     bindUndoElements();
 
+    for (int i = 0; i <50 ; i++)
+    {
+        scaleDownView();
+    }
+
 }
 void MainWindow :: initButtons(){
 
@@ -405,7 +410,7 @@ void MainWindow::clearedTimeline(TimelineScene *timeline, QVector<Shot *> remove
 
 void MainWindow::saveActionTriggered()
 {
-    saveDialog = new ProjectLoader(this);
+    saveDialog = new ProjectLoader(true, this);
     saveDialog->setModal(true);
     saveDialog->exec();
 
@@ -415,4 +420,7 @@ void MainWindow::saveActionTriggered()
 void MainWindow::loadActionTriggered()
 {
     qDebug()<<"loadAction triggered";
+    saveDialog = new ProjectLoader(false, this);
+    saveDialog->setModal(true);
+    saveDialog->exec();
 }

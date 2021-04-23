@@ -698,7 +698,6 @@ void TimelineScene::setSingleSelectionToLast()
         if (sh)
             sh->setY(0);
     }
-
 }
 void TimelineScene :: newRect(){
     ExtendSceneWidth(0);

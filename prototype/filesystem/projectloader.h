@@ -6,18 +6,26 @@
 #include <QVBoxLayout>
 #include <QTreeView>
 #include <QFileSystemModel>
+#include <QPushButton>
+#include <QLineEdit>
 
 class ProjectLoader : public QDialog
 {
+Q_OBJECT
 public:
 
 
-    ProjectLoader(QWidget* parent = nullptr);
+    ProjectLoader(bool, QWidget* parent = nullptr);
     ~ProjectLoader();
-
+public slots:
+    void attemptSaving();
+    void attemptLoading();
 
 private :
-
+    bool creationmod;
+    QPushButton* actionButton;
+    QPushButton* cancelButton;
+    QLineEdit* nameInput;
     QVBoxLayout* layout;
     QTreeView* view;
     QFileSystemModel* model;

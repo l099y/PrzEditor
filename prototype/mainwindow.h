@@ -51,7 +51,7 @@ public:
 
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+//
     float currentTimelineScaling = 1;
 
     // containers and layout

@@ -147,7 +147,7 @@ QJsonObject Shot::generateJson()
     QJsonObject ret;
 
     ret.insert("x", roundedTo10(previousxpos));
-    ret.insert("width", roundedTo10(previousxpos));
+    ret.insert("width", roundedTo10(previousboxwidth));
     ret.insert("sequences", array);
     return ret;
 }
