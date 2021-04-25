@@ -130,7 +130,9 @@ public:
     void bindUndoElements();
     void changeEvent(QEvent *event);
     void generateData();
+
 public slots:
+
     void changeButtonTxt();
     void scaleUpView();
     void scaleDownView();
@@ -149,7 +151,7 @@ public slots:
     void movedShots(TimelineScene*, QVector<Shot*> movedShots, int prevscenewidth, int currentscenewidth);
     void clearedTimeline(TimelineScene*, QVector<Shot*>, int);
 
-    //Saving and Loading projet related slots
+    // Saving and Loading projet related slots
 
     void saveActionTriggered();
     void loadActionTriggered();

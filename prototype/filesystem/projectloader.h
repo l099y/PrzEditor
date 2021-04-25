@@ -17,9 +17,16 @@ public:
 
     ProjectLoader(bool, QWidget* parent = nullptr);
     ~ProjectLoader();
+
 public slots:
+
+    // those functions are called on clicking concerned buttons, they call concerned validation functions. if the validation is fullfilled, they callback the mainwindow to execute
+    // the save or loard function
+
     void attemptSaving();
     void attemptLoading();
+
+    void enableActionButton();
 
 private :
     bool creationmod;
@@ -29,6 +36,13 @@ private :
     QVBoxLayout* layout;
     QTreeView* view;
     QFileSystemModel* model;
+
+    // validate the possibility to save or load based on the QlineInput and the
+
+    bool validateSave();
+    bool validateLoad();
+
+
 
 protected :
     void closeEvent(QCloseEvent *e) override;

@@ -53,9 +53,6 @@ QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir) // th
     return ret;
 }
 
-
-
-
 inline fileInf SequenceRegister::getReleventInfo(QString* path)
 {
     if (path->length() != 0){
