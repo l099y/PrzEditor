@@ -3,7 +3,7 @@
 
 ProjectLoader::ProjectLoader(bool creationmod, QWidget * parent): QDialog(parent)
 {
-    this->creationmod = creationmod;
+    this->savingMod = creationmod;
     layout = new QVBoxLayout(this);
     view = new QTreeView(this);
     model = new QFileSystemModel(this);
@@ -29,21 +29,22 @@ ProjectLoader::ProjectLoader(bool creationmod, QWidget * parent): QDialog(parent
     model->setNameFilters(filter);
 
     connect (cancelButton, SIGNAL(clicked(bool)), this, SLOT(close()));
-    connect (nameInput, SIGNAL(textEdited(QString)), this, SLOT(enableActionButton()));
-    connect (view, SIGNAL(clicked(QModelIndex)),this, SLOT(enableActionButton()));
+    connect (nameInput, SIGNAL(textEdited(QString)), this, SLOT(setEnableStateByTextInput()));
+    connect (view, SIGNAL(clicked(QModelIndex)),this, SLOT(setEnableStateByTree()));
 
-    if (creationmod){
+    if (savingMod){
         actionButton->setText("Save");
         connect (actionButton, SIGNAL(clicked(bool)), this, SLOT(attemptSaving()));
         connect (nameInput, SIGNAL(returnPressed()), this, SLOT(attemptSaving()));
-        actionButton->setDisabled(true);
+        this->setWindowTitle("Save");
     }
     else {
         actionButton->setText("Load");
         connect (actionButton, SIGNAL(clicked(bool)), this, SLOT(attemptLoading()));
         connect (nameInput, SIGNAL(returnPressed()), this, SLOT(attemptLoading()));
-        actionButton->setDisabled(true);
+        this->setWindowTitle("Load");
     }
+    actionButton->setDisabled(true);
 }
 
 ProjectLoader::~ProjectLoader()
@@ -64,23 +65,78 @@ void ProjectLoader::attemptLoading()
         this->close();
 }
 
-void ProjectLoader::enableActionButton()
+void ProjectLoader::setEnableStateByTree()
 {
     auto currentSelection = model->fileInfo(view->currentIndex());
-    qDebug()<<currentSelection.suffix();
-    if (creationmod){
-        if (currentSelection.suffix() == "przsqs")
+    //qDebug()<<currentSelection.fileName()<< "name file" <<currentSelection.isDir() << " is Dir" << currentSelection.isFile() << "is File" << currentSelection.isRoot();
+
+
+    if (savingMod){
+        if (currentSelection.suffix() == "przsqs"){
             nameInput->setText(currentSelection.fileName());
-        if (nameInput->text().length() != 0 && (currentSelection.isDir() || currentSelection.suffix() == "przsqs")){
             actionButton->setDisabled(false);
         }
+        else{
+            if (currentSelection.isDir() && !currentSelection.isRoot() && nameInput->text().length() != 0){
+                actionButton->setDisabled(false);
+            }
+            else{
+                actionButton->setDisabled(true);
+            }
+        }
+    }
 
+    else{
+        if (currentSelection.suffix() == "przsqs"){
+            nameInput->setText(currentSelection.fileName());
+            actionButton->setDisabled(false);
+        }
+        else{
+            if (currentSelection.isDir() &&  !currentSelection.isRoot()){
+                QDir currentdir (currentSelection.absoluteFilePath());
+                qDebug()<<currentSelection.absoluteFilePath()<< "- filepath" << currentdir.entryList();
+                if (currentdir.entryList().contains(nameInput->text().append(stringIsPrzsqsType(nameInput->text())? "": ".przsqs"))){
+                    actionButton->setDisabled(false);
+                }
+            }
+            else
+            actionButton->setDisabled(true);
+        }
+    }
+}
+
+void ProjectLoader::setEnableStateByTextInput()
+{
+    auto currentSelection = model->fileInfo(view->currentIndex());
+    //qDebug()<<currentSelection.fileName()<< "name file" <<currentSelection.isDir() << " is Dir" << currentSelection.isFile() << "is File" << currentSelection.isRoot();
+
+
+    if (savingMod){
+        if (nameInput->text().length() != 0 && (currentSelection.isDir() && !currentSelection.isRoot())){
+            actionButton->setDisabled(false);
+        }
         else
         actionButton->setDisabled(true);
 
     }
     else
     {
+        if (currentSelection.isDir() &&  !currentSelection.isRoot())
+        {
+            QDir currentdir (currentSelection.absoluteFilePath());
+            qDebug()<<currentSelection.absoluteFilePath()<< "- filepath" << currentdir.entryList();
+            if (currentdir.entryList().contains(nameInput->text().append(stringIsPrzsqsType(nameInput->text())? "": ".przsqs"))){
+                actionButton->setDisabled(false);
+            }
+            else
+                actionButton->setDisabled(true);
+        }
+        else if (currentSelection.isFile() && currentSelection.suffix() == "przsqs"){
+            actionButton->setDisabled(false);
+        }
+        else {
+            actionButton->setDisabled(true);
+        }
 
 
     }
@@ -94,6 +150,20 @@ bool ProjectLoader::validateSave()
 bool ProjectLoader::validateLoad()
 {
 
+}
+
+bool ProjectLoader::stringIsPrzsqsType(QString input)
+{
+    if(input.length()!= 0){
+    int i = input.length()-1;
+    QString ret;
+    while (input.at(i)!='.' && i>0)
+    {
+        ret.append(input.at(i--));
+    }
+    return ret == "sqszrp";
+    }
+    else return false;
 }
 
 void ProjectLoader::closeEvent(QCloseEvent *e)

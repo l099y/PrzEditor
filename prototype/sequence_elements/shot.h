@@ -22,6 +22,7 @@ class Shot : public QObject, public QGraphicsRectItem
 public:
     Shot();
     ~Shot();
+    static QList<QColor> usedColor;
     QTimeLine *timer = new QTimeLine(130);
     QGraphicsItemAnimation *animation = new QGraphicsItemAnimation;
     BoxState mod = BoxState::REGULAR;

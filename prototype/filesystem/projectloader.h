@@ -26,10 +26,11 @@ public slots:
     void attemptSaving();
     void attemptLoading();
 
-    void enableActionButton();
+    void setEnableStateByTree();
+    void setEnableStateByTextInput();
 
 private :
-    bool creationmod;
+    bool savingMod;
     QPushButton* actionButton;
     QPushButton* cancelButton;
     QLineEdit* nameInput;
@@ -41,6 +42,7 @@ private :
 
     bool validateSave();
     bool validateLoad();
+    bool stringIsPrzsqsType(QString);
 
 
 

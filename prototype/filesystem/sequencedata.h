@@ -23,3 +23,11 @@ public:
     QJsonObject generateJson();
 };
 #endif // SEQUENCEDATA_H
+
+
+// std lib -> les pointers ne sont plus défnit comme pointeurs mais uniquepointers (ils possèdent déjà une mécanique de construction et de destruction )
+
+// mémoire virtuelle. le programme s'aloue x bloc de mémoire physique, si nécessaire il requière d'autre blocs, tant que tout le bloc n'est pas vide ou d'autres circontances
+// fragmentation interne? parfois on aloue plus d'espace que nécessaire . -> possibilité de reserver un bloc de mémoire spécific virtuel.
+
+//Utiliser la fonction malloc de stdlib, avec en paramêtre une taille de block en byte.
