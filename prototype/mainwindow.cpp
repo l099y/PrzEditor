@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
     createMenus();
     createUndoView();
     bindUndoElements();
-
+    this->setWindowTitle("Presenz movie editor");
     for (int i = 0; i <50 ; i++)
     {
         scaleDownView();
@@ -142,7 +142,7 @@ void MainWindow::setupTreeItem(){
    // generateData(); //well you only need to do it once...
 
     connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequencesAndCollapse(QModelIndex)));
-    connect (tree, SIGNAL(expanded(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
+    connect (tree, SIGNAL(clicked(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
     connect (TreeModel, SIGNAL(clearSequences()), this, SLOT(clearSequences()));
     connect (TreeModel, SIGNAL(displaySequences(QString)), this, SLOT(displaySequences(QString)));
     connect (TreeModel, SIGNAL(setOnlyCurrentFolderExpanded(QModelIndex)), this, SLOT(collapseAllAndExpand(QModelIndex)));

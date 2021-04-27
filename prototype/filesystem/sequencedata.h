@@ -31,3 +31,4 @@ public:
 // fragmentation interne? parfois on aloue plus d'espace que nécessaire . -> possibilité de reserver un bloc de mémoire spécific virtuel.
 
 //Utiliser la fonction malloc de stdlib, avec en paramêtre une taille de block en byte.
+ // recherche virtual alloc memory map file -> pour aloué de la mémoire virtuelle à du data.

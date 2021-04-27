@@ -42,7 +42,15 @@ private :
 
     bool validateSave();
     bool validateLoad();
-    bool stringIsPrzsqsType(QString);
+
+    bool confirm(QString, QString);
+    void notifyFailure(QString, QString);
+
+    inline bool stringIsPrzsqsType(QString);
+    inline QString nameToFormat(QString);
+    inline QString joinPathAndName(QString, QString);
+    bool fileByAbsoluteFilePathExists(QString);
+
 
 
 

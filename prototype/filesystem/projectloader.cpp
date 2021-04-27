@@ -1,5 +1,6 @@
 #include "projectloader.h"
 #include "QDebug"
+#include <QMessageBox>
 
 ProjectLoader::ProjectLoader(bool creationmod, QWidget * parent): QDialog(parent)
 {
@@ -54,15 +55,21 @@ ProjectLoader::~ProjectLoader()
 
 void ProjectLoader::attemptSaving()
 {
-    if (validateSave())
-    qDebug()<<model->fileInfo(view->currentIndex()).absoluteFilePath()<< " in attempsaving";
-    this->close();
+    if (validateSave()){
+        //emit the proper signal to enable the saving in mainwindow (this will be troublesome in the case the file isnt saved yet, i ask to save before loading another project,
+        //-> i have to emit a signal that triggers the saveaction in mainwindows emit signal saverequest, slot saveaction).
+        this->close();
+
+    }
 }
 
 void ProjectLoader::attemptLoading()
 {
-    if (validateLoad())
+    if (validateLoad()){
+        //emit the proper signal to enable the saving in mainwindow (this will be troublesome in the case the file isnt saved yet, i ask to save before loading another project,
+        //-> i have to emit a signal that triggers the saveaction in mainwindows emit signal saverequest, slot saveaction).
         this->close();
+    }
 }
 
 void ProjectLoader::setEnableStateByTree()
@@ -125,7 +132,7 @@ void ProjectLoader::setEnableStateByTextInput()
         {
             QDir currentdir (currentSelection.absoluteFilePath());
             qDebug()<<currentSelection.absoluteFilePath()<< "- filepath" << currentdir.entryList();
-            if (currentdir.entryList().contains(nameInput->text().append(stringIsPrzsqsType(nameInput->text())? "": ".przsqs"))){
+            if (currentdir.entryList().contains(nameToFormat(nameInput->text()))){
                 actionButton->setDisabled(false);
             }
             else
@@ -137,22 +144,50 @@ void ProjectLoader::setEnableStateByTextInput()
         else {
             actionButton->setDisabled(true);
         }
-
-
     }
 }
 
 bool ProjectLoader::validateSave()
 {
+    auto currentSelection = model->fileInfo(view->currentIndex());
+    if (currentSelection.isDir() && !currentSelection.isRoot() && nameInput->text().length() != 0){
+        QDir currentdir (currentSelection.absoluteFilePath());
 
+        if (!currentdir.entryList().contains(nameToFormat(nameInput->text()))){
+            return true;
+        }
+        else{      
+            return confirm("Do you want to replace this file", joinPathAndName(currentSelection.absolutePath(), nameToFormat(nameInput->text())));
+        }
+    }
+    else if (currentSelection.isFile() && currentSelection.suffix()=="przsqs"){
+         return confirm("Do you want to replace this file", joinPathAndName(currentSelection.absolutePath(), nameToFormat(nameInput->text())));
+    }
+    else return false;
 }
 
 bool ProjectLoader::validateLoad()
 {
+    auto currentSelection = model->fileInfo(view->currentIndex());
 
+    if (currentSelection.isDir() && !currentSelection.isRoot() && nameInput->text().length() != 0){
+        QDir currentdir (currentSelection.absoluteFilePath());
+
+        if (currentdir.entryList().contains(nameToFormat(nameInput->text())) || fileByAbsoluteFilePathExists(nameInput->text())){
+            return true;
+        }
+        else{
+            notifyFailure("Specified file doesnt exist", "sorry");
+            return false;
+        }
+    }
+    else if (currentSelection.isFile() && currentSelection.suffix()=="przsqs"){
+         return true;
+    }
+    else return false;
 }
 
-bool ProjectLoader::stringIsPrzsqsType(QString input)
+inline bool ProjectLoader::stringIsPrzsqsType(QString input)
 {
     if(input.length()!= 0){
     int i = input.length()-1;
@@ -164,6 +199,48 @@ bool ProjectLoader::stringIsPrzsqsType(QString input)
     return ret == "sqszrp";
     }
     else return false;
+}
+
+QString ProjectLoader::nameToFormat(QString input)
+{
+    return  input.append(stringIsPrzsqsType(input)? "": ".przsqs");
+}
+
+QString ProjectLoader::joinPathAndName(QString path, QString name)
+{
+    return path.append("/").append(name);
+}
+
+bool ProjectLoader::fileByAbsoluteFilePathExists(QString absoluteFilePath)
+{
+    QFile test(absoluteFilePath);
+    return test.exists();
+}
+
+bool ProjectLoader::confirm(QString text, QString title)
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(title);
+    msgBox.setText(text);
+    msgBox.setStandardButtons(QMessageBox::Yes);
+    msgBox.addButton(QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+    if(msgBox.exec() == QMessageBox::Yes){
+      return true;
+    }else {
+        qDebug()<<"no pressed";
+      return false;
+    }
+}
+
+void ProjectLoader::notifyFailure(QString text , QString title)
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(title);
+    msgBox.setText(text);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::No);
+    msgBox.exec();
 }
 
 void ProjectLoader::closeEvent(QCloseEvent *e)
