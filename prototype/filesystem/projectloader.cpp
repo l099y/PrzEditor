@@ -55,19 +55,32 @@ ProjectLoader::~ProjectLoader()
 
 void ProjectLoader::attemptSaving()
 {
+    auto currentSelection = model->fileInfo(view->currentIndex());
     if (validateSave()){
-        //emit the proper signal to enable the saving in mainwindow (this will be troublesome in the case the file isnt saved yet, i ask to save before loading another project,
-        //-> i have to emit a signal that triggers the saveaction in mainwindows emit signal saverequest, slot saveaction).
+        if (fileByAbsoluteFilePathExists(nameInput->text()))
+            emit (saveRequest(nameInput->text()));
+        else if (currentSelection.isFile() && currentSelection.suffix() == "przsqs")
+        {
+            emit(saveRequest(currentSelection.absoluteFilePath()));
+        }
+        else
+            emit (saveRequest(joinPathAndName(currentSelection.absoluteFilePath(), nameToFormat(nameInput->text()))));
         this->close();
-
     }
 }
 
 void ProjectLoader::attemptLoading()
 {
+    auto currentSelection = model->fileInfo(view->currentIndex());
     if (validateLoad()){
-        //emit the proper signal to enable the saving in mainwindow (this will be troublesome in the case the file isnt saved yet, i ask to save before loading another project,
-        //-> i have to emit a signal that triggers the saveaction in mainwindows emit signal saverequest, slot saveaction).
+        if (fileByAbsoluteFilePathExists(nameInput->text()))
+            emit (loadRequest(nameInput->text()));
+        else if (currentSelection.isFile() && currentSelection.suffix() == "przsqs")
+        {
+            emit(loadRequest(currentSelection.absoluteFilePath()));
+        }
+        else
+            emit (loadRequest(joinPathAndName(currentSelection.absoluteFilePath(), nameToFormat(nameInput->text()))));
         this->close();
     }
 }

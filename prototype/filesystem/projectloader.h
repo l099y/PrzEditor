@@ -18,6 +18,9 @@ public:
     ProjectLoader(bool, QWidget* parent = nullptr);
     ~ProjectLoader();
 
+
+
+
 public slots:
 
     // those functions are called on clicking concerned buttons, they call concerned validation functions. if the validation is fullfilled, they callback the mainwindow to execute
@@ -28,6 +31,10 @@ public slots:
 
     void setEnableStateByTree();
     void setEnableStateByTextInput();
+
+signals:
+        void saveRequest(QString);
+        void loadRequest(QString);
 
 private :
     bool savingMod;

@@ -156,6 +156,11 @@ public slots:
     void saveActionTriggered();
     void loadActionTriggered();
 
+    // those function are triggered by the modalDialog if an action is required
+
+    void saveRequestExecuted(QString);
+    void loadRequestExecuted(QString);
+
 private:
     void initButtons();
     void inittimelinescene();

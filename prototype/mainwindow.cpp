@@ -412,6 +412,7 @@ void MainWindow::saveActionTriggered()
 {
     saveDialog = new ProjectLoader(true, this);
     saveDialog->setModal(true);
+    connect(saveDialog, SIGNAL(saveRequest(QString)), this, SLOT(saveRequestExecuted(QString)));
     saveDialog->exec();
 
     qDebug()<<"saveAction triggered";
@@ -422,5 +423,36 @@ void MainWindow::loadActionTriggered()
     qDebug()<<"loadAction triggered";
     saveDialog = new ProjectLoader(false, this);
     saveDialog->setModal(true);
+    connect(saveDialog, SIGNAL(loadRequest(QString)), this, SLOT(loadRequestExecuted(QString)));
     saveDialog->exec();
+}
+
+void MainWindow::saveRequestExecuted(QString filepath)
+{
+    qDebug()<<filepath;
+    QFile file(filepath);
+        if (filepath.size()!=0){
+            if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
+            {
+                qDebug()<<"file now exists";
+                QJsonDocument content(timeline->generateJson());
+                file.write(content.toJson());
+                file.close();
+                qDebug() << "Writing finished";
+            }
+        }
+}
+
+void MainWindow::loadRequestExecuted(QString filepath)
+{
+    QFile file(filepath);
+        if (filepath.size()!=0){
+            if (file.open(QIODevice::ReadWrite))
+            {
+                QJsonDocument content(timeline->generateJson());
+                QTextStream stream(&file);
+                qDebug() << stream.readAll();
+                file.close();
+            }
+        }
 }
