@@ -170,6 +170,13 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::resetUndoStack()
+{
+    while (undoStack->canUndo())
+        undoStack->undo();
+    undoStack->clear();
+}
+
 void MainWindow::createActions()
 {
     undoAction = undoStack->createUndoAction(this, tr("&Undo"));
@@ -449,10 +456,58 @@ void MainWindow::loadRequestExecuted(QString filepath)
         if (filepath.size()!=0){
             if (file.open(QIODevice::ReadWrite))
             {
-                QJsonDocument content(timeline->generateJson());
+
                 QTextStream stream(&file);
-                qDebug() << stream.readAll();
+                QString stringContent = stream.readAll();
+                QJsonDocument readJson =  QJsonDocument::fromJson(stringContent.toUtf8());
+                QJsonObject obj;
+
+                // check validity of the document
+                  if(!readJson.isNull())
+                  {
+                      if(readJson.isObject())
+                      {
+                          obj = readJson.object();
+                          resetUndoStack();
+                          reg->usedSequences.clear();
+                          reg->corruptedSequences.clear();
+
+                          timeline->setSceneRect(0,0,obj.value("size").toInt(), 300);
+                          timeline->newRect();
+                          QJsonArray shots = obj.value("shots").toArray();
+                          foreach (QJsonValue current, shots){
+                              auto obj =  current.toObject();
+                              Shot* shotToBeInsert = new Shot();
+                              qDebug()<<"sequences found in "<<obj.value("sequences");
+                              foreach (QJsonValue currentseq, obj.value("sequences").toArray()){
+
+                              }
+                              shotToBeInsert->setXToFrame(obj.value("x").toInt());
+                              shotToBeInsert->setRect(0,0, obj.value("width").toInt(), 100);
+                              shotToBeInsert->setPreviousToCurrent();
+                              shotToBeInsert->setBrush(QColor(obj.value("bred").toInt(), obj.value("bgreen").toInt(), obj.value("bblue").toInt()));
+                              timeline->addItem(shotToBeInsert);
+                          }
+
+
+                          LoadCommand* lc = new LoadCommand(timeline, filepath);
+                          undoStack->push(lc);
+
+                      }
+                      else
+                      {
+                          ProjectLoader :: notifyFailure("document has not the proper format", "error");
+                      }
+                  }
+                  else
+                  {
+                      ProjectLoader :: notifyFailure("document has not the proper format", "error");
+                  }
+
+//                qDebug()<<obj;
+//                qDebug()<<obj.value("shots");
+
                 file.close();
             }
-        }
+        }       
 }

@@ -16,6 +16,8 @@ public:
 
 
     ProjectLoader(bool, QWidget* parent = nullptr);
+    static void notifyFailure(QString, QString);
+
     ~ProjectLoader();
 
 
@@ -51,7 +53,7 @@ private :
     bool validateLoad();
 
     bool confirm(QString, QString);
-    void notifyFailure(QString, QString);
+
 
     inline bool stringIsPrzsqsType(QString);
     inline QString nameToFormat(QString);

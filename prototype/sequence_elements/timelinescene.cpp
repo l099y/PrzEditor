@@ -415,7 +415,6 @@ void TimelineScene :: clearItems(){
             }
         }
     }
-
     emit (clearTimeline(this, ret, sceneRect().width()));
 }
 

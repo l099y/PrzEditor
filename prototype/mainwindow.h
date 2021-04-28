@@ -119,6 +119,7 @@ public:
 
     QUndoStack *undoStack = nullptr;
     QUndoView *undoView = nullptr;
+    void resetUndoStack();
 
     // load/save Dialog
 

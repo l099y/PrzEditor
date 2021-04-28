@@ -149,6 +149,9 @@ QJsonObject Shot::generateJson()
     ret.insert("x", roundedTo10(previousxpos));
     ret.insert("width", roundedTo10(previousboxwidth));
     ret.insert("sequences", array);
+    ret.insert("bred", this->brush().color().red());
+    ret.insert("bgreen", this->brush().color().green());
+    ret.insert("bblue", this->brush().color().blue());
     return ret;
 }
 

@@ -252,8 +252,9 @@ void ProjectLoader::notifyFailure(QString text , QString title)
     msgBox.setWindowTitle(title);
     msgBox.setText(text);
     msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.setDefaultButton(QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::Ok);
     msgBox.exec();
+
 }
 
 void ProjectLoader::closeEvent(QCloseEvent *e)

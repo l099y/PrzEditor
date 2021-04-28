@@ -6,6 +6,7 @@
 #include "filesystem/sequencedata.h"
 #include "sequence_elements/timelinescene.h"
 #include <QHash>
+#include <QJsonObject>
 
 class DeleteCommand : public QUndoCommand
 {
@@ -68,5 +69,16 @@ private:
     TimelineScene* timeline;
     QVector<Shot*> removedShots;
     int prevtimelinesize;
+};
+
+class LoadCommand : public QUndoCommand{
+public:
+    LoadCommand(TimelineScene*, QString,  QUndoCommand *parent = nullptr);
+    void undo() override;
+    void redo() override;
+private:
+    TimelineScene* timeline;
+    float timelinesize;
+    QList<Shot*> shots;
 };
 #endif // COMMANDS_H

@@ -14,7 +14,7 @@ DeleteCommand::DeleteCommand(TimelineScene *scene, QUndoCommand *parent)
     list.first()->setSelected(false);
     shot = static_cast<Shot *>(list.first());
     setText(QObject::tr("Delete %1")
-        .arg(" created "));
+            .arg(" created "));
 }
 
 void DeleteCommand::undo()
@@ -45,7 +45,7 @@ AddCommand::AddCommand(QList<SequenceData*> seq, int xpos, int length, TimelineS
 
     scene->update();
     setText(QObject::tr("Add %1")
-        .arg(seqs[0]->name));
+            .arg(seqs[0]->name));
 }
 
 AddCommand::~AddCommand()
@@ -61,9 +61,9 @@ void AddCommand::undo()
     QHash<Shot*, int>::const_iterator i = movedShotOldPos.constBegin();
     while (i != movedShotOldPos.constEnd()) {
 
-         auto  sh =i.key();
-         sh->setX(i.value());
-         sh->setPreviousToCurrent();
+        auto  sh =i.key();
+        sh->setX(i.value());
+        sh->setPreviousToCurrent();
         i++;
     }
 }
@@ -73,9 +73,9 @@ void AddCommand::redo()
     QHash<Shot*, int>::const_iterator i = movedShotNewPos.constBegin();
     while (i != movedShotNewPos.constEnd()) {
 
-         auto  sh =i.key();
-         sh->setXToFrame(i.value());
-         sh->setPreviousToCurrent();
+        auto  sh =i.key();
+        sh->setXToFrame(i.value());
+        sh->setPreviousToCurrent();
         i++;
     }
     timeline->addItem(shot);
@@ -105,9 +105,9 @@ void MoveCommand::undo()
     QHash<Shot*, int>::const_iterator i = movedShotNewPos.constBegin();
     while (i != movedShotNewPos.constEnd()) {
 
-         auto  sh =i.key();
-         sh->setXToFrame(i.value());
-         sh->setPreviousToCurrent();
+        auto  sh =i.key();
+        sh->setXToFrame(i.value());
+        sh->setPreviousToCurrent();
         i++;
     }
     timeline->setSceneRect(0,0,prevscenesize,100);
@@ -118,9 +118,9 @@ void MoveCommand::redo()
     QHash<Shot*, int>::const_iterator i = movedShotOldPos.constBegin();
     while (i != movedShotOldPos.constEnd()) {
 
-         auto  sh =i.key();
-         sh->setX(i.value());
-         sh->setPreviousToCurrent();
+        auto  sh =i.key();
+        sh->setX(i.value());
+        sh->setPreviousToCurrent();
         i++;
     }
     timeline->setSceneRect(0,0,currentscenesize,100);
@@ -149,10 +149,44 @@ void ClearCommand::undo()
 void ClearCommand::redo()
 {
     foreach (Shot* current, removedShots)
-        {
+    {
         timeline->removeItem(current);
     }
     timeline->setSceneRect(0,0, 200000, 300);
     timeline->ruler.setSize(2000000);
     timeline->newRect();
+}
+
+LoadCommand::LoadCommand(TimelineScene* timeline, QString path, QUndoCommand *parent) : QUndoCommand(parent)
+{
+    this->timeline = timeline;
+    timelinesize = this->timeline->sceneRect().width();
+    foreach (QGraphicsItem* current, this->timeline->items()){
+        Shot* sh = dynamic_cast<Shot*>(current);
+        if (sh){
+            shots.append(sh);
+        }
+    }
+    setText(QObject::tr("load %1").arg(path));
+}
+
+void LoadCommand::undo()
+{
+    foreach (QGraphicsItem* current, timeline->items())
+    {
+        auto sh = dynamic_cast<Shot*>(current);
+        if (sh){
+            timeline->removeItem(sh);
+        }
+    }
+    timeline->setSceneRect(0,0, 200000, 300);
+    timeline->ruler.setSize(2000000);
+    timeline->przreg->usedSequences.clear();
+    timeline->newRect();
+}
+void LoadCommand::redo(){
+
+    foreach (Shot* current, shots){
+        timeline->addItem(current);
+    }
 }
