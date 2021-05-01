@@ -39,6 +39,9 @@
 #include <QToolBar>
 #include <QMenu>
 
+//
+#include <parameters_interfaces/shotparametersinterface.h>
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -102,13 +105,9 @@ public:
     QPushButton* dispbutton = new QPushButton();
     QPushButton* delbutton = new QPushButton();
 
-    // Parameters window elements
 
-    QPushButton* displaceSelectionButton = new QPushButton();
-    QPushButton* changeSelectionSizeButton = new QPushButton();
-    QLineEdit* framePositionInput = new QLineEdit(this);
-    QLineEdit* boxSizeInput = new QLineEdit(this);
-
+    //
+    ShotParametersInterface* shotparams = nullptr;
 
     // toolbars elements
 
@@ -144,8 +143,10 @@ public slots:
     void changeButtonTxt();
     void scaleUpView();
     void scaleDownView();
-    void displaceSelectionInTimeline();
-    void changeSelectionSizeInTimeline();
+
+//    void displaceSelectionInTimeline();
+//    void changeSelectionSizeInTimeline();
+
     void displaySequences(QString);
     void clearSequences();
     void clearSequencesAndCollapse(QModelIndex);

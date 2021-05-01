@@ -701,4 +701,5 @@ void TimelineScene::setSingleSelectionToLast()
 void TimelineScene :: newRect(){
     ExtendSceneWidth(0);
     qDebug()<<generateJson();
+    qDebug()<<"sequences"<<endl<<przreg->usedSequences;
 }

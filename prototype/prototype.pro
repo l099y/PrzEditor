@@ -14,6 +14,7 @@ SOURCES += \
     filesystem/projectloader.cpp \
     filesystem/sequencedata.cpp \
     filesystem/sequenceregister.cpp \
+    parameters_interfaces/shotparametersinterface.cpp \
     sequence_elements\shot.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -27,6 +28,7 @@ HEADERS += \
     filesystem/projectloader.h \
     filesystem/sequencedata.h \
     filesystem/sequenceregister.h \
+    parameters_interfaces/shotparametersinterface.h \
     sequence_elements\shot.h \
     mainwindow.h \
     emitter.h \

@@ -9,6 +9,7 @@ class SequenceData : public QObject
     Q_OBJECT
 public:
     SequenceData(QObject* parent);
+    SequenceData(QJsonObject, QObject* parent);
     ~SequenceData();
     QString sequencefilename;
     QString path;

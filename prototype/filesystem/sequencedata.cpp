@@ -7,6 +7,15 @@ SequenceData::SequenceData(QObject* parent): QObject(parent)
 
 }
 
+SequenceData::SequenceData(QJsonObject data, QObject* parent): QObject(parent)
+{
+    this->sequencefilename = data.value("sequencefilename").toString();
+    this->path =  data.value("path").toString();
+    this->name = data.value("name").toString();
+    this->startIdx = data.value("startIdx").toInt();
+    this->endIdx = data.value("endIdx").toInt();
+}
+
 SequenceData::~SequenceData()
 {
 

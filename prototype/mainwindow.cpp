@@ -56,10 +56,7 @@ void MainWindow :: initButtons(){
     delbutton->setText("disp");
     delbutton->setMinimumSize(QSize(40,40));
     connect(delbutton, SIGNAL(clicked(bool)), timeline, SLOT(deleteSelection()));
-    displaceSelectionButton->setText("displace selection");
-    connect(displaceSelectionButton, SIGNAL(clicked(bool)), this, SLOT(displaceSelectionInTimeline()));
-    changeSelectionSizeButton->setText("Change selection Size");
-    connect (changeSelectionSizeButton, SIGNAL(clicked(bool)), this, SLOT(changeSelectionSizeInTimeline()));
+
 
 }
 void MainWindow ::initLayouts(){
@@ -79,19 +76,12 @@ void MainWindow::initcontenance(){
     sublayoutsplit->addWidget(sequencesStorageView);
     sublayoutsplit->addWidget(params1);
     sublayoutsplit->setMargin(20);
-    sublayoutparams1->addWidget(paramlabel);
     sublayoutbutton->addWidget(newboxbutton);
     sublayoutbutton->addWidget(clearbutton);
     sublayoutbutton->addWidget(allignbutton);
     sublayoutbutton->addWidget(dispbutton);
     sublayoutbutton->addWidget(mod2button);
     sublayoutbutton->addWidget(delbutton);
-    sublayoutparams1->addWidget(displaceSelectionButton);
-    sublayoutparams1->addWidget(framePositionInput);
-    sublayoutparams1->addWidget(changeSelectionSizeButton);
-    sublayoutparams1->addWidget(boxSizeInput);
-    sublayoutparams1->setAlignment(Qt::AlignTop);
-
 }
 void MainWindow::initwidgetsparams(){
 
@@ -109,8 +99,7 @@ void MainWindow::initwidgetsparams(){
     params2->setAutoFillBackground(true);
     params2->setPalette(pal);
     params2->setVisible(false);
-    framePositionInput->setStyleSheet("background: rgb(220,220,220);");
-    boxSizeInput->setStyleSheet("background: rgb(220,220,220);");
+
 }
 void MainWindow :: bindLayoutsToWidgets(){
     timelineNutils->setLayout(sublayoutsplit0);
@@ -277,52 +266,52 @@ void MainWindow::scaleDownView()
     qDebug()<<currentTimelineScaling;
 }
 
-void MainWindow::displaceSelectionInTimeline()
-{
-    qDebug()<<framePositionInput->text();
+//void MainWindow::displaceSelectionInTimeline()
+//{
+//    qDebug()<<framePositionInput->text();
 
-    if (framePositionInput->text() != "")
-    {
-        try
-        {
-            int i = std::stoi(framePositionInput->text().toStdString());
-            qDebug()<<i;
-            timeline->displaceSelection(i);
+//    if (framePositionInput->text() != "")
+//    {
+//        try
+//        {
+//            int i = std::stoi(framePositionInput->text().toStdString());
+//            qDebug()<<i;
+//            timeline->displaceSelection(i);
 
-        }
-        catch (std::invalid_argument const &e)
-        {
-            qDebug() << "Bad input: std::invalid_argument thrown";
-        }
-        catch (std::out_of_range const &e)
-        {
-            qDebug() << "Integer overflow: std::out_of_range thrown";
-        }
-    }
-}
+//        }
+//        catch (std::invalid_argument const &e)
+//        {
+//            qDebug() << "Bad input: std::invalid_argument thrown";
+//        }
+//        catch (std::out_of_range const &e)
+//        {
+//            qDebug() << "Integer overflow: std::out_of_range thrown";
+//        }
+//    }
+//}
 
-void MainWindow::changeSelectionSizeInTimeline()
-{
-    if (boxSizeInput->text() != "")
-    {
-        try
-        {
-            int i = std::stoi(boxSizeInput->text().toStdString());
-            qDebug()<<i;
-            timeline->changeSelectionSize(i);
+//void MainWindow::changeSelectionSizeInTimeline()
+//{
+//    if (boxSizeInput->text() != "")
+//    {
+//        try
+//        {
+//            int i = std::stoi(boxSizeInput->text().toStdString());
+//            qDebug()<<i;
+//            timeline->changeSelectionSize(i);
 
-        }
-        catch (std::invalid_argument const &e)
-        {
-            qDebug() << "Bad input: std::invalid_argument thrown";
-        }
-        catch (std::out_of_range const &e)
-        {
-            qDebug() << "Integer overflow: std::out_of_range thrown";
-        }
-    }
+//        }
+//        catch (std::invalid_argument const &e)
+//        {
+//            qDebug() << "Bad input: std::invalid_argument thrown";
+//        }
+//        catch (std::out_of_range const &e)
+//        {
+//            qDebug() << "Integer overflow: std::out_of_range thrown";
+//        }
+//    }
 
-}
+//}
 
 void MainWindow::displaySequences(QString path)
 {
@@ -460,12 +449,11 @@ void MainWindow::initShotsParameters()
     QTextStream stream(&file);
     QString stringContent = stream.readAll();
     QJsonDocument configJson = QJsonDocument::fromJson(stringContent.toUtf8());
+
     if(isValidJsonObject(configJson))
     {
-        foreach (QJsonValue val, configJson.object().value("shot").toArray()){
-            qDebug()<<val.toObject().value("name");
-        }
-        qDebug()<<configJson.object().value("shot") <<"in initshots";
+        shotparams = new ShotParametersInterface(configJson.object(), this);
+        sublayoutparams1->addWidget(shotparams);
     }
 }
 
@@ -488,7 +476,11 @@ void MainWindow::loadRequestExecuted(QString filepath)
                 resetUndoStack();
                 reg->usedSequences.clear();
                 reg->corruptedSequences.clear();
-
+                foreach (QGraphicsItem* current, timeline->items()){
+                    Shot* sh = dynamic_cast<Shot*>(current);
+                    if (sh)
+                       timeline->removeItem(sh);
+                }
                 timeline->setSceneRect(0,0,obj.value("size").toInt(), 300);
                 timeline->newRect();
                 QJsonArray shots = obj.value("shots").toArray();
@@ -497,6 +489,16 @@ void MainWindow::loadRequestExecuted(QString filepath)
                     Shot* shotToBeInsert = new Shot();
                     qDebug()<<"sequences found in "<<obj.value("sequences");
                     foreach (QJsonValue currentseq, obj.value("sequences").toArray()){
+                        auto curseq = currentseq.toObject();
+                        if (reg->usedSequences.contains(curseq.value("name").toString())){
+                            shotToBeInsert->seqs.append(reg->usedSequences.value(curseq.value("name").toString()));
+                        }
+                        else
+                        {
+                            SequenceData* sq = new SequenceData(curseq, nullptr);
+                            shotToBeInsert->seqs.append(sq);
+                            reg->usedSequences.insert(sq->name, sq);
+                        }
 
                     }
                     shotToBeInsert->setXToFrame(obj.value("x").toInt());
