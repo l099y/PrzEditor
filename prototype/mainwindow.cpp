@@ -7,16 +7,15 @@
 #include "undo_framework/commands.h"
 #include <sequence_elements/timelinescene.h>
 #include <QJsonObject>
+#include <QResource>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
 
-    QJsonObject a;
-    a.insert("key1", "value1");
-    a.insert("key2", "value2");
-    qDebug()<<a;
+
     this->move(0,0);
     ui->setupUi(this);
     setCentralWidget(widget);
@@ -24,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     initLayouts();
     setupTreeItem();
     inittimelinescene();
+    initShotsParameters();
     initButtons();
     createActions();
     createMenus();
@@ -70,6 +70,7 @@ void MainWindow ::initLayouts(){
 
 }
 void MainWindow::initcontenance(){
+
     sublayoutsplit0->addWidget(timelineButtons);
     sublayoutsplit0->addWidget(supposedtimeslider);
     sublayoutEditor->addWidget(timelineNutils);
@@ -139,7 +140,7 @@ void MainWindow::setupTreeItem(){
     tree->setHeaderHidden(true);
     tree->setStyleSheet("background: rgb(120,120,120);");
 
-   // generateData(); //well you only need to do it once...
+    // generateData(); //well you only need to do it once...
 
     connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequencesAndCollapse(QModelIndex)));
     connect (tree, SIGNAL(clicked(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
@@ -169,6 +170,8 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+
 
 void MainWindow::resetUndoStack()
 {
@@ -438,76 +441,90 @@ void MainWindow::saveRequestExecuted(QString filepath)
 {
     qDebug()<<filepath;
     QFile file(filepath);
-        if (filepath.size()!=0){
-            if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
-            {
-                qDebug()<<"file now exists";
-                QJsonDocument content(timeline->generateJson());
-                file.write(content.toJson());
-                file.close();
-                qDebug() << "Writing finished";
-            }
+    if (filepath.size()!=0){
+        if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
+        {
+            qDebug()<<"file now exists";
+            QJsonDocument content(timeline->generateJson());
+            file.write(content.toJson());
+            file.close();
+            qDebug() << "Writing finished";
         }
+    }
+}
+void MainWindow::initShotsParameters()
+{
+    QFile file (":/templates/shot.json");
+    file.open(QIODevice::ReadOnly);
+
+    QTextStream stream(&file);
+    QString stringContent = stream.readAll();
+    QJsonDocument configJson = QJsonDocument::fromJson(stringContent.toUtf8());
+    if(isValidJsonObject(configJson))
+    {
+        foreach (QJsonValue val, configJson.object().value("shot").toArray()){
+            qDebug()<<val.toObject().value("name");
+        }
+        qDebug()<<configJson.object().value("shot") <<"in initshots";
+    }
 }
 
 void MainWindow::loadRequestExecuted(QString filepath)
 {
     QFile file(filepath);
-        if (filepath.size()!=0){
-            if (file.open(QIODevice::ReadWrite))
+    if (filepath.size()!=0){
+        if (file.open(QIODevice::ReadWrite))
+        {
+
+            QTextStream stream(&file);
+            QString stringContent = stream.readAll();
+            QJsonDocument readJson =  QJsonDocument::fromJson(stringContent.toUtf8());
+            QJsonObject obj;
+
+            // check validity of the document
+            if(isValidJsonObject(readJson))
             {
+                obj = readJson.object();
+                resetUndoStack();
+                reg->usedSequences.clear();
+                reg->corruptedSequences.clear();
 
-                QTextStream stream(&file);
-                QString stringContent = stream.readAll();
-                QJsonDocument readJson =  QJsonDocument::fromJson(stringContent.toUtf8());
-                QJsonObject obj;
+                timeline->setSceneRect(0,0,obj.value("size").toInt(), 300);
+                timeline->newRect();
+                QJsonArray shots = obj.value("shots").toArray();
+                foreach (QJsonValue current, shots){
+                    auto obj =  current.toObject();
+                    Shot* shotToBeInsert = new Shot();
+                    qDebug()<<"sequences found in "<<obj.value("sequences");
+                    foreach (QJsonValue currentseq, obj.value("sequences").toArray()){
 
-                // check validity of the document
-                  if(!readJson.isNull())
-                  {
-                      if(readJson.isObject())
-                      {
-                          obj = readJson.object();
-                          resetUndoStack();
-                          reg->usedSequences.clear();
-                          reg->corruptedSequences.clear();
+                    }
+                    shotToBeInsert->setXToFrame(obj.value("x").toInt());
+                    shotToBeInsert->setRect(0,0, obj.value("width").toInt(), 100);
+                    shotToBeInsert->setPreviousToCurrent();
+                    shotToBeInsert->setBrush(QColor(obj.value("bred").toInt(), obj.value("bgreen").toInt(), obj.value("bblue").toInt()));
+                    timeline->addItem(shotToBeInsert);
 
-                          timeline->setSceneRect(0,0,obj.value("size").toInt(), 300);
-                          timeline->newRect();
-                          QJsonArray shots = obj.value("shots").toArray();
-                          foreach (QJsonValue current, shots){
-                              auto obj =  current.toObject();
-                              Shot* shotToBeInsert = new Shot();
-                              qDebug()<<"sequences found in "<<obj.value("sequences");
-                              foreach (QJsonValue currentseq, obj.value("sequences").toArray()){
+                    //                          LoadCommand* lc = new LoadCommand(timeline, filepath);
+                    //                          undoStack->push(lc);
 
-                              }
-                              shotToBeInsert->setXToFrame(obj.value("x").toInt());
-                              shotToBeInsert->setRect(0,0, obj.value("width").toInt(), 100);
-                              shotToBeInsert->setPreviousToCurrent();
-                              shotToBeInsert->setBrush(QColor(obj.value("bred").toInt(), obj.value("bgreen").toInt(), obj.value("bblue").toInt()));
-                              timeline->addItem(shotToBeInsert);
-                          }
-
-
-                          LoadCommand* lc = new LoadCommand(timeline, filepath);
-                          undoStack->push(lc);
-
-                      }
-                      else
-                      {
-                          ProjectLoader :: notifyFailure("document has not the proper format", "error");
-                      }
-                  }
-                  else
-                  {
-                      ProjectLoader :: notifyFailure("document has not the proper format", "error");
-                  }
-
-//                qDebug()<<obj;
-//                qDebug()<<obj.value("shots");
-
-                file.close();
+                }
             }
-        }       
+            else
+            {
+                ProjectLoader :: notifyFailure("document has not the proper format", "error");
+            }
+        }
+        else
+        {
+            ProjectLoader :: notifyFailure("document has not the proper format", "error");
+        }
+        file.close();
+    }
+}
+
+
+bool MainWindow::isValidJsonObject(QJsonDocument doc)
+{
+    return !doc.isNull() && doc.isObject();
 }

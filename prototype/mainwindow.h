@@ -73,6 +73,13 @@ public:
     QVBoxLayout *sublayoutparams1 = new QVBoxLayout(params1);
     QHBoxLayout *sublayoutparams2 = new QHBoxLayout(params2);
 
+    //load the shot template and setup the parameters ui comps
+
+    void initShotsParameters();
+
+        //utilies for this usecase
+        inline bool isValidJsonObject(QJsonDocument);
+
 
     // extended File Explorer
 
@@ -173,4 +180,5 @@ private:
     void initcontenance();
     Ui::MainWindow *ui;
 };
+
 #endif // MAINWINDOW_H

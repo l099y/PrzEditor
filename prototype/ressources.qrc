@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/templates">
+        <file>shot.json</file>
+    </qresource>
+    <qresource prefix="/images">
+        <file alias="quark">51knnZau1QL._AC_.jpg</file>
+    </qresource>
+</RCC>
