@@ -54,6 +54,8 @@ public:
 
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+
 //
     float currentTimelineScaling = 1;
 
@@ -65,7 +67,6 @@ public:
     QWidget *timelineButtons = new QWidget(parameters);
     QWidget *supposedtimeslider = new QWidget(parameters);
     QWidget *params1 = new QWidget(parameters);
-    QWidget *params2 = new QWidget(parameters);
     QLabel *paramlabel = new QLabel("parameters");
     QHBoxLayout *layout = new QHBoxLayout(this);
     QVBoxLayout *sublayoutEditor = new QVBoxLayout(widget);
@@ -74,7 +75,6 @@ public:
     QHBoxLayout *sublayoutsplit0 = new QHBoxLayout(parameters);
     QHBoxLayout *sublayoutsplit = new QHBoxLayout(parameters);
     QVBoxLayout *sublayoutparams1 = new QVBoxLayout(params1);
-    QHBoxLayout *sublayoutparams2 = new QHBoxLayout(params2);
 
     //load the shot template and setup the parameters ui comps
 
@@ -131,12 +131,19 @@ public:
 
     ProjectLoader* saveDialog;
 
+    //init functions
+
     void createActions();
     void createMenus();
     void createUndoView();
     void bindUndoElements();
     void changeEvent(QEvent *event);
     void generateData();
+
+
+    //test
+
+    QScrollArea *scrollArea = new QScrollArea(params1);
 
 public slots:
 
@@ -180,6 +187,9 @@ private:
     void initwidgetsparams();
     void initcontenance();
     Ui::MainWindow *ui;
+
+protected:
+    void resizeEvent(QResizeEvent *event) override ;
 };
 
 #endif // MAINWINDOW_H

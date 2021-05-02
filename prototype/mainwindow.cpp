@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
     {
         scaleDownView();
     }
-
+    this->showMaximized();
 }
 void MainWindow :: initButtons(){
 
@@ -75,6 +75,11 @@ void MainWindow::initcontenance(){
     sublayoutsplit->addWidget(tree);
     sublayoutsplit->addWidget(sequencesStorageView);
     sublayoutsplit->addWidget(params1);
+
+    scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOn );
+    scrollArea->setWidgetResizable( true );
+
+
     sublayoutsplit->setMargin(20);
     sublayoutbutton->addWidget(newboxbutton);
     sublayoutbutton->addWidget(clearbutton);
@@ -82,6 +87,14 @@ void MainWindow::initcontenance(){
     sublayoutbutton->addWidget(dispbutton);
     sublayoutbutton->addWidget(mod2button);
     sublayoutbutton->addWidget(delbutton);
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+    scrollArea->setMinimumHeight(params1->height());
+    scrollArea->setMaximumHeight(params1->height());
+    qDebug()<<"resized";
 }
 void MainWindow::initwidgetsparams(){
 
@@ -93,12 +106,7 @@ void MainWindow::initwidgetsparams(){
     params1->setAutoFillBackground(true);
     params1->setPalette(pal);
     params1->setStyleSheet("background: rgb(120,120,120);");
-    //params1->setVisible(false);
-    params1->setMinimumWidth(400);
     paramlabel->setMaximumHeight(100);
-    params2->setAutoFillBackground(true);
-    params2->setPalette(pal);
-    params2->setVisible(false);
 
 }
 void MainWindow :: bindLayoutsToWidgets(){
@@ -108,7 +116,6 @@ void MainWindow :: bindLayoutsToWidgets(){
     timelineButtons->setLayout(sublayoutbutton);
     parameters->setLayout(sublayoutsplit);
     params1->setLayout(sublayoutparams1);
-    params2->setLayout(sublayoutparams2);
     //widget->setLayout(layout);
 }
 void MainWindow::setupTreeItem(){
@@ -454,6 +461,8 @@ void MainWindow::initShotsParameters()
     {
         shotparams = new ShotParametersInterface(configJson.object(), this);
         sublayoutparams1->addWidget(shotparams);
+        scrollArea->setWidget(shotparams);
+        scrollArea->setLayout(sublayoutparams1);
     }
 }
 

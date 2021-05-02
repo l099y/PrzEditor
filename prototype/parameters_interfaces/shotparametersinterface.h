@@ -15,11 +15,6 @@ public:
     // Parameters window elements
     Shot* shot = nullptr;
 
-    QPushButton* displaceSelectionButton = new QPushButton();
-    QPushButton* changeSelectionSizeButton = new QPushButton();
-    QLineEdit* framePositionInput = new QLineEdit(this);
-    QLineEdit* boxSizeInput = new QLineEdit(this);
-
 signals:
 
 };
