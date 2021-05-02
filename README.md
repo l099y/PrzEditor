@@ -1,25 +1,30 @@
 # NAVIGATIONSHEET
 
-## plan pour la semaine à venir
-
-- terminer la sauvegarde de l'état et implémenter le chargement
-- changer le comportement du mouvements des shots, l'évaluation présente qui est en place depuis plus d'un mois n'est en fait pas le comportement attendu: le mouvement des shots doit être évaluer sur la position de la souris et non sur les extrémités des shots
-- implémenter les QUndo appropriés en accord avec la sauvegarde et le chargement. 
+## Plan pour la semaine à venir
+- implémenter la configuration statique des shots via un json, implémenter l'interface graphique permettant de modifier ces paramètres
+- terminer l'uc SAVE/LOAD
+- fix le mouvement et l'insertion des shots
 
 ## Résumé d'activité par semaine
 
-### Semaine 10 (19 - 23 de 05/21)
+### Semaine 11 (26 - 30 de 04/21)
+
+- terminer la sauvegarde de l'état et implémenter le chargement
+- changer le comportement des mouvements des shots, l'évaluation présente qui est en place depuis plus d'un mois n'est en fait pas le comportement attendu: le mouvement des shots doit être évaluer sur la position de la souris et non sur les extrémités des shots
+- implémenter les QUndo appropriés en accord avec la sauvegarde et le chargement. 
+
+### Semaine 10 (19 - 23 de 04/21)
 
 - implémenter les actions QUndo non présentes
 - implémenter la sauvegarde et le chargement de l'état de la ligne du temps
 - changer le comportement des mouvements de shots une fois que le shot inséré figure dans la zone appropriée.
 
-### semaine 9 (12 au 16 de 05/21)
+### semaine 9 (12 au 16 de 04/21)
 
 - finaliser les uc filesystem et insertion
 - commencer à implémenter le framework undo de Qt, et mon propre format de sauvegarde d'application.
 
-### semaine 8(5 au 9 de 05/21) 
+### semaine 8(5 au 9 de 04/21) 
 
 - Donner à l'explorateur de fichier les comportements précisé pendant la dernière réunion, implémenter le drag and drop des séquences détectées vers la timeline
 - mettre en place la dynamique de l'interface parametre et saisie d'information, qui doit se déclancher sur enter, sur esc annulé la valeur modifiée mais pas validée.
