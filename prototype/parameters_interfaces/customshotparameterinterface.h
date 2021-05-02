@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QJsonObject>
-
+#include <sequence_elements/shot.h>
 
 class CustomShotParameterInterface : public QWidget
 {
@@ -11,7 +11,13 @@ class CustomShotParameterInterface : public QWidget
 public:
     explicit CustomShotParameterInterface(QJsonObject, QWidget *parent = nullptr);
     QJsonObject param;
+    Shot* shot = nullptr;
 
+    void setShot(Shot*);
+    void InitInt();
+    void InitFloat();
+    void InitBool();
+    void InitFile();
 signals:
 
 };

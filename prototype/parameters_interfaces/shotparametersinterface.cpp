@@ -11,6 +11,16 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
 
 
   foreach (QJsonValue val, config.value("shot").toArray()){
-      layout()->addWidget(new CustomShotParameterInterface(val.toObject()));
+      CustomShotParameterInterface* param = new CustomShotParameterInterface(val.toObject());
+      layout()->addWidget(param);
+      parameters.append(param);
   }
+}
+
+void ShotParametersInterface::setShot(Shot *shot)
+{
+    this->shot=shot;
+    foreach (CustomShotParameterInterface* current, parameters){
+        current->setShot(shot);
+    }
 }

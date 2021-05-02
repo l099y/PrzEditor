@@ -3,6 +3,10 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QSpinBox>
+#include <QSlider>
+#include <QCheckBox>
+#include <QPushButton>
 
 CustomShotParameterInterface::CustomShotParameterInterface(QJsonObject data, QWidget *parent) : QWidget(parent)
 {
@@ -14,9 +18,51 @@ CustomShotParameterInterface::CustomShotParameterInterface(QJsonObject data, QWi
     this->setMinimumHeight(30);
     namelab->setText(param.value("name").toString());
     namelab->setMinimumWidth(200);
-    QLineEdit* le = new QLineEdit(this);
-    le->setMinimumWidth(200);
-    le->setMinimumHeight(25);
     layout->addWidget(namelab);
-    layout->addWidget(le);
+
+    if (param.value("type").toString()=="0"){
+        InitInt();
+    }
+    else if (param.value("type").toString()=="1"){
+        InitFloat();
+    }
+    else if (param.value("type").toString()=="2"){
+        InitBool();
+    }
+    else if (param.value("type").toString()=="3"){
+        InitFile();
+    }
+}
+
+void CustomShotParameterInterface::setShot(Shot * shot)
+{
+    this->shot = shot;
+
+}
+
+void CustomShotParameterInterface::InitInt()
+{
+    QSpinBox* sb = new QSpinBox(this);
+    layout()->addWidget(sb);
+
+}
+
+void CustomShotParameterInterface::InitFloat()
+{
+    QSlider* sd = new QSlider(this);
+    sd->setOrientation(Qt::Horizontal);
+    layout()->addWidget(sd);
+}
+
+void CustomShotParameterInterface::InitBool()
+{
+    QCheckBox* cb = new QCheckBox(this);
+    layout()->addWidget(cb);
+}
+
+void CustomShotParameterInterface::InitFile()
+{
+    QPushButton* bt = new QPushButton(this);
+    bt->setText("select");
+    layout()->addWidget(bt);
 }

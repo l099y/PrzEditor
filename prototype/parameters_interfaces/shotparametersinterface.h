@@ -6,6 +6,8 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <sequence_elements/shot.h>
+#include <parameters_interfaces/customshotparameterinterface.h>
+
 class ShotParametersInterface : public QWidget
 {
     Q_OBJECT
@@ -14,6 +16,8 @@ public:
 
     // Parameters window elements
     Shot* shot = nullptr;
+    void setShot(Shot* shot);
+    QList<CustomShotParameterInterface*> parameters;
 
 signals:
 
