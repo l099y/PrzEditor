@@ -1,9 +1,6 @@
 #include "customshotparameterinterface.h"
 #include <QDebug>
 #include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-
 
 CustomShotParameterInterface::CustomShotParameterInterface(QJsonObject data, QWidget *parent) : QWidget(parent)
 {
@@ -11,10 +8,9 @@ CustomShotParameterInterface::CustomShotParameterInterface(QJsonObject data, QWi
     setLayout(layout);
     param=data;
     QLabel* namelab = new QLabel(this);
-    layout->setMargin(3);
     this->setMinimumHeight(30);
     namelab->setText(param.value("name").toString());
-    namelab->setMinimumWidth(200);
+    namelab->setMinimumWidth(300);
     layout->addWidget(namelab);
 
     if (param.value("type").toString()=="0"){ //INT type
@@ -29,6 +25,9 @@ CustomShotParameterInterface::CustomShotParameterInterface(QJsonObject data, QWi
     else if (param.value("type").toString()=="3"){ //FILE type
         InitFile();
     }
+    else if (param.value("type").toString()=="4"){ //PLAYMOD type
+        InitPlayMod();
+    }
 }
 
 void CustomShotParameterInterface::setShot(Shot * shot)
@@ -39,12 +38,15 @@ void CustomShotParameterInterface::setShot(Shot * shot)
     }
     else if (param.value("type").toString()=="1"){ //FLOAT type
         sd->setValue(getParamValueFromShot().toFloat());
-        sdinfo->setText(getParamValueFromShot());
     }
     else if (param.value("type").toString()=="2"){ //BOOL type
         cb->setChecked(getParamValueFromShot().toInt());
     }
     else if (param.value("type").toString()=="3"){ //FILE type
+        // need to configure the dialog
+    }
+    else if (param.value("type").toString()=="4"){ //PLAYMOD type
+        combb->setCurrentIndex(getParamValueFromShot().toInt());
         // need to configure the dialog
     }
 
@@ -53,25 +55,22 @@ void CustomShotParameterInterface::setShot(Shot * shot)
 void CustomShotParameterInterface::InitInt()
 {
     sb = new QSpinBox(this);
+    sb->setMinimum(param.value("minval").toString().toInt());
+    sb->setMaximum(param.value("maxval").toString().toInt());
     connect (sb, SIGNAL(editingFinished()), this, SLOT(setValue()));
+    sb->setMinimumWidth(120);
     layout()->addWidget(sb);
 
 }
 
 void CustomShotParameterInterface::InitFloat()
 {
-    sd = new QSlider(this);
-    sd->setOrientation(Qt::Horizontal);
+    sd = new QDoubleSpinBox(this);
     sd->setMinimum(param.value("minval").toString().toInt());
     sd->setMaximum(param.value("maxval").toString().toInt());
-
-    sdinfo = new QLabel();
-    sdinfo->setMinimumWidth(30);
-
-    layout()->addWidget(sdinfo);
+    sd->setMinimumWidth(120);
     layout()->addWidget(sd);
-    connect (sd, SIGNAL(sliderReleased()), this, SLOT(setValue()));
-    connect (sd, SIGNAL(valueChanged(int)), this, SLOT(refreshSdLabel()));
+    connect (sd, SIGNAL(editingFinished()), this, SLOT(setValue()));
 }
 
 void CustomShotParameterInterface::InitBool()
@@ -86,6 +85,19 @@ void CustomShotParameterInterface::InitFile()
     bt = new QPushButton(this);
     bt->setText("select");
     layout()->addWidget(bt);
+}
+
+void CustomShotParameterInterface::InitPlayMod()
+{
+    combb = new QComboBox(this);
+    combb->setEditable(false);
+    combb->addItem("Pause at end");
+    combb->addItem("To next scene");
+    combb->addItem("Stop at Begining");
+    combb->addItem("Repeat");
+    connect (combb, SIGNAL(currentIndexChanged(int)), this, SLOT(setValue()));
+    layout()->addWidget(combb);
+
 }
 
 QString CustomShotParameterInterface::getParamValueFromShot()
@@ -120,11 +132,9 @@ void CustomShotParameterInterface::setValue()
     else if (param.value("type").toString()=="2"){ //BOOL type
         setParamValueInShot(QString::fromStdString(std::to_string(!cb->isChecked())));
     }
-}
-
-void CustomShotParameterInterface::refreshSdLabel()
-{
-    sdinfo->setText(QString::fromStdString(std::to_string(sd->value())));
+    else if (param.value("type").toString()=="4"){ //PLAYMOD type
+        setParamValueInShot(QString::fromStdString(std::to_string(combb->currentIndex())));
+    }
 }
 
 void CustomShotParameterInterface::focusOutEvent(QFocusEvent *event)

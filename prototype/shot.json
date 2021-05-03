@@ -5,8 +5,8 @@
          "value":"24",
          "type":"0",
          "default_value":"24",
-         "minval":"null",
-         "maxval":"null"
+         "minval":"0",
+         "maxval":"200"
       },
       {
          "name":"glowIntensity",
@@ -90,9 +90,9 @@
       },
       {
          "name":"playmode",
-         "value":"0",
-         "type":"0",
-         "default_value":"0",
+         "value":"1",
+         "type":"4",
+         "default_value":"1",
          "minval":"",
          "maxval":""
       },
@@ -101,8 +101,8 @@
          "value":"0",
          "type":"0",
          "default_value":"0",
-         "minval":"",
-         "maxval":""
+         "minval":"0",
+         "maxval":"100"
       },
       {
          "name":"scale",
@@ -125,32 +125,32 @@
          "value":"0",
          "type":"0",
          "default_value":"0",
-         "minval":"",
-         "maxval":""
+         "minval":"0",
+         "maxval":"1000000"
       },
       {
          "name":"fadeFromBlackFrameOut",
          "value":"0",
          "type":"0",
          "default_value":"0",
-         "minval":"",
-         "maxval":""
+         "minval":"0",
+         "maxval":"1000000"
       },
       {
          "name":"fadeToBlackFrameIn",
          "value":"0",
          "type":"0",
          "default_value":"0",
-         "minval":"",
-         "maxval":""
+         "minval":"0",
+         "maxval":"1000000"
       },
       {
          "name":"fadeToBlackFrameOut",
          "value":"0",
          "type":"0",
          "default_value":"0",
-         "minval":"",
-         "maxval":""
+         "minval":"0",
+         "maxval":"1000000"
       }
    ]
 }

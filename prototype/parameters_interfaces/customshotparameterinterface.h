@@ -5,10 +5,11 @@
 #include <QJsonObject>
 #include <sequence_elements/shot.h>
 #include <QSpinBox>
-#include <QSlider>
+#include <QDoubleSpinBox>
 #include <QCheckBox>
 #include <QPushButton>
 #include <QLabel>
+#include <QComboBox>
 
 class CustomShotParameterInterface : public QWidget
 {
@@ -20,15 +21,16 @@ public:
 
     QSpinBox* sb  = nullptr;
     QCheckBox* cb = nullptr;
-    QSlider* sd = nullptr;
+    QDoubleSpinBox* sd = nullptr;
     QPushButton* bt = nullptr;
-    QLabel* sdinfo = nullptr;
+    QComboBox* combb = nullptr;
 
     void setShot(Shot*);
     void InitInt();
     void InitFloat();
     void InitBool();
     void InitFile();
+    void InitPlayMod();
     void setParamValueInShot(QString value);
 
     QString getParamValueFromShot();
@@ -38,7 +40,6 @@ signals:
 
 public slots:
     void setValue();
-    void refreshSdLabel();
 
 protected:
     virtual void focusOutEvent(QFocusEvent *event);

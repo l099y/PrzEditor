@@ -96,6 +96,8 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     QMainWindow::resizeEvent(event);
     scrollArea->setMinimumHeight(params1->height());
     scrollArea->setMaximumHeight(params1->height());
+    scrollArea->setMinimumWidth(params1->width());
+    scrollArea->setMaximumWidth(params1->width());
     qDebug()<<"resized";
 }
 void MainWindow::initwidgetsparams(){
@@ -122,7 +124,7 @@ void MainWindow :: bindLayoutsToWidgets(){
 }
 void MainWindow::setupTreeItem(){
     sequencesStorageView->setModel(sequencesModel);
-    sequencesStorageView->setMaximumWidth(200);
+    sequencesStorageView->setMaximumWidth(450);
     sequencesStorageView->setDragEnabled(true);
     sequencesStorageView->setEditTriggers(nullptr); // this disable the ability to rename the current selected row;
     sequencesStorageView->setStyleSheet("background: rgb(120,120,120);");
