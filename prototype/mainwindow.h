@@ -177,6 +177,10 @@ public slots:
     void saveRequestExecuted(QString);
     void loadRequestExecuted(QString);
 
+
+    // attempt to change the target of the parameter interface
+    void changeSelectedShotInParametersInterface();
+
 private:
     void initButtons();
     void inittimelinescene();

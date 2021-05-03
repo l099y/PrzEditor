@@ -540,6 +540,11 @@ QVector<Shot *> TimelineScene::getMovedShots()
     return ret;
 }
 
+bool TimelineScene::validateParameterTargetChange()
+{
+    return (selectedItems().length() != 0 && selectedItems().at(0)!= dropRepresentation);
+}
+
 void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
 {
     if (dropRepresentation->inserted)

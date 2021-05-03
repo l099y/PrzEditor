@@ -44,6 +44,10 @@ class TimelineScene : public QGraphicsScene
     Shot* dropRepresentation;
     SequenceRegister* przreg;
 
+    // check if the condition to assign selection to the the interface Panel
+
+    bool validateParameterTargetChange();
+
 public slots:
     void activatelxt();
     void activaterxt();

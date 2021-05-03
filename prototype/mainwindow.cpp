@@ -35,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent)
         scaleDownView();
     }
     this->showMaximized();
+
+    connect(timeline, SIGNAL(selectionChanged()), this, SLOT(changeSelectedShotInParametersInterface()));
 }
 void MainWindow :: initButtons(){
 
@@ -460,10 +462,15 @@ void MainWindow::initShotsParameters()
     if(isValidJsonObject(configJson))
     {
         shotparams = new ShotParametersInterface(configJson.object(), this);
+        shotparams->setVisible(false);
+        shotparams->setEnabled(false);
         sublayoutparams1->addWidget(shotparams);
         scrollArea->setWidget(shotparams);
         scrollArea->setLayout(sublayoutparams1);
+        shotparams->setVisible(false);
+        shotparams->setEnabled(false);
     }
+
 }
 
 void MainWindow::loadRequestExecuted(QString filepath)
@@ -522,6 +529,23 @@ void MainWindow::loadRequestExecuted(QString filepath)
             ProjectLoader :: notifyFailure("document has not the proper format", "error");
         }
         file.close();
+    }
+}
+
+void MainWindow::changeSelectedShotInParametersInterface()
+{
+    if (timeline->validateParameterTargetChange())
+    {
+        Shot* sh = dynamic_cast<Shot*>(timeline->selectedItems().at(0));
+        if (sh){
+            shotparams->setDisabled(false);
+            shotparams->setVisible(true);
+            shotparams->setShot(sh);
+        }
+    }
+    else{
+        shotparams->setDisabled(true);
+        shotparams->setVisible(false);
     }
 }
 
