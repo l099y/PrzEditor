@@ -39,6 +39,7 @@ void CustomShotParameterInterface::setShot(Shot * shot)
     }
     else if (param.value("type").toString()=="1"){ //FLOAT type
         sd->setValue(getParamValueFromShot().toFloat());
+        sdinfo->setText(getParamValueFromShot());
     }
     else if (param.value("type").toString()=="2"){ //BOOL type
         cb->setChecked(getParamValueFromShot().toInt());
@@ -52,6 +53,7 @@ void CustomShotParameterInterface::setShot(Shot * shot)
 void CustomShotParameterInterface::InitInt()
 {
     sb = new QSpinBox(this);
+    connect (sb, SIGNAL(editingFinished()), this, SLOT(setValue()));
     layout()->addWidget(sb);
 
 }
@@ -60,15 +62,23 @@ void CustomShotParameterInterface::InitFloat()
 {
     sd = new QSlider(this);
     sd->setOrientation(Qt::Horizontal);
-    sd->setMinimum(param.value("minval").toInt());
-    sd->setMinimum(param.value("maxval").toInt());
+    sd->setMinimum(param.value("minval").toString().toInt());
+    sd->setMaximum(param.value("maxval").toString().toInt());
+
+    sdinfo = new QLabel();
+    sdinfo->setMinimumWidth(30);
+
+    layout()->addWidget(sdinfo);
     layout()->addWidget(sd);
+    connect (sd, SIGNAL(sliderReleased()), this, SLOT(setValue()));
+    connect (sd, SIGNAL(valueChanged(int)), this, SLOT(refreshSdLabel()));
 }
 
 void CustomShotParameterInterface::InitBool()
 {
     cb = new QCheckBox(this);
     layout()->addWidget(cb);
+    connect (cb, SIGNAL(pressed()), this, SLOT(setValue()));
 }
 
 void CustomShotParameterInterface::InitFile()
@@ -86,11 +96,39 @@ QString CustomShotParameterInterface::getParamValueFromShot()
 
 void CustomShotParameterInterface::setParamValueInShot(QString value)
 {
-    auto json = shot->templateParams.value(param.value("name").toString());
-    json["value"]=value;
+
+    QJsonObject a = shot->templateParams.value(paramName());
+    a.insert("value", value);
+    shot->templateParams.insert(paramName(), a);
+    qDebug()<<a;
 }
 
 QString CustomShotParameterInterface::paramName()
 {
     return param.value("name").toString();
+}
+
+void CustomShotParameterInterface::setValue()
+{
+
+    if (param.value("type").toString()=="0"){ //INT type
+        setParamValueInShot(QString::fromStdString(std::to_string(sb->value())));
+    }
+    else if (param.value("type").toString()=="1"){ //FLOAT type
+        setParamValueInShot(QString::fromStdString(std::to_string(sd->value())));
+    }
+    else if (param.value("type").toString()=="2"){ //BOOL type
+        setParamValueInShot(QString::fromStdString(std::to_string(!cb->isChecked())));
+    }
+}
+
+void CustomShotParameterInterface::refreshSdLabel()
+{
+    sdinfo->setText(QString::fromStdString(std::to_string(sd->value())));
+}
+
+void CustomShotParameterInterface::focusOutEvent(QFocusEvent *event)
+{
+
+    QWidget::focusOutEvent(event);
 }

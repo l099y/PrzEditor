@@ -8,6 +8,7 @@
 #include <QSlider>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QLabel>
 
 class CustomShotParameterInterface : public QWidget
 {
@@ -21,18 +22,26 @@ public:
     QCheckBox* cb = nullptr;
     QSlider* sd = nullptr;
     QPushButton* bt = nullptr;
+    QLabel* sdinfo = nullptr;
 
     void setShot(Shot*);
     void InitInt();
     void InitFloat();
     void InitBool();
     void InitFile();
+    void setParamValueInShot(QString value);
 
     QString getParamValueFromShot();
-    void setParamValueInShot(QString value);
+
     inline QString paramName();
 signals:
 
+public slots:
+    void setValue();
+    void refreshSdLabel();
+
+protected:
+    virtual void focusOutEvent(QFocusEvent *event);
 };
 
 #endif // CUSTOMSHOTPARAMETERINTERFACE_H

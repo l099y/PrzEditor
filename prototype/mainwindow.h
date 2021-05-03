@@ -106,8 +106,7 @@ public:
     QPushButton* delbutton = new QPushButton();
 
 
-    //
-    ShotParametersInterface* shotparams = nullptr;
+
 
     // toolbars elements
 
@@ -131,6 +130,11 @@ public:
 
     ProjectLoader* saveDialog;
 
+    // Shot Parameter interface
+
+    ShotParametersInterface* shotparams = nullptr;
+    QScrollArea *scrollArea = new QScrollArea(params1);
+
     //init functions
 
     void createActions();
@@ -140,10 +144,10 @@ public:
     void changeEvent(QEvent *event);
     void generateData();
 
+    inline void enableParameterInterface(bool);
 
-    //test
 
-    QScrollArea *scrollArea = new QScrollArea(params1);
+
 
 public slots:
 

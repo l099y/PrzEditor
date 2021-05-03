@@ -245,6 +245,13 @@ void MainWindow::generateData()
     }
 }
 
+void MainWindow::enableParameterInterface(bool mod)
+{
+        shotparams->setVisible(mod);
+        shotparams->setEnabled(mod);
+        scrollArea->setVisible(mod);
+}
+
 void MainWindow::changeButtonTxt(){
 
 }
@@ -462,13 +469,10 @@ void MainWindow::initShotsParameters()
     if(isValidJsonObject(configJson))
     {
         shotparams = new ShotParametersInterface(configJson.object(), this);
-        shotparams->setVisible(false);
-        shotparams->setEnabled(false);
         sublayoutparams1->addWidget(shotparams);
         scrollArea->setWidget(shotparams);
         scrollArea->setLayout(sublayoutparams1);
-        shotparams->setVisible(false);
-        shotparams->setEnabled(false);
+        enableParameterInterface(false);
     }
 
 }
@@ -538,14 +542,13 @@ void MainWindow::changeSelectedShotInParametersInterface()
     {
         Shot* sh = dynamic_cast<Shot*>(timeline->selectedItems().at(0));
         if (sh){
-            shotparams->setDisabled(false);
-            shotparams->setVisible(true);
+
             shotparams->setShot(sh);
+            enableParameterInterface(true);
         }
     }
     else{
-        shotparams->setDisabled(true);
-        shotparams->setVisible(false);
+        enableParameterInterface(false);
     }
 }
 
