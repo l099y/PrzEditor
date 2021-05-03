@@ -495,8 +495,7 @@ void MainWindow::loadRequestExecuted(QString filepath)
                 QJsonArray shots = obj.value("shots").toArray();
                 foreach (QJsonValue current, shots){
                     auto obj =  current.toObject();
-                    Shot* shotToBeInsert = new Shot();
-                    qDebug()<<"sequences found in "<<obj.value("sequences");
+                    Shot* shotToBeInsert = new Shot(obj);
                     foreach (QJsonValue currentseq, obj.value("sequences").toArray()){
                         auto curseq = currentseq.toObject();
                         if (reg->usedSequences.contains(curseq.value("name").toString())){
@@ -510,15 +509,7 @@ void MainWindow::loadRequestExecuted(QString filepath)
                         }
 
                     }
-                    shotToBeInsert->setXToFrame(obj.value("x").toInt());
-                    shotToBeInsert->setRect(0,0, obj.value("width").toInt(), 100);
-                    shotToBeInsert->setPreviousToCurrent();
-                    shotToBeInsert->setBrush(QColor(obj.value("bred").toInt(), obj.value("bgreen").toInt(), obj.value("bblue").toInt()));
                     timeline->addItem(shotToBeInsert);
-
-                    //                          LoadCommand* lc = new LoadCommand(timeline, filepath);
-                    //                          undoStack->push(lc);
-
                 }
             }
             else

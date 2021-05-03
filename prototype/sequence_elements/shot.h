@@ -21,11 +21,21 @@ class Shot : public QObject, public QGraphicsRectItem
     Q_OBJECT
 public:
     Shot();
+    Shot(QJsonObject);
     ~Shot();
+
+    // collection of json parameters, name as the key
+
+    QHash<QString, QJsonObject> templateParams;
+
     static QList<QColor> usedColor;
+
     QTimeLine *timer = new QTimeLine(130);
+
     QGraphicsItemAnimation *animation = new QGraphicsItemAnimation;
+
     BoxState mod = BoxState::REGULAR;
+
     bool inserted = false;
     bool modified = false;
     bool animated = false;
@@ -36,11 +46,17 @@ public:
     float mousePosXonClick;
     Emitter *emitter = new Emitter(this);
 
+    // if not generated from a saved object, generate templateParams from the static config
+
+    void generateParamsFromTemplate();
+
+    // if the object is created from a jsonTemplate, the function sets the parameters to the templateparams
+
+    void generateParamsFromJsonShot(QJsonObject);
+
     void setXToFrame(float x);
     void setPreviousToCurrent();
     void restore();
-    void strechLeft(QGraphicsSceneMouseEvent *e);
-    void strechRight(QGraphicsSceneMouseEvent *e);
     void animatedMove(float pos);
     void setSize(int realsize);
 

@@ -8,10 +8,14 @@
 #include <QRandomGenerator>
 #include <chrono>
 #include <ctime>
+#include <QFile>
+#include <QJsonDocument>
 
 
 Shot::Shot(): QGraphicsRectItem()
 {
+
+    generateParamsFromTemplate();
     QRandomGenerator rdm(std::time(0));
     QPen pen (Qt::white);
     QColor a;
@@ -28,12 +32,58 @@ Shot::Shot(): QGraphicsRectItem()
     animation->setTimeLine(timer);
 }
 
+void Shot::generateParamsFromTemplate()
+{
+    QFile file (":/templates/shot.json");
+    file.open(QIODevice::ReadOnly);
+    QTextStream stream(&file);
+    QString stringContent = stream.readAll();
+    QJsonDocument configJson = QJsonDocument::fromJson(stringContent.toUtf8());
+    auto config = configJson.object();
+
+    foreach (QJsonValue val, config.value("shot").toArray()){
+        templateParams.insert(val.toObject().value("name").toString(), val.toObject());
+    }
+}
+
+void Shot::generateParamsFromJsonShot(QJsonObject jsonShot)
+{
+    foreach (QJsonValue val, jsonShot.value("templateParams").toArray()){
+        templateParams.insert(val.toObject().value("name").toString(), val.toObject());
+    }
+
+}
+
+Shot::Shot(QJsonObject jsonShot)
+{
+    setXToFrame(jsonShot.value("x").toInt());
+    setRect(0,0, jsonShot.value("width").toInt(), 100);
+    setPreviousToCurrent();
+    setBrush(QColor(jsonShot.value("bred").toInt(), jsonShot.value("bgreen").toInt(), jsonShot.value("bblue").toInt()));
+
+    QPen pen (Qt::white);
+    setPen(pen);
+    setAcceptHoverEvents(true);
+    setFlag(QGraphicsItem :: ItemIsMovable);
+    setFlag(QGraphicsItem :: ItemIsSelectable);
+
+    connect(timer, SIGNAL(finished()), this, SLOT(setAnimatedFalse()));
+
+    animation->setItem(this);
+    animation->setTimeLine(timer);
+
+    generateParamsFromJsonShot(jsonShot);
+}
+
+
+
 Shot::~Shot()
 {
     delete(animation);
     delete(timer);
     delete(emitter);
 }
+
 
 void Shot::setXToFrame(float x)
 {
@@ -78,40 +128,6 @@ void Shot::restore()
     setVisible(true);
 }
 
-void Shot::strechLeft(QGraphicsSceneMouseEvent *e)
-{
-    if (previousxpos - e->scenePos().x()>=0){
-        setRect(0, 0, (previousxpos - e->scenePos().x())+previousboxwidth, 100);
-        setX(e->scenePos().x());
-    }
-    else if (previousxpos - e->scenePos().x()<=0 && previousxpos +previousboxwidth - e->scenePos().x()>=0){
-        setRect(0, 0, (previousxpos - e->scenePos().x())+previousboxwidth, 100);
-        setX(e->scenePos().x());
-
-    }
-    else{
-        setX(previousxpos + previousboxwidth - 4);
-        setRect(0, 0, 10, 100);
-    }
-}
-
-void Shot::strechRight(QGraphicsSceneMouseEvent *e)
-{
-    if (e->scenePos().x()>(previousxpos+previousboxwidth)){
-        setRect(0, 0, (roundedTo10(e->scenePos().x()- previousxpos)), 100);
-        setX(previousxpos);
-    }
-    else if (e->scenePos().x() >previousxpos &&  e->scenePos().x()<previousboxwidth+previousxpos){
-        setX(previousxpos);
-        setRect(0, 0, roundedTo10(e->scenePos().x()-previousxpos), 100);
-
-    }
-    else{
-        setRect(0, 0, 10, 100);
-        setX(previousxpos);
-    }
-}
-
 void Shot::animatedMove(float pos)
 {
     if(!animated){
@@ -138,12 +154,16 @@ QJsonObject Shot::generateJson()
         SequenceData* seq = dynamic_cast<SequenceData*>(current);
         if (seq)
         {
-
-          array.push_back(seq->generateJson());
-          qDebug()<<seq->name<<" in generatedjson in shot";
+            array.push_back(seq->generateJson());
         }
     }
+    QJsonArray paramsarray;
+    QHash<QString, QJsonObject>::const_iterator i = templateParams.constBegin();
+    while (i != templateParams.constEnd()) {
+        paramsarray.append(i.value());
 
+        ++i;
+    }
     QJsonObject ret;
 
     ret.insert("x", roundedTo10(previousxpos));
@@ -152,6 +172,7 @@ QJsonObject Shot::generateJson()
     ret.insert("bred", this->brush().color().red());
     ret.insert("bgreen", this->brush().color().green());
     ret.insert("bblue", this->brush().color().blue());
+    ret.insert("templateParams", paramsarray);
     return ret;
 }
 
