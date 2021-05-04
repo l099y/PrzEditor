@@ -10,6 +10,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QComboBox>
+#include <QLineEdit>
 
 class CustomShotParameterInterface : public QWidget
 {
@@ -24,6 +25,7 @@ public:
     QDoubleSpinBox* sd = nullptr;
     QPushButton* bt = nullptr;
     QComboBox* combb = nullptr;
+    QLineEdit* le = nullptr;
 
     void setShot(Shot*);
     void InitInt();
@@ -31,6 +33,7 @@ public:
     void InitBool();
     void InitFile();
     void InitPlayMod();
+    void InitLabel();
     void setParamValueInShot(QString value);
 
     QString getParamValueFromShot();

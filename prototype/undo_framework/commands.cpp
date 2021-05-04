@@ -206,17 +206,16 @@ void ChangeParameterInShotCommand::undo()
 {
    QString name = oldconfig.value("name").toString();
    sh->templateParams.insert(name, oldconfig);
-   sh->scene()->selectedItems().clear();
+   sh->scene()->clearSelection();
    sh->setSelected(true);
-   app->shotparams->setShot(sh);
+   sh->update();
 }
 
 void ChangeParameterInShotCommand::redo()
 {
     QString name = oldconfig.value("name").toString();
     sh->templateParams.insert(name, newconfig);
-    sh->scene()->selectedItems().clear();
+    sh->scene()->clearSelection();
     sh->setSelected(true);
-    app->shotparams->setShot(sh);
-
+    sh->update();
 }

@@ -203,6 +203,17 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
         painter->setPen(this->pen());
     }
     painter->drawRoundedRect(rect(),5,5);
+
+    double scaleValue =1/painter->transform().m11();
+    painter->save();
+    painter->scale(scaleValue, 1);
+        painter->setPen(QColor(0,0,100));
+        painter->setBrush(QColor(0,0,0));
+        painter->rotate(-90);
+        QString qs = templateParams.value("Shot designation").value("value").toString();
+        painter->drawText(-95, 13, qs.length()<15? qs : qs.left(14));
+        painter->rotate(90);
+    painter->restore();
 }
 
 

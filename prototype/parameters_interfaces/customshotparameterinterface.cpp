@@ -28,6 +28,9 @@ CustomShotParameterInterface::CustomShotParameterInterface(QJsonObject data, QWi
     else if (param.value("type").toString()=="4"){ //PLAYMOD type
         InitPlayMod();
     }
+    else if (param.value("type").toString()=="5"){ //QString type
+        InitLabel();
+    }
 }
 
 void CustomShotParameterInterface::setShot(Shot * shot)
@@ -41,13 +44,17 @@ void CustomShotParameterInterface::setShot(Shot * shot)
     }
     else if (param.value("type").toString()=="2"){ //BOOL type
         qDebug()<<getParamValueFromShot().toInt() << "in setshot";
-        cb->setChecked(getParamValueFromShot().toInt());
+        cb->setChecked  (getParamValueFromShot().toInt());
     }
     else if (param.value("type").toString()=="3"){ //FILE type
         // need to configure the dialog
     }
     else if (param.value("type").toString()=="4"){ //PLAYMOD type
         combb->setCurrentIndex(getParamValueFromShot().toInt());
+        // need to configure the dialog
+    }
+    else if (param.value("type").toString()=="5"){ //QString type
+        le->setText(getParamValueFromShot());
         // need to configure the dialog
     }
 
@@ -103,6 +110,15 @@ void CustomShotParameterInterface::InitPlayMod()
 
 }
 
+void CustomShotParameterInterface::InitLabel()
+{
+    le = new QLineEdit(this);
+    le->setMinimumWidth(120);
+    le->setMinimumHeight(20);
+    layout()->addWidget(le);
+    connect(le, SIGNAL(editingFinished()), this, SLOT(setValue()));
+}
+
 QString CustomShotParameterInterface::getParamValueFromShot()
 {
     auto json = shot->templateParams.value(paramName());
@@ -141,15 +157,18 @@ void CustomShotParameterInterface::setValue()
         setParamValueInShot(QString::fromStdString(std::to_string(sd->value())));
     }
     else if (param.value("type").toString()=="2"){ //BOOL type
-        setParamValueInShot(QString::fromStdString(std::to_string(cb->isChecked())));
+        setParamValueInShot(QString::fromStdString(std::to_string(!cb->isChecked())));
     }
     else if (param.value("type").toString()=="4"){ //PLAYMOD type
         setParamValueInShot(QString::fromStdString(std::to_string(combb->currentIndex())));
+    }
+    else if (param.value("type").toString()=="5"){ //QString type
+        setParamValueInShot(le->text());
     }
 }
 
 void CustomShotParameterInterface::focusOutEvent(QFocusEvent *event)
 {
-
+    qDebug()<<"i focused out a parameter widget";
     QWidget::focusOutEvent(event);
 }
