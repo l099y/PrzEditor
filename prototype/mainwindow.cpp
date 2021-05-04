@@ -40,23 +40,36 @@ MainWindow::MainWindow(QWidget *parent)
 }
 void MainWindow :: initButtons(){
 
-    allignbutton->setText("allign");
-    allignbutton->setMinimumSize(QSize(40,40));
-    connect(allignbutton, SIGNAL(clicked(bool)), timeline, SLOT(debugItems()));
-    clearbutton->setText("clear");
-    clearbutton->setMinimumSize(QSize(40,40));
+    QPixmap b(":/images/align.png");
+    QIcon bb(b);
+    alignbutton->setIcon(bb);
+    alignbutton->setIconSize(QSize(30,30));
+    alignbutton->setMaximumSize(QSize(40,40));
+    alignbutton->setToolTip("align shots");
+    connect(alignbutton, SIGNAL(clicked(bool)), timeline, SLOT(debugItems()));
+
+    QPixmap a(":/images/sweeping.png");
+    QIcon aa(a);
+    clearbutton->setIcon(aa);
+    clearbutton->setIconSize(QSize(30,30));
+    clearbutton->setMaximumSize(QSize(40,40));
+    clearbutton->setToolTip("clear the timeline");
     connect(clearbutton, SIGNAL(clicked(bool)), timeline, SLOT(clearItems()));
-    newboxbutton->setMinimumSize(QSize(40,40));
-    newboxbutton->setText("new");
-    connect(newboxbutton, SIGNAL(clicked(bool)), timeline, SLOT(newRect()));
-    mod2button->setText("mod2");
-    mod2button->setMinimumSize(QSize(40,40));
-    connect(mod2button, SIGNAL(clicked(bool)), timeline, SLOT(setmod2()));
-    dispbutton->setText("disp");
-    dispbutton->setMinimumSize(QSize(40,40));
+
+    QPixmap c(":/images/displace.png");
+    QIcon cc(c);
+    dispbutton->setIcon(cc);
+    dispbutton->setIconSize(QSize(30,30));
+    dispbutton->setMaximumSize(QSize(40,40));
+    dispbutton->setToolTip("next selection movement will displace other shots");
     connect(dispbutton, SIGNAL(clicked(bool)), timeline, SLOT(setdisp()));
-    delbutton->setText("disp");
-    delbutton->setMinimumSize(QSize(40,40));
+
+    QPixmap pixmap(":/images/delete.png");
+    QIcon ButtonIcon(pixmap);
+    delbutton->setIcon(ButtonIcon);
+    delbutton->setIconSize(QSize(30,30));
+    delbutton->setMaximumSize(QSize(40,40));
+    delbutton->setToolTip("delete selection");
     connect(delbutton, SIGNAL(clicked(bool)), timeline, SLOT(deleteSelection()));
 
 
@@ -70,8 +83,9 @@ void MainWindow ::initLayouts(){
 }
 void MainWindow::initcontenance(){
 
-    sublayoutsplit0->addWidget(timelineButtons);
+
     sublayoutsplit0->addWidget(supposedtimeslider);
+    sublayoutsplit0->addWidget(timelineButtons);
     sublayoutEditor->addWidget(timelineNutils);
     sublayoutEditor->addWidget(parameters);
     sublayoutsplit->addWidget(tree);
@@ -82,13 +96,14 @@ void MainWindow::initcontenance(){
     scrollArea->setWidgetResizable( true );
 
 
-    sublayoutsplit->setMargin(20);
-    sublayoutbutton->addWidget(newboxbutton);
+    sublayoutsplit->setMargin(10);
+    sublayoutbutton->setAlignment(Qt::AlignRight);
     sublayoutbutton->addWidget(clearbutton);
-    sublayoutbutton->addWidget(allignbutton);
+    sublayoutbutton->addWidget(alignbutton);
     sublayoutbutton->addWidget(dispbutton);
-    sublayoutbutton->addWidget(mod2button);
     sublayoutbutton->addWidget(delbutton);
+    timelineButtons->setMaximumWidth(300);
+    sublayoutbutton->setAlignment(Qt::AlignRight);
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -115,7 +130,7 @@ void MainWindow::initwidgetsparams(){
 }
 void MainWindow :: bindLayoutsToWidgets(){
     timelineNutils->setLayout(sublayoutsplit0);
-    timelineNutils->setMaximumHeight(350);
+    timelineNutils->setMaximumHeight(400);
     supposedtimeslider->setLayout(sublayouttimeline);
     timelineButtons->setLayout(sublayoutbutton);
     parameters->setLayout(sublayoutsplit);
@@ -155,7 +170,6 @@ void MainWindow::inittimelinescene(){
     timelineView->setStyleSheet(QString("QScrollBar:horizontal { border: 2px solid grey; background: #505050; height: 15px; margin: 1px; }"));
     timelineView->setDragMode(QGraphicsView::RubberBandDrag);
     timelineView->setAlignment(Qt::AlignLeft);
-    timelineView->setMaximumHeight(300);
     timelineView->acceptDrops();
     sublayouttimeline->addWidget(timelineView);
     sublayouttimeline->setAlignment(Qt::AlignTop);
@@ -425,6 +439,13 @@ void MainWindow::clearedTimeline(TimelineScene *timeline, QVector<Shot *> remove
     undoStack->push(clear);
 }
 
+void MainWindow::changeParameterInAShot(Shot * sh, QJsonObject obj)
+{
+    qDebug()<<"arrived in main"<< obj.value("value").toString();
+    QUndoCommand *changeparam = new ChangeParameterInShotCommand(this, sh, obj);
+    undoStack->push(changeparam);
+}
+
 void MainWindow::saveActionTriggered()
 {
     saveDialog = new ProjectLoader(true, this);
@@ -475,6 +496,7 @@ void MainWindow::initShotsParameters()
         scrollArea->setWidget(shotparams);
         scrollArea->setLayout(sublayoutparams1);
         enableParameterInterface(false);
+        connect(shotparams, SIGNAL(valueChangedRequest(Shot*, QJsonObject)), this, SLOT(changeParameterInAShot(Shot*, QJsonObject)));
     }
 
 }

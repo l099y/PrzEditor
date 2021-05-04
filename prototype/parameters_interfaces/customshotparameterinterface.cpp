@@ -40,6 +40,7 @@ void CustomShotParameterInterface::setShot(Shot * shot)
         sd->setValue(getParamValueFromShot().toFloat());
     }
     else if (param.value("type").toString()=="2"){ //BOOL type
+        qDebug()<<getParamValueFromShot().toInt() << "in setshot";
         cb->setChecked(getParamValueFromShot().toInt());
     }
     else if (param.value("type").toString()=="3"){ //FILE type
@@ -91,6 +92,8 @@ void CustomShotParameterInterface::InitPlayMod()
 {
     combb = new QComboBox(this);
     combb->setEditable(false);
+    combb->setMinimumWidth(120);
+    combb->setFixedHeight(30);
     combb->addItem("Pause at end");
     combb->addItem("To next scene");
     combb->addItem("Stop at Begining");
@@ -108,11 +111,19 @@ QString CustomShotParameterInterface::getParamValueFromShot()
 
 void CustomShotParameterInterface::setParamValueInShot(QString value)
 {
+    // sending a new configuration to the paraminterface, relaying it to the main to handle the change by Qundo
 
-    QJsonObject a = shot->templateParams.value(paramName());
-    a.insert("value", value);
-    shot->templateParams.insert(paramName(), a);
-    qDebug()<<a;
+      QJsonObject newparam = shot->templateParams.value(paramName());
+
+
+      if (newparam.value("value").toString() != value){
+      newparam.insert("value", value);
+      emit (valueChangeRequest(newparam));
+      }
+//    QJsonObject a = shot->templateParams.value(paramName());
+//    a.insert("value", value);
+//    shot->templateParams.insert(paramName(), a);
+//    qDebug()<<a;
 }
 
 QString CustomShotParameterInterface::paramName()
@@ -130,7 +141,7 @@ void CustomShotParameterInterface::setValue()
         setParamValueInShot(QString::fromStdString(std::to_string(sd->value())));
     }
     else if (param.value("type").toString()=="2"){ //BOOL type
-        setParamValueInShot(QString::fromStdString(std::to_string(!cb->isChecked())));
+        setParamValueInShot(QString::fromStdString(std::to_string(cb->isChecked())));
     }
     else if (param.value("type").toString()=="4"){ //PLAYMOD type
         setParamValueInShot(QString::fromStdString(std::to_string(combb->currentIndex())));

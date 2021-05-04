@@ -437,9 +437,11 @@ void TimelineScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
         {
             handleSelectionMoveFinal();
             //resetBoxStates();
+            if (selection->scenePos().x()!=selection->previousxpos){
             emit (moveShotss(this,  getMovedShots(), previousSceneWidth, this->sceneRect().width()));
-            QGraphicsScene :: mouseReleaseEvent(e);
             previousSceneWidth = this->width();
+            }
+            QGraphicsScene :: mouseReleaseEvent(e);
         }
 
     }

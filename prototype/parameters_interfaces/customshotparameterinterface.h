@@ -37,7 +37,7 @@ public:
 
     inline QString paramName();
 signals:
-
+    void valueChangeRequest(QJsonObject newparam);
 public slots:
     void setValue();
 

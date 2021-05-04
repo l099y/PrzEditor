@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QDataStream>
 #include <QHash>
+#include <mainwindow.h>
 
 DeleteCommand::DeleteCommand(TimelineScene *scene, QUndoCommand *parent)
     : QUndoCommand(parent)
@@ -189,4 +190,33 @@ void LoadCommand::redo(){
     foreach (Shot* current, shots){
         timeline->addItem(current);
     }
+}
+
+ChangeParameterInShotCommand::ChangeParameterInShotCommand(MainWindow* app, Shot * shot, QJsonObject obj, QUndoCommand *parent) : QUndoCommand(parent)
+{
+   this->app = app;
+   sh = shot;
+   QString name = obj.value("name").toString();
+   oldconfig = shot->templateParams.value(name);
+   newconfig = obj;
+   setText(QObject::tr("change parameter %1").arg(name));
+}
+
+void ChangeParameterInShotCommand::undo()
+{
+   QString name = oldconfig.value("name").toString();
+   sh->templateParams.insert(name, oldconfig);
+   sh->scene()->selectedItems().clear();
+   sh->setSelected(true);
+   app->shotparams->setShot(sh);
+}
+
+void ChangeParameterInShotCommand::redo()
+{
+    QString name = oldconfig.value("name").toString();
+    sh->templateParams.insert(name, newconfig);
+    sh->scene()->selectedItems().clear();
+    sh->setSelected(true);
+    app->shotparams->setShot(sh);
+
 }

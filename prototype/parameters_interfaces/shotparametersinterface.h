@@ -20,7 +20,9 @@ public:
     QList<CustomShotParameterInterface*> parameters;
 
 signals:
-
+    void valueChangedRequest(Shot*, QJsonObject);
+public slots:
+    void RequestValueChanged(QJsonObject);
 };
 
 #endif // SHOTPARAMETERSINTERFACE_H

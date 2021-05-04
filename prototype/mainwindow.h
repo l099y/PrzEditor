@@ -70,9 +70,9 @@ public:
     QLabel *paramlabel = new QLabel("parameters");
     QHBoxLayout *layout = new QHBoxLayout(this);
     QVBoxLayout *sublayoutEditor = new QVBoxLayout(widget);
-    QVBoxLayout *sublayoutbutton = new QVBoxLayout(widget);
+    QHBoxLayout *sublayoutbutton = new QHBoxLayout(widget);
     QVBoxLayout *sublayouttimeline = new QVBoxLayout(parameters);
-    QHBoxLayout *sublayoutsplit0 = new QHBoxLayout(parameters);
+    QVBoxLayout *sublayoutsplit0 = new QVBoxLayout(parameters);
     QHBoxLayout *sublayoutsplit = new QHBoxLayout(parameters);
     QVBoxLayout *sublayoutparams1 = new QVBoxLayout(params1);
 
@@ -98,7 +98,7 @@ public:
 
     QGraphicsView *timelineView = new QGraphicsView(this);
     TimelineScene *timeline = new TimelineScene(reg, timelineView, this);
-    QPushButton* allignbutton = new QPushButton();
+    QPushButton* alignbutton = new QPushButton();
     QPushButton* clearbutton = new QPushButton();
     QPushButton* newboxbutton = new QPushButton();
     QPushButton* mod2button = new QPushButton();
@@ -170,6 +170,7 @@ public slots:
     void createdShot(QList<SequenceData*> seq, int xpos, int length, TimelineScene* timeline , QVector<Shot*> movedShots);
     void movedShots(TimelineScene*, QVector<Shot*> movedShots, int prevscenewidth, int currentscenewidth);
     void clearedTimeline(TimelineScene*, QVector<Shot*>, int);
+    void changeParameterInAShot(Shot*, QJsonObject);
 
     // Saving and Loading projet related slots
 

@@ -7,6 +7,7 @@
 #include "sequence_elements/timelinescene.h"
 #include <QHash>
 #include <QJsonObject>
+#include <mainwindow.h>
 
 class DeleteCommand : public QUndoCommand
 {
@@ -80,5 +81,17 @@ private:
     TimelineScene* timeline;
     float timelinesize;
     QList<Shot*> shots;
+};
+
+class ChangeParameterInShotCommand : public QUndoCommand{
+public:
+    ChangeParameterInShotCommand(MainWindow*, Shot*, QJsonObject,  QUndoCommand *parent = nullptr);
+    void undo() override;
+    void redo() override;
+private:
+    MainWindow* app;
+    Shot* sh;
+    QJsonObject oldconfig;
+    QJsonObject newconfig;
 };
 #endif // COMMANDS_H

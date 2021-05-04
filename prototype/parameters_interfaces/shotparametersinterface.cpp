@@ -15,6 +15,7 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
 
   foreach (QJsonValue val, config.value("shot").toArray()){
       CustomShotParameterInterface* param = new CustomShotParameterInterface(val.toObject());
+      connect (param, SIGNAL(valueChangeRequest(QJsonObject)), this, SLOT(RequestValueChanged(QJsonObject)));
       layout()->addWidget(param);
       layout()->setAlignment(param, Qt::AlignLeft);
       parameters.append(param);
@@ -27,4 +28,10 @@ void ShotParametersInterface::setShot(Shot *shot)
     foreach (CustomShotParameterInterface* current, parameters){
         current->setShot(shot);
     }
+}
+
+void ShotParametersInterface::RequestValueChanged(QJsonObject newparam)
+{
+    emit (valueChangedRequest(shot, newparam));
+    qDebug()<<"request paramchange";
 }

@@ -10,7 +10,7 @@
       },
       {
          "name":"glowIntensity",
-         "value":"0",
+         "value":"0.000000",
          "type":"1",
          "default_value":"0",
          "minval":"0",
@@ -18,7 +18,7 @@
       },
       {
          "name":"glowPower",
-         "value":"0",
+         "value":"0.000000",
          "type":"1",
          "default_value":"0",
          "minval":"0",
@@ -34,7 +34,7 @@
       },
       {
          "name":"sceneRotation",
-         "value":"0",
+         "value":"0.000000",
          "type":"1",
          "default_value":"0",
          "minval":"0",
@@ -58,7 +58,7 @@
       },
       {
          "name":"audioRotation",
-         "value":"0",
+         "value":"0.000000",
          "type":"1",
          "default_value":"0",
          "minval":"0",
@@ -74,7 +74,7 @@
       },
       {
          "name":"backgroundRotation",
-         "value":"0",
+         "value":"0.000000",
          "type":"1",
          "default_value":"0",
          "minval":"0",
@@ -106,7 +106,7 @@
       },
       {
          "name":"scale",
-         "value":"0",
+         "value":"0.000000",
          "type":"1",
          "default_value":"0",
          "minval":"0",
@@ -114,7 +114,7 @@
       },
       {
          "name":"cameraHeight",
-         "value":"0",
+         "value":"0.000000",
          "type":"1",
          "default_value":"0",
          "minval":"0",

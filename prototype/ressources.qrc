@@ -3,6 +3,12 @@
         <file>shot.json</file>
     </qresource>
     <qresource prefix="/images">
-        <file alias="quark">51knnZau1QL._AC_.jpg</file>
+        <file>delete.png</file>
+        <file>sweeping.png</file>
+        <file>displace.png</file>
+        <file>align.png</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>sweeping.png</file>
     </qresource>
 </RCC>
