@@ -18,6 +18,11 @@ public:
     Shot* shot = nullptr;
     void setShot(Shot* shot);
     QList<CustomShotParameterInterface*> parameters;
+    QLabel* title = new QLabel(this);
+    QLineEdit* path = new QLineEdit(this);
+
+    QSpinBox* widthInput = new QSpinBox(this);
+    QSpinBox* positionInput = new QSpinBox(this);
 
 signals:
     void valueChangedRequest(Shot*, QJsonObject);

@@ -9,20 +9,15 @@
       "maxval":"200"
       },
       {
-         "name":"Framerate",
-         "value":"24",
-         "type":"0",
-         "default_value":"24",
-         "minval":"0",
-         "maxval":"200"
-      },
-      {
          "name":"Glow Intensity",
          "value":"0.000000",
          "type":"1",
          "default_value":"0",
          "minval":"0",
-         "maxval":"100"
+         "maxval":"100",
+         "softmin":"0",
+         "softmax":"10",
+         "stepvalue": "0.1"
       },
       {
          "name":"Glow Power",
@@ -30,7 +25,10 @@
          "type":"1",
          "default_value":"0",
          "minval":"0",
-         "maxval":"100"
+         "maxval":"100",
+         "softmin":"0",
+         "softmax":"10",
+         "stepvalue": "0.1"
       },
       {
          "name":"Reset View",
@@ -43,7 +41,7 @@
       {
          "name":"Scene Rotation",
          "value":"0.000000",
-         "type":"1",
+         "type":"0",
          "default_value":"0",
          "minval":"0",
          "maxval":"360"
@@ -67,7 +65,7 @@
       {
          "name":"Audio Rotation",
          "value":"0.000000",
-         "type":"1",
+         "type":"0",
          "default_value":"0",
          "minval":"0",
          "maxval":"360"
@@ -83,7 +81,7 @@
       {
          "name":"Background Rotation",
          "value":"0.000000",
-         "type":"1",
+         "type":"0",
          "default_value":"0",
          "minval":"0",
          "maxval":"360"
@@ -105,20 +103,15 @@
          "maxval":""
       },
       {
-         "name":"Audio",
-         "value":"0",
-         "type":"0",
-         "default_value":"0",
-         "minval":"0",
-         "maxval":"100"
-      },
-      {
          "name":"Scale",
          "value":"0.000000",
          "type":"1",
          "default_value":"0",
          "minval":"0",
-         "maxval":"1"
+         "maxval":"1",
+         "stepvalue": "0.01",
+         "softmin":"0",
+         "softmax":"1"
       },
       {
          "name":"CameraHeight",
@@ -126,26 +119,13 @@
          "type":"1",
          "default_value":"0",
          "minval":"0",
-         "maxval":"200"
-      },
-      {
-         "name":"Fade From Black Frame In",
-         "value":"0",
-         "type":"0",
-         "default_value":"0",
-         "minval":"0",
-         "maxval":"1000000"
+         "maxval":"200",
+         "stepvalue": "0.01",
+         "softmin":"0",
+         "softmax":"200"
       },
       {
          "name":"Fade From Black Frame Out",
-         "value":"0",
-         "type":"0",
-         "default_value":"0",
-         "minval":"0",
-         "maxval":"1000000"
-      },
-      {
-         "name":"Fade To Black Frame In",
          "value":"0",
          "type":"0",
          "default_value":"0",

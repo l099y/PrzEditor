@@ -38,10 +38,15 @@ AddCommand::AddCommand(QList<SequenceData*> seq, int xpos, int length, TimelineS
     }
     timeline = scene;
     shot = new Shot();
+
     this->seqs = seq;
     this->xpos = xpos;
     this->length = length;
     shot->seqs.append(seqs[0]);
+
+    QJsonObject newparam = shot->templateParams.value("Shot designation");
+    newparam.insert("value", seqs[0]->name);
+    shot->templateParams.insert("Shot designation", newparam);
 
 
     scene->update();

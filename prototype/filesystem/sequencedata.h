@@ -1,4 +1,4 @@
-#ifndef SEQUENCEDATA_H
+    #ifndef SEQUENCEDATA_H
 #define SEQUENCEDATA_H
 
 #include <QObject>

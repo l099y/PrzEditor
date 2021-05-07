@@ -41,6 +41,7 @@ void CustomShotParameterInterface::setShot(Shot * shot)
     }
     else if (param.value("type").toString()=="1"){ //FLOAT type
         sd->setValue(getParamValueFromShot().toFloat());
+        cs->setValue(getParamValueFromShot().toFloat()/param.value("stepvalue").toString().toDouble());
     }
     else if (param.value("type").toString()=="2"){ //BOOL type
         qDebug()<<getParamValueFromShot().toInt() << "in setshot";
@@ -74,11 +75,24 @@ void CustomShotParameterInterface::InitInt()
 void CustomShotParameterInterface::InitFloat()
 {
     sd = new QDoubleSpinBox(this);
+    cs = new CustomQSlider(this);
+    cs->setOrientation(Qt::Horizontal);
     sd->setMinimum(param.value("minval").toString().toInt());
     sd->setMaximum(param.value("maxval").toString().toInt());
-    sd->setMinimumWidth(120);
+    cs->setRange(param.value("softmin").toString().toInt()/param.value("stepvalue").toString().toDouble(),
+                 param.value("softmax").toString().toInt()/param.value("stepvalue").toString().toDouble());
+    qDebug()<<param.value("stepvalue").toString().toDouble()<< "stepvalue";
+
+    sd->setSingleStep(param.value("stepvalue").toString().toDouble());
+    sd->setMinimumWidth(50);
+    cs->setMinimumWidth(150);
     layout()->addWidget(sd);
+    layout()->addWidget(cs);
     connect (sd, SIGNAL(editingFinished()), this, SLOT(setValue()));
+    connect (cs, SIGNAL(sliderReleased()), this, SLOT(setValue()));
+    connect (sd, SIGNAL(valueChanged(double)), this, SLOT(updateFloatControllersFromSd()));
+    connect (cs, SIGNAL(sliderMoved(int)), this, SLOT(updateFloatControllersFromCs()));
+    connect (cs, SIGNAL(clicked()), this, SLOT(updateFloatControllersFromCs()));
 }
 
 void CustomShotParameterInterface::InitBool()
@@ -92,7 +106,12 @@ void CustomShotParameterInterface::InitFile()
 {
     bt = new QPushButton(this);
     bt->setText("select");
+    le = new QLineEdit(this);
+    le->setReadOnly(true);
+    cb = new QCheckBox(this);
     layout()->addWidget(bt);
+    layout()->addWidget(le);
+    layout()->addWidget(cb);
 }
 
 void CustomShotParameterInterface::InitPlayMod()
@@ -113,7 +132,7 @@ void CustomShotParameterInterface::InitPlayMod()
 void CustomShotParameterInterface::InitLabel()
 {
     le = new QLineEdit(this);
-    le->setMinimumWidth(120);
+    le->setMinimumWidth(220);
     le->setMinimumHeight(20);
     layout()->addWidget(le);
     connect(le, SIGNAL(editingFinished()), this, SLOT(setValue()));
@@ -154,7 +173,7 @@ void CustomShotParameterInterface::setValue()
         setParamValueInShot(QString::fromStdString(std::to_string(sb->value())));
     }
     else if (param.value("type").toString()=="1"){ //FLOAT type
-        setParamValueInShot(QString::fromStdString(std::to_string(sd->value())));
+        setParamValueInShot(QString::fromStdString(std::to_string(cs->value()*param.value("stepvalue").toString().toDouble())));
     }
     else if (param.value("type").toString()=="2"){ //BOOL type
         setParamValueInShot(QString::fromStdString(std::to_string(!cb->isChecked())));
@@ -167,8 +186,27 @@ void CustomShotParameterInterface::setValue()
     }
 }
 
+void CustomShotParameterInterface::updateFloatControllersFromCs()
+{
+    sd->setValue(cs->value()*param.value("stepvalue").toString().toDouble());
+}
+
+void CustomShotParameterInterface::updateFloatControllersFromSd()
+{
+    cs->setValue(sd->value()/param.value("stepvalue").toString().toDouble());
+}
+
 void CustomShotParameterInterface::focusOutEvent(QFocusEvent *event)
 {
     qDebug()<<"i focused out a parameter widget";
     QWidget::focusOutEvent(event);
 }
+
+bool CustomShotParameterInterface::event(QEvent * e)
+{
+    if (e->type()==QEvent::Wheel)
+        qDebug()<<e->type();
+    return true ;
+}
+
+

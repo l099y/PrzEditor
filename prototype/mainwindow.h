@@ -150,7 +150,6 @@ public:
 
 
 public slots:
-
     void changeButtonTxt();
     void scaleUpView();
     void scaleDownView();

@@ -11,6 +11,7 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QLineEdit>
+#include <parameters_interfaces/customqslider.h>
 
 class CustomShotParameterInterface : public QWidget
 {
@@ -20,6 +21,7 @@ public:
     QJsonObject param;
     Shot* shot = nullptr;
 
+    CustomQSlider* cs = nullptr;
     QSpinBox* sb  = nullptr;
     QCheckBox* cb = nullptr;
     QDoubleSpinBox* sd = nullptr;
@@ -42,10 +44,14 @@ public:
 signals:
     void valueChangeRequest(QJsonObject newparam);
 public slots:
+
     void setValue();
+    void updateFloatControllersFromCs();
+    void updateFloatControllersFromSd();
 
 protected:
     virtual void focusOutEvent(QFocusEvent *event);
+    virtual bool event(QEvent*);
 };
 
 #endif // CUSTOMSHOTPARAMETERINTERFACE_H

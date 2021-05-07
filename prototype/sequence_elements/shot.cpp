@@ -26,6 +26,7 @@ Shot::Shot(): QGraphicsRectItem()
     setFlag(QGraphicsItem :: ItemIsMovable);
     setFlag(QGraphicsItem :: ItemIsSelectable);
 
+
     connect(timer, SIGNAL(finished()), this, SLOT(setAnimatedFalse()));
 
     animation->setItem(this);
@@ -116,6 +117,11 @@ void Shot::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
     QGraphicsRectItem :: mouseMoveEvent(e);
 }
 
+QRectF Shot::boundingRect() const
+{
+    return this->rect();
+}
+
 void Shot::setPreviousToCurrent(){
     previousboxwidth = rect().width();
     previousxpos = scenePos().x();
@@ -204,15 +210,84 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     }
     painter->drawRoundedRect(rect(),5,5);
 
+    // Drawing the fadin / fadeout triangles;
+
+    int val =  templateParams.value("Fade From Black Frame Out").value("value").toString().toInt();
+
+    if (val != 0){
+    qreal startPointX1 = 0.0;
+    qreal startPointY1 = 0.0;
+
+    qreal endPointX1   = 0.0;
+    qreal endPointY1   = 100.0;
+
+    qreal endPointX2 = val*10;
+    qreal endPointY2 = 0;//fadin size;
+
+    QPainterPath path;
+
+    path.moveTo (startPointX1, startPointY1);
+
+    path.moveTo (startPointX1, startPointY1);
+    // Draw line from pen point to this point.
+    path.lineTo (endPointX1, endPointY1);
+    path.lineTo (endPointX2,   endPointY2);
+    path.lineTo (startPointX1, startPointY1);
+
+    painter->setPen (Qt :: NoPen);
+    QColor color(0,0,0);
+    color.setAlpha(40);
+    painter->fillPath (path, QBrush (color));
+    }
+
+    val =  templateParams.value("Fade To Black Frame Out").value("value").toString().toInt();
+
+    if (val!=0){
+
+    qreal startPointX1 = rect().width();
+    qreal startPointY1 = 0.0;
+
+    qreal endPointX1   = rect().width();
+    qreal endPointY1   = 100.0;
+
+    qreal endPointX2 = rect().width()-(val)*10;
+    qreal endPointY2 = 100;//fadin size;
+
+    QPainterPath path;
+
+    path.moveTo (startPointX1, startPointY1);
+
+    path.moveTo (startPointX1, startPointY1);
+    path.lineTo (endPointX1, endPointY1);
+    path.lineTo (endPointX2,   endPointY2);
+    path.lineTo (startPointX1, startPointY1);
+
+    painter->setPen (Qt :: NoPen);
+    QColor color(0,0,0);
+    color.setAlpha(40);
+    painter->fillPath (path, QBrush (color));
+    }
+
+    // retrieving the size of the visible shot
+
+    auto visiblerectsize = static_cast<int>((rect().width()*painter->transform().m11()));
     double scaleValue =1/painter->transform().m11();
     painter->save();
+
+    //disable scaling on painter, to have fix representation of graphics
+
     painter->scale(scaleValue, 1);
         painter->setPen(QColor(0,0,100));
         painter->setBrush(QColor(0,0,0));
-        painter->rotate(-90);
         QString qs = templateParams.value("Shot designation").value("value").toString();
-        painter->drawText(-95, 13, qs.length()<15? qs : qs.left(14));
-        painter->rotate(90);
+        if (qs.length()*6<visiblerectsize){
+        painter->drawText(5, 90, qs);
+        this->setToolTip("");
+        }
+        else{
+        this->setToolTip(qs);
+
+        }
     painter->restore();
 }
 

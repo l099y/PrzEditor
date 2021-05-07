@@ -107,5 +107,7 @@ protected:
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
     virtual void mousePressEvent (QGraphicsSceneMouseEvent *e);
     virtual void mouseMoveEvent (QGraphicsSceneMouseEvent *e);
+
+     QRectF boundingRect() const;
 };
 #endif // SHOT_H

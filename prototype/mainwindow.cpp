@@ -30,9 +30,10 @@ MainWindow::MainWindow(QWidget *parent)
     createUndoView();
     bindUndoElements();
     this->setWindowTitle("Presenz movie editor");
-    for (int i = 0; i <50 ; i++)
+    for (int i = 0; i <40 ; i++)
     {
         scaleDownView();
+
     }
     this->showMaximized();
 
@@ -143,6 +144,7 @@ void MainWindow::setupTreeItem(){
     sequencesStorageView->setDragEnabled(true);
     sequencesStorageView->setEditTriggers(nullptr); // this disable the ability to rename the current selected row;
     sequencesStorageView->setStyleSheet("background: rgb(120,120,120);");
+
     TreeModel->setRootPath("");
     TreeModel->setNameFilterDisables(false);
     TreeModel->setFilter(QDir::AllDirs|QDir::NoDotAndDotDot);
@@ -422,6 +424,7 @@ void MainWindow::deleteSelection()
 
 void MainWindow::createdShot(QList<SequenceData *> seq, int xpos, int length, TimelineScene *timeline , QVector<Shot*> movedShots)
 {
+    sequencesStorageView->clearSelection();
     QUndoCommand *createCommand = new AddCommand(seq, xpos, length, timeline , movedShots);
     undoStack->push(createCommand);
 }
@@ -448,21 +451,22 @@ void MainWindow::changeParameterInAShot(Shot * sh, QJsonObject obj)
 
 void MainWindow::saveActionTriggered()
 {
-    saveDialog = new ProjectLoader(true, this);
+    saveDialog = new ProjectLoader(true, "", this);
     saveDialog->setModal(true);
-    connect(saveDialog, SIGNAL(saveRequest(QString)), this, SLOT(saveRequestExecuted(QString)));
     saveDialog->exec();
-
-    qDebug()<<"saveAction triggered";
+    if (saveDialog->selectedFiles().length() == 1){
+        saveRequestExecuted(saveDialog->selectedFiles().at(0));
+    }
 }
 
 void MainWindow::loadActionTriggered()
 {
-    qDebug()<<"loadAction triggered";
-    saveDialog = new ProjectLoader(false, this);
+    saveDialog = new ProjectLoader(false, "", this);
     saveDialog->setModal(true);
-    connect(saveDialog, SIGNAL(loadRequest(QString)), this, SLOT(loadRequestExecuted(QString)));
     saveDialog->exec();
+    if (saveDialog->selectedFiles().length() == 1){
+        loadRequestExecuted(saveDialog->selectedFiles().at(0));
+    }
 }
 
 void MainWindow::saveRequestExecuted(QString filepath)

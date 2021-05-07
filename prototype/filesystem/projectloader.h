@@ -1,7 +1,7 @@
 #ifndef PROJECTLOADER_H
 #define PROJECTLOADER_H
 
-#include <QDialog>
+#include <QFileDialog>
 #include <QObject>
 #include <QVBoxLayout>
 #include <QTreeView>
@@ -9,13 +9,13 @@
 #include <QPushButton>
 #include <QLineEdit>
 
-class ProjectLoader : public QDialog
+class ProjectLoader : public QFileDialog
 {
 Q_OBJECT
 public:
 
 
-    ProjectLoader(bool, QWidget* parent = nullptr);
+    ProjectLoader(bool, QString, QWidget* parent = nullptr);
     static void notifyFailure(QString, QString);
 
     ~ProjectLoader();
@@ -40,12 +40,6 @@ signals:
 
 private :
     bool savingMod;
-    QPushButton* actionButton;
-    QPushButton* cancelButton;
-    QLineEdit* nameInput;
-    QVBoxLayout* layout;
-    QTreeView* view;
-    QFileSystemModel* model;
 
     // validate the possibility to save or load based on the QlineInput and the
 
