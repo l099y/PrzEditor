@@ -34,6 +34,8 @@ public slots:
     void setEnableStateByTree();
     void setEnableStateByTextInput();
 
+    static bool confirm(QString, QString);
+
 signals:
         void saveRequest(QString);
         void loadRequest(QString);
@@ -46,7 +48,7 @@ private :
     bool validateSave();
     bool validateLoad();
 
-    bool confirm(QString, QString);
+
 
 
     inline bool stringIsPrzsqsType(QString);

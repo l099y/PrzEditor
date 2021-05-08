@@ -25,7 +25,8 @@ ProjectLoader::ProjectLoader(bool creationmod, QString path = "", QWidget * pare
         this->setWindowTitle("Save");
    }
     else {
-        this->setAcceptMode(QFileDialog::AcceptOpen);
+       this->setFileMode(QFileDialog::ExistingFile);
+       this->setAcceptMode(QFileDialog::AcceptOpen);
 //        actionButton->setText("Load");
 //        connect (actionButton, SIGNAL(clicked(bool)), this, SLOT(attemptLoading()));
 //        connect (nameInput, SIGNAL(returnPressed()), this, SLOT(attemptLoading()));

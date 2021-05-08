@@ -8,6 +8,7 @@
 #include <sequence_elements/timelinescene.h>
 #include <QJsonObject>
 #include <QResource>
+#include <filesystem/projectloader.h>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -116,10 +117,21 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     scrollArea->setMaximumWidth(params1->width());
     qDebug()<<"resized";
 }
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    qDebug()<<"closed";
+    if (!isSaved)
+    {
+        if (ProjectLoader::confirm("do you want to save modified document","unsaved modifications"))
+        saveActionTriggered();
+    }
+}
 void MainWindow::initwidgetsparams(){
 
     widget->setMinimumWidth(1600);
     sublayoutsplit->setMargin(0);
+    sublayoutsplit0->setMargin(0);
     sublayoutEditor->setMargin(0);
     QPalette pal = palette();
     pal.setColor(QPalette::Background, Qt::white);
@@ -211,12 +223,16 @@ void MainWindow::createActions()
     exitAction = new QAction(tr("E&xit"), this);
     exitAction->setShortcuts(QKeySequence::Quit);
     connect(exitAction, &QAction::triggered, this, &QWidget::close);
+
+    saveAsAction = new QAction(tr("Save&As"), this);
+    connect(saveAsAction, SIGNAL(triggered(bool)), this, SLOT(saveAsTriggered()));
 }
 
 void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(saveAction);
+    fileMenu->addAction(saveAsAction);
     fileMenu->addAction(loadAction);
     fileMenu->addAction(exitAction);
 
@@ -268,6 +284,15 @@ void MainWindow::enableParameterInterface(bool mod)
         shotparams->setVisible(mod);
         shotparams->setEnabled(mod);
         scrollArea->setVisible(mod);
+}
+
+QJsonObject MainWindow::toJSON()
+{
+    QJsonObject ret;
+    ret.insert("timeline", timeline->generateJson());
+    ret.insert("savepath", savepath);
+    ret.insert("framerate", framerate);
+    return ret;
 }
 
 void MainWindow::changeButtonTxt(){
@@ -419,6 +444,7 @@ void MainWindow::deleteSelection()
         return;
 
     QUndoCommand *deleteCommand = new DeleteCommand(timeline);
+    isSaved = false;
     undoStack->push(deleteCommand);
 }
 
@@ -426,6 +452,7 @@ void MainWindow::createdShot(QList<SequenceData *> seq, int xpos, int length, Ti
 {
     sequencesStorageView->clearSelection();
     QUndoCommand *createCommand = new AddCommand(seq, xpos, length, timeline , movedShots);
+    isSaved = false;
     undoStack->push(createCommand);
 }
 
@@ -433,6 +460,7 @@ void MainWindow::movedShots(TimelineScene* timeline,QVector<Shot *> movedShots, 
 {
     qDebug()<<"reached moveshots in main";
     QUndoCommand *moveCommand = new MoveCommand(timeline, movedShots, prevscenesize, currentscenesize);
+    isSaved = false;
     undoStack->push(moveCommand);
 }
 
@@ -446,24 +474,44 @@ void MainWindow::changeParameterInAShot(Shot * sh, QJsonObject obj)
 {
     qDebug()<<"arrived in main"<< obj.value("value").toString();
     QUndoCommand *changeparam = new ChangeParameterInShotCommand(this, sh, obj);
+    isSaved = false;
     undoStack->push(changeparam);
 }
 
 void MainWindow::saveActionTriggered()
 {
+    if (savepath == ""){
+        saveAsTriggered();
+    }
+    else{
+        saveRequestExecuted(savepath);
+    }
+
+}
+
+void MainWindow::saveAsTriggered()
+{
     saveDialog = new ProjectLoader(true, "", this);
     saveDialog->setModal(true);
     saveDialog->exec();
+    qDebug()<<saveDialog->selectedFiles();
     if (saveDialog->selectedFiles().length() == 1){
         saveRequestExecuted(saveDialog->selectedFiles().at(0));
+        savepath = saveDialog->selectedFiles().at(0);
     }
 }
 
 void MainWindow::loadActionTriggered()
 {
+    if (!isSaved)
+    {
+        if (ProjectLoader::confirm("do you want to save modified document","unsaved modifications"))
+        saveActionTriggered();
+    }
     saveDialog = new ProjectLoader(false, "", this);
     saveDialog->setModal(true);
     saveDialog->exec();
+    qDebug()<<saveDialog->selectedFiles();
     if (saveDialog->selectedFiles().length() == 1){
         loadRequestExecuted(saveDialog->selectedFiles().at(0));
     }
@@ -477,9 +525,11 @@ void MainWindow::saveRequestExecuted(QString filepath)
         if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
         {
             qDebug()<<"file now exists";
-            QJsonDocument content(timeline->generateJson());
+
+            QJsonDocument content(toJSON());
             file.write(content.toJson());
             file.close();
+            isSaved = true;
             qDebug() << "Writing finished";
         }
     }
@@ -515,22 +565,28 @@ void MainWindow::loadRequestExecuted(QString filepath)
             QTextStream stream(&file);
             QString stringContent = stream.readAll();
             QJsonDocument readJson =  QJsonDocument::fromJson(stringContent.toUtf8());
-            QJsonObject obj;
+            QJsonObject save;
 
             // check validity of the document
             if(isValidJsonObject(readJson))
             {
-                obj = readJson.object();
+                save = readJson.object();
+                QJsonObject obj(save.value("timeline").toObject());
                 resetUndoStack();
+                savepath = save.value("savepath").toString();
+                framerate = save.value("framerate").toInt();
                 reg->usedSequences.clear();
                 reg->corruptedSequences.clear();
                 foreach (QGraphicsItem* current, timeline->items()){
                     Shot* sh = dynamic_cast<Shot*>(current);
-                    if (sh)
+                    if (sh){
                        timeline->removeItem(sh);
+                       //delete(&sh);
+                    }
                 }
                 timeline->setSceneRect(0,0,obj.value("size").toInt(), 300);
                 timeline->newRect();
+                isSaved = true;
                 QJsonArray shots = obj.value("shots").toArray();
                 foreach (QJsonValue current, shots){
                     auto obj =  current.toObject();
@@ -558,7 +614,7 @@ void MainWindow::loadRequestExecuted(QString filepath)
         }
         else
         {
-            ProjectLoader :: notifyFailure("document has not the proper format", "error");
+            ProjectLoader :: notifyFailure("file doesnt exist", "error");
         }
         file.close();
     }

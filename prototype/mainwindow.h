@@ -58,6 +58,9 @@ public:
 
 //
     float currentTimelineScaling = 1;
+    int framerate = 24;
+    QString savepath = "";
+    bool isSaved = true;
 
     // containers and layout
 
@@ -117,6 +120,7 @@ public:
     QAction *redoAction = nullptr;
     QAction *exitAction = nullptr;
     QAction *saveAction = nullptr;
+    QAction *saveAsAction = nullptr;
     QAction *loadAction = nullptr;
 
 
@@ -137,8 +141,7 @@ public:
 
     //init functions
 
-    void createActions();
-    void createMenus();
+
     void createUndoView();
     void bindUndoElements();
     void changeEvent(QEvent *event);
@@ -147,7 +150,7 @@ public:
     inline void enableParameterInterface(bool);
 
 
-
+    QJsonObject toJSON();
 
 public slots:
     void changeButtonTxt();
@@ -174,6 +177,7 @@ public slots:
     // Saving and Loading projet related slots
 
     void saveActionTriggered();
+    void saveAsTriggered();
     void loadActionTriggered();
 
     // those function are triggered by the modalDialog if an action is required
@@ -186,6 +190,8 @@ public slots:
     void changeSelectedShotInParametersInterface();
 
 private:
+    void createActions();
+    void createMenus();
     void initButtons();
     void inittimelinescene();
     void initLayouts();
@@ -198,6 +204,7 @@ private:
 
 protected:
     void resizeEvent(QResizeEvent *event) override ;
+    virtual void closeEvent(QCloseEvent *event) override;
 };
 
 #endif // MAINWINDOW_H

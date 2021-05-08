@@ -5,7 +5,7 @@
 Ruler::Ruler(float rulerSize):QGraphicsItem()
 {
     setSize(rulerSize);
-    background->setHeight(40);
+    background->setHeight(240);
 }
 
 void Ruler::xtand(float f)
