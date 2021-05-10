@@ -539,7 +539,7 @@ void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
         QList<Shot*> param;
         resetShotDisplacedFinal();
         auto print = getMovedShots();
-        resetBoxStates();
+        //resetBoxStates();
         emit (createShot(dropRepresentation->seqs, dropRepresentation->scenePos().x(), dropRepresentation->rect().width(), this, print));
         dropRepresentation =  nullptr;
     }
