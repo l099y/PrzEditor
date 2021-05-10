@@ -12,6 +12,7 @@
 #include <QComboBox>
 #include <QLineEdit>
 #include <parameters_interfaces/customqslider.h>
+#include <QFileDialog>
 
 class CustomShotParameterInterface : public QWidget
 {
@@ -29,6 +30,10 @@ public:
     QComboBox* combb = nullptr;
     QLineEdit* le = nullptr;
 
+
+    QFileDialog* dialog = nullptr;
+    QString selectedFile = "";
+
     void setShot(Shot*);
     void InitInt();
     void InitFloat();
@@ -38,13 +43,15 @@ public:
     void InitLabel();
     void setParamValueInShot(QString value);
 
-    QString getParamValueFromShot();
+    inline QString getParamValueFromShot();
 
     inline QString paramName();
+    inline void evaluateGlowDisplay();
 signals:
     void valueChangeRequest(QJsonObject newparam);
 public slots:
-
+    void evaluateDialogSelection();
+    void evaluateFileCheckBox();
     void setValue();
     void updateFloatControllersFromCs();
     void updateFloatControllersFromSd();

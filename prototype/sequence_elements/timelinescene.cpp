@@ -43,7 +43,7 @@ QJsonObject TimelineScene::generateJson()
         Shot* sh = dynamic_cast<Shot*>(current);
         if (sh)
         {
-          array.push_back(sh->generateJson());
+            array.push_back(sh->generateJson());
         }
     }
 
@@ -55,12 +55,12 @@ QJsonObject TimelineScene::generateJson()
 
 //this functions roots to real resizing functions on the selection mod on mouse move
 
-void TimelineScene::handleSelectionMove(){
+void TimelineScene::handleSelectionMove(float e){
     if (!selectedItems().isEmpty()){
         Shot* rect= dynamic_cast<Shot*>(selectedItems().at(0));
         switch (rect->mod){
         case (BoxState :: REGULAR):
-            behaveOnSelectionSwitchPosMove();
+            behaveOnSelectionSwitchPosMove(e);
             break;
         case (BoxState ::DISPLACE):
             behaveOnSelectionDisplace();
@@ -70,13 +70,13 @@ void TimelineScene::handleSelectionMove(){
 
 // on mouse release, another treatment is nessessary to settle the proper positions ( sometime the animated move creates wrong evaluation
 
-void TimelineScene::handleSelectionMoveFinal()
+void TimelineScene::handleSelectionMoveFinal(float e)
 {
     if (!selectedItems().isEmpty()){
         Shot* rect= dynamic_cast<Shot*>(selectedItems().at(0));
         switch (rect->mod){
         case (BoxState :: REGULAR):
-            behaveOnSelectionSwitchPosMoveFinal();
+            behaveOnSelectionSwitchPosMoveFinal(e);
             break;
         case (BoxState ::DISPLACE):
             behaveOnSelectionDisplace();
@@ -86,7 +86,7 @@ void TimelineScene::handleSelectionMoveFinal()
 
 }
 
-void TimelineScene::behaveOnSelectionSwitchPosMove()
+void TimelineScene::behaveOnSelectionSwitchPosMove(float e)
 {
     if (!selectedItems().isEmpty()){
         Shot* selection= dynamic_cast<Shot*>(selectedItems().at(0));
@@ -99,65 +99,55 @@ void TimelineScene::behaveOnSelectionSwitchPosMove()
             {
                 if (selection->wasLeftOf(rect)){
 
-                    if  (selection->rightSideIsInFirstHalfOf(rect))
+                    if  (!rect->isMyMiddlePastOrEqual(e))
                     {
-
-                        selection->setXToFrame(rect->previousxpos-sW) ;
-                        if(!rect->animated && rect->scenePos().x() != rect->previousxpos){
-                            rect->animatedMove(rect->previousxpos);
-
+                        if (rect->collidesWithItem(selection)){
+                            selection->setXToFrame(rect->previousxpos-sW) ;
                         }
+                        rect->animatedMove(rect->previousxpos);
                     }
-                    else if (selection->rightSideIsAfterSecondHalfOf(rect)){
+                    else {
 
-                        if(!rect->animated && rect->scenePos().x() != rect->previousxpos-sW){
+                        if(!rect->animated)
+                        {
                             rect->animatedMove(rect->previousxpos-sW);
-
                         }
 
-                        if (sW+sX<rect->previousboxwidth+rect->previousxpos)
+                        if (rect->isInMySecondHalf(e))
                             selection->setXToFrame(rect->previousboxwidth+rect->previousxpos-sW);
                     }
-                    else
-                        if(!rect->animated)
-                            rect->restore();
                 }
                 else
                 {
-                    if (selection->leftSideIsInSecondHalfOf(rect))
+                    if (rect->isMyMiddlePastOrEqual(e-10))
                     {
-                        selection->setXToFrame(rect->previousboxwidth+rect->previousxpos);
-                        if(!rect->animated && rect->scenePos().x() != rect->previousxpos){
-                            rect->animatedMove(rect->previousxpos);
-
+                        if (rect->collidesWithItem(selection)){
+                            selection->setXToFrame(rect->previousboxwidth+rect->previousxpos);
                         }
+                        rect->animatedMove(rect->previousxpos);
                     }
 
-                    else  if (selection->leftSideIsAfterFirstHalfOf(rect))
+                    else
                     {
-                        if(!rect->animated && rect->scenePos().x() != rect->previousxpos+sW){
+                        if(!rect->animated){
                             rect->animatedMove(rect->previousxpos+sW);
 
                         }
-                        if (sX>rect->previousxpos)
+                        if (rect->isInMyFirstHalf(e-10))
                             selection->setXToFrame(rect->previousxpos);
                     }
-                    else
-                        if(!rect->animated)
-                            rect->restore();
                 }
             }
         }
     }
 }
 
-void TimelineScene::behaveOnSelectionSwitchPosMoveFinal()
+void TimelineScene::behaveOnSelectionSwitchPosMoveFinal(float e)
 {
     qDebug()<<"rechaed posemovefinal";
     if (!selectedItems().isEmpty()){
         Shot* selection= dynamic_cast<Shot*>(selectedItems().at(0));
         selection->setX(selection->roundedTo10(selection->scenePos().x()<0?0:selection->scenePos().x()));
-        float sX = selection->scenePos().x();
         float sW = selection->rect().width();
         foreach (QGraphicsItem* current, items()){
             Shot* rect= dynamic_cast<Shot*>(current);
@@ -169,54 +159,47 @@ void TimelineScene::behaveOnSelectionSwitchPosMoveFinal()
                 rect->restore();
                 if (selection->wasLeftOf(rect)){
 
-                    if  (selection->rightSideIsInFirstHalfOf(rect))
+                    if  (!rect->isMyMiddlePastOrEqual(e))
                     {
-
-                        selection->setXToFrame(rect->previousxpos-sW) ;
-                        if(rect->scenePos().x() != rect->previousxpos){
-                            rect->setXToFrame(rect->previousxpos);
-
+                        if (rect->collidesWithItem(selection)){
+                            selection->setXToFrame(rect->previousxpos-sW) ;
                         }
+                        rect->setXToFrame(rect->previousxpos);
                     }
-                    else if (selection->rightSideIsAfterSecondHalfOf(rect)){
+                    else {
 
-                        if(rect->scenePos().x() != rect->previousxpos-sW){
+                        if(!rect->animated)// && rect->scenePos().x() != rect->previousxpos-sW
+                        {
                             rect->setXToFrame(rect->previousxpos-sW);
-
                         }
 
-                        if (sW+sX<rect->previousboxwidth+rect->previousxpos)
+                        if (rect->isInMySecondHalf(e))
                             selection->setXToFrame(rect->previousboxwidth+rect->previousxpos-sW);
                     }
-                    else
-                        rect->restore();
                 }
                 else
                 {
-                    if (selection->leftSideIsInSecondHalfOf(rect))
+                    if (rect->isMyMiddlePastOrEqual(e-10))
                     {
-                        selection->setXToFrame(rect->previousboxwidth+rect->previousxpos);
-                        if(rect->scenePos().x() != rect->previousxpos){
-                            rect->setXToFrame(rect->previousxpos);
-
+                        if (rect->collidesWithItem(selection)){
+                            selection->setXToFrame(rect->previousboxwidth+rect->previousxpos);
                         }
+                        rect->setXToFrame(rect->previousxpos);
                     }
 
-                    else  if (selection->leftSideIsAfterFirstHalfOf(rect))
+                    else
                     {
-                        if(rect->scenePos().x() != rect->previousxpos+sW){
+                        if(!rect->animated){
                             rect->setXToFrame(rect->previousxpos+sW);
 
                         }
-                        if (sX>rect->previousxpos)
+                        if (rect->isInMyFirstHalf(e-10))
                             selection->setXToFrame(rect->previousxpos);
                     }
-                    else
-                        rect->restore();
                 }
             }
         }
-        if (selection->previousxpos<selection->scenePos().x())
+        if (sceneRect().width() < selection->scenePos().x())
             this->setSceneRect(0,0,previousSceneWidth+(selection->scenePos().x()-selection->previousxpos),100);
     }
 }
@@ -240,25 +223,8 @@ void TimelineScene::behaveOnSelectionDisplace()
         this->setSceneRect(0,0,previousSceneWidth+(selection->scenePos().x()-selection->previousxpos),100);
     }
 }
-void TimelineScene::behaveOnSelectionInsertionDisplace()
-{
-    Shot* selection= dynamic_cast<Shot*>(selectedItems().at(0));
-    int limit = rectXAndWBefore(selection);
-    selection->setXToFrame(selection->scenePos().x()<limit? limit : selection->scenePos().x());
 
-
-    foreach (QGraphicsItem* current, items()){
-        Shot* rect= dynamic_cast<Shot *>(current);
-        if (rect && rect != selection && rect->previousxpos>= selection->previousxpos){
-            rect->setXToFrame(selection->rect().width()+rect->previousxpos+(selection->scenePos().x()-selection->previousxpos));
-
-        }
-        if (previousSceneWidth<previousSceneWidth+(selection->scenePos().x()-selection->previousxpos))
-            this->setSceneRect(0,0,previousSceneWidth+(selection->scenePos().x()-selection->previousxpos),100);
-    }
-}
-
-void TimelineScene::placeInsertedShotInTimeline()
+void TimelineScene::placeInsertedShotInTimeline(float e)
 {
     if (dropRepresentation->collidingItems().length()!=0){
 
@@ -271,14 +237,14 @@ void TimelineScene::placeInsertedShotInTimeline()
             Shot * sh = dynamic_cast<Shot*>(current);
             if (sh && sh!= dropRepresentation)
             {
-                if (sh->posOfMidd()<dropRepresentation->posOfMidd())
+                if (sh->isMyMiddlePastOrEqual(e))
                 {
-                    if (sh->previousxpos+sh->previousboxwidth>maxbeforeInsertMiddle)
+                    if (sh->collidesWithItem(dropRepresentation) && sh->previousxpos+sh->previousboxwidth>maxbeforeInsertMiddle)
                         maxbeforeInsertMiddle=sh->previousxpos+sh->previousboxwidth;
                 }
                 else
                 {
-                    if (sh->previousxpos<minafterInsertMiddle)
+                    if (sh->collidesWithItem(dropRepresentation) && sh->previousxpos<minafterInsertMiddle)
                         minafterInsertMiddle=sh->previousxpos;
                 }
             }
@@ -293,16 +259,30 @@ void TimelineScene::placeInsertedShotInTimeline()
 
             foreach (QGraphicsItem* current, items()){
                 Shot * sh = dynamic_cast<Shot*>(current);
+                if (minafterInsertMiddle == 2000000000){
 
-                //if the half of droprepresentation is before the half of current inspected shot
 
-                if (sh && sh!= dropRepresentation && sh->posOfMidd()>=dropRepresentation->posOfMidd())
-                {
-                   sh->setXToFrame(sh->previousxpos+dropRepresentation->rect().width());
-                   sh->setPreviousToCurrent();
+                    //if the half of droprepresentation is before the half of current inspected shot
+
+                    if (sh && sh!= dropRepresentation && !sh->isMyMiddlePastOrEqual(e))
+                    {
+                        sh->setXToFrame(sh->previousxpos+dropRepresentation->rect().width());
+                        sh->setPreviousToCurrent();
+                    }
                 }
+                else{
+                    int decalage = (dropRepresentation->previousboxwidth+maxbeforeInsertMiddle)-minafterInsertMiddle;
+                    dropRepresentation->setXToFrame(maxbeforeInsertMiddle);
+                    if (sh && sh!= dropRepresentation && sh->posOfMidd()>=dropRepresentation->posOfMidd())
+                    {
+                        sh->setXToFrame(sh->previousxpos+decalage);
+                        sh->setPreviousToCurrent();
+                    }
+
+                }
+
             }
-            dropRepresentation->setXToFrame(maxbeforeInsertMiddle);
+
 
         }
         else if (dropRepresentation->previousxpos+dropRepresentation->previousboxwidth>minafterInsertMiddle){
@@ -314,13 +294,13 @@ void TimelineScene::placeInsertedShotInTimeline()
 
                 if (sh && sh!= dropRepresentation && sh->posOfMidd()>=dropRepresentation->posOfMidd())
                 {
-                   sh->setXToFrame(sh->previousxpos-decalage);
-                   sh->setPreviousToCurrent();
+                    sh->setXToFrame(sh->previousxpos-decalage);
+                    sh->setPreviousToCurrent();
                 }
             }
 
         }
-    dropRepresentation->setPreviousToCurrent();
+        dropRepresentation->setPreviousToCurrent();
     }
 }
 void TimelineScene::resetShotDisplacedByInsertion()
@@ -328,11 +308,13 @@ void TimelineScene::resetShotDisplacedByInsertion()
 
     QHash<Shot*, int>::const_iterator i = imageOfPositions.constBegin();
     while (i != imageOfPositions.constEnd()) {
-         auto  sh =i.key();
-         sh->previousxpos = i.value();
-         sh->timer->stop();
-         sh->setXToFrame(sh->previousxpos);
-         i++;
+        auto  sh =i.key();
+        sh->previousxpos = i.value();
+        sh->timer->stop();
+        sh->setXToFrame(sh->previousxpos);
+        sh->setPreviousToCurrent();
+        sh->setAnimatedFalse();
+        i++;
     }
     imageOfPositions.clear();
 }
@@ -341,9 +323,9 @@ void TimelineScene::resetShotDisplacedFinal()
 {
     QHash<Shot*, int>::const_iterator i = imageOfPositions.constBegin();
     while (i != imageOfPositions.constEnd()) {
-         auto  sh =i.key();
-         sh->previousxpos = i.value();
-         i++;
+        auto  sh =i.key();
+        sh->previousxpos = i.value();
+        i++;
     }
     imageOfPositions.clear();
 }
@@ -399,7 +381,7 @@ void TimelineScene::activaterxt()
 void TimelineScene::deactivatext()
 {
 
-            qDebug()<<"xtension mod deactivated";
+    qDebug()<<"xtension mod deactivated";
 }
 
 void TimelineScene :: debugItems(){
@@ -423,7 +405,7 @@ void TimelineScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
     QGraphicsScene :: mouseMoveEvent (e);
     if (!selectedItems().isEmpty() && e->buttons()==Qt::LeftButton){
         Shot* rect= dynamic_cast<Shot*>(selectedItems().at(0));
-        handleSelectionMove();
+        handleSelectionMove(e->scenePos().x());
         selectedItems().at(0)->setY(-10);
     }
 }
@@ -435,11 +417,11 @@ void TimelineScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
         Shot* selection= dynamic_cast<Shot*>(selectedItems().at(0));
         if (selection)
         {
-            handleSelectionMoveFinal();
+            handleSelectionMoveFinal(e->scenePos().x());
             //resetBoxStates();
             if (selection->scenePos().x()!=selection->previousxpos){
-            emit (moveShotss(this,  getMovedShots(), previousSceneWidth, this->sceneRect().width()));
-            previousSceneWidth = this->width();
+                emit (moveShotss(this,  getMovedShots(), previousSceneWidth, this->sceneRect().width()));
+                previousSceneWidth = this->width();
             }
             QGraphicsScene :: mouseReleaseEvent(e);
         }
@@ -519,12 +501,12 @@ void TimelineScene::dragMoveEvent(QGraphicsSceneDragDropEvent *e)
             dropRepresentation->setY(0);
             dropRepresentation->setPreviousToCurrent();
             dropRepresentation->inserted=true;
-            placeInsertedShotInTimeline();
+            placeInsertedShotInTimeline(e->scenePos().x());
         }
         else{
             dropRepresentation->setXToFrame(e->scenePos().x()-(dropRepresentation->rect().width()/2));
             dropRepresentation->setY(0);
-            behaveOnSelectionSwitchPosMove();
+            behaveOnSelectionSwitchPosMove(e->scenePos().x());
         }
     }
 }
@@ -551,7 +533,7 @@ void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
 {
     if (dropRepresentation->inserted)
     {
-        behaveOnSelectionSwitchPosMoveFinal();
+        behaveOnSelectionSwitchPosMoveFinal(e->scenePos().x());
         removeItem(dropRepresentation);
         qDebug()<<"should be created";
         QList<Shot*> param;
@@ -671,7 +653,7 @@ void TimelineScene::displaceSelection(int framePos)
     if (!selectedItems().isEmpty()){
         Shot* selection= dynamic_cast<Shot *>(selectedItems().at(0));
         selection->setX(framePos*10);
-        handleSelectionMove();
+        handleSelectionMove(framePos*10);
         resetBoxStates();
         update();
     }

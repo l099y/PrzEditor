@@ -62,7 +62,7 @@ public:
 
     QJsonObject generateJson();
 
-inline int roundedTo10(float x);
+    int roundedTo10(float x);
 
 inline bool wasLeftOf(Shot* OtherCube)
     {
@@ -92,10 +92,19 @@ inline bool leftSideIsInFirstHalfOf (Shot* OtherCube)
         return  scenePos().x()>= OtherCube->previousxpos &&
                 scenePos().x()< OtherCube->previousxpos+(OtherCube->previousboxwidth/2);
     }
+
 inline int posOfMidd(){
     return previousxpos+(previousboxwidth/2);
 }
-
+inline bool isMyMiddlePastOrEqual(float e){
+    return e >= previousxpos+(rect().width())/2;
+}
+inline bool isInMyFirstHalf(float e){
+    return e>= previousxpos && e < previousxpos+(rect().width())/2;
+}
+inline bool isInMySecondHalf(float e){
+    return e>= previousxpos+(rect().width())/2 && e < previousxpos+rect().width();
+}
 public slots:
     void setAnimatedFalse();
 

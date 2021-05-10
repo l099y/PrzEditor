@@ -29,13 +29,16 @@ class TimelineScene : public QGraphicsScene
 
     void resetBoxStates();
     void resetToPrevious();
-    void behaveOnSelectionSwitchPosMove();
-    void behaveOnSelectionSwitchPosMoveFinal();
-    void handleSelectionMoveFinal();
-    void handleSelectionMove();
+
+
+    void behaveOnSelectionSwitchPosMove(float e);
+    void behaveOnSelectionSwitchPosMoveFinal(float e);
+
+    void handleSelectionMoveFinal(float e);
+    void handleSelectionMove(float e);
+
     void behaveOnSelectionDisplace();
-    void behaveOnSelectionInsertionDisplace();
-    void placeInsertedShotInTimeline();
+    void placeInsertedShotInTimeline(float e);
     void resetShotDisplacedByInsertion();
     void resetShotDisplacedFinal();
     void generateImageOfPosition();

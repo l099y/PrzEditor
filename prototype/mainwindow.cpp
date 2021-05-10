@@ -496,8 +496,9 @@ void MainWindow::saveAsTriggered()
     saveDialog->exec();
     qDebug()<<saveDialog->selectedFiles();
     if (saveDialog->selectedFiles().length() == 1){
-        saveRequestExecuted(saveDialog->selectedFiles().at(0));
         savepath = saveDialog->selectedFiles().at(0);
+        saveRequestExecuted(saveDialog->selectedFiles().at(0));
+
     }
 }
 

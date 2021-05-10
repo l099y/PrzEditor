@@ -10,6 +10,7 @@
 #include <ctime>
 #include <QFile>
 #include <QJsonDocument>
+#include <QGraphicsDropShadowEffect>
 
 
 Shot::Shot(): QGraphicsRectItem()
@@ -26,7 +27,12 @@ Shot::Shot(): QGraphicsRectItem()
     setFlag(QGraphicsItem :: ItemIsMovable);
     setFlag(QGraphicsItem :: ItemIsSelectable);
 
-
+    QGraphicsDropShadowEffect * dse = new QGraphicsDropShadowEffect();
+    dse->setBlurRadius(10);
+    dse->setColor(QColor(255,255,255,50));
+    dse->setXOffset(0);
+    dse->setYOffset(0);
+    setGraphicsEffect(dse);
     connect(timer, SIGNAL(finished()), this, SLOT(setAnimatedFalse()));
 
     animation->setItem(this);
@@ -67,6 +73,13 @@ Shot::Shot(QJsonObject jsonShot)
     setAcceptHoverEvents(true);
     setFlag(QGraphicsItem :: ItemIsMovable);
     setFlag(QGraphicsItem :: ItemIsSelectable);
+
+    QGraphicsDropShadowEffect * dse = new QGraphicsDropShadowEffect();
+    dse->setBlurRadius(10);
+    dse->setColor(QColor(255,255,255,50));
+    dse->setXOffset(0);
+    dse->setYOffset(0);
+    setGraphicsEffect(dse);
 
     connect(timer, SIGNAL(finished()), this, SLOT(setAnimatedFalse()));
 

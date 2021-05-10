@@ -1,6 +1,8 @@
 #include "customshotparameterinterface.h"
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QGraphicsDropShadowEffect>
+
 
 CustomShotParameterInterface::CustomShotParameterInterface(QJsonObject data, QWidget *parent) : QWidget(parent)
 {
@@ -31,6 +33,15 @@ CustomShotParameterInterface::CustomShotParameterInterface(QJsonObject data, QWi
     else if (param.value("type").toString()=="5"){ //QString type
         InitLabel();
     }
+
+    //init dialog
+    dialog  = new QFileDialog(this);
+    QStringList filter;
+    filter<< "*.mp4"<<"*.avi"<<"*.mkv";
+    dialog->setNameFilters(filter);
+    dialog->setFileMode(QFileDialog::ExistingFile);
+    dialog->setAcceptMode(QFileDialog::AcceptOpen);
+    dialog->setWindowTitle("select background");
 }
 
 void CustomShotParameterInterface::setShot(Shot * shot)
@@ -42,22 +53,25 @@ void CustomShotParameterInterface::setShot(Shot * shot)
     else if (param.value("type").toString()=="1"){ //FLOAT type
         sd->setValue(getParamValueFromShot().toFloat());
         cs->setValue(getParamValueFromShot().toFloat()/param.value("stepvalue").toString().toDouble());
+        evaluateGlowDisplay();
     }
     else if (param.value("type").toString()=="2"){ //BOOL type
         qDebug()<<getParamValueFromShot().toInt() << "in setshot";
         cb->setChecked  (getParamValueFromShot().toInt());
     }
     else if (param.value("type").toString()=="3"){ //FILE type
-        // need to configure the dialog
+        le->setText(getParamValueFromShot());
+        cb->setChecked(getParamValueFromShot()==""? false: true);
+        dialog->selectFile(getParamValueFromShot());
     }
     else if (param.value("type").toString()=="4"){ //PLAYMOD type
         combb->setCurrentIndex(getParamValueFromShot().toInt());
-        // need to configure the dialog
+
     }
     else if (param.value("type").toString()=="5"){ //QString type
         le->setText(getParamValueFromShot());
-        // need to configure the dialog
     }
+
 
 }
 
@@ -91,7 +105,7 @@ void CustomShotParameterInterface::InitFloat()
     connect (sd, SIGNAL(editingFinished()), this, SLOT(setValue()));
     connect (cs, SIGNAL(sliderReleased()), this, SLOT(setValue()));
     connect (sd, SIGNAL(valueChanged(double)), this, SLOT(updateFloatControllersFromSd()));
-    connect (cs, SIGNAL(sliderMoved(int)), this, SLOT(updateFloatControllersFromCs()));
+    connect (cs, SIGNAL(valueChanged(int)), this, SLOT(updateFloatControllersFromCs()));
     connect (cs, SIGNAL(clicked()), this, SLOT(updateFloatControllersFromCs()));
 }
 
@@ -112,6 +126,8 @@ void CustomShotParameterInterface::InitFile()
     layout()->addWidget(bt);
     layout()->addWidget(le);
     layout()->addWidget(cb);
+    connect(bt, SIGNAL(clicked(bool)), this, SLOT(evaluateDialogSelection()));
+    connect(cb, SIGNAL(clicked()), this, SLOT(evaluateFileCheckBox()));
 }
 
 void CustomShotParameterInterface::InitPlayMod()
@@ -148,22 +164,73 @@ void CustomShotParameterInterface::setParamValueInShot(QString value)
 {
     // sending a new configuration to the paraminterface, relaying it to the main to handle the change by Qundo
 
-      QJsonObject newparam = shot->templateParams.value(paramName());
+    QJsonObject newparam = shot->templateParams.value(paramName());
 
 
-      if (newparam.value("value").toString() != value){
-      newparam.insert("value", value);
-      emit (valueChangeRequest(newparam));
-      }
-//    QJsonObject a = shot->templateParams.value(paramName());
-//    a.insert("value", value);
-//    shot->templateParams.insert(paramName(), a);
-//    qDebug()<<a;
+    if (newparam.value("value").toString() != value){
+        newparam.insert("value", value);
+        emit (valueChangeRequest(newparam));
+    }
+    //    QJsonObject a = shot->templateParams.value(paramName());
+    //    a.insert("value", value);
+    //    shot->templateParams.insert(paramName(), a);
+    //    qDebug()<<a;
 }
 
 QString CustomShotParameterInterface::paramName()
 {
     return param.value("name").toString();
+}
+
+void CustomShotParameterInterface::evaluateGlowDisplay()
+{
+
+    if (param.value("name").toString()=="Glow Intensity")
+    {
+        qDebug()<<"in evaluateglow display intensity";
+        QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(shot->graphicsEffect());
+        effect->setYOffset((getParamValueFromShot().toFloat()/param.value("stepvalue").toString().toDouble()/10)*2);
+    }
+    else if(param.value("name").toString()=="Glow Power")
+    {
+        qDebug()<<"in evaluateglow display power";
+        QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(shot->graphicsEffect());
+        effect->setBlurRadius(10 - getParamValueFromShot().toFloat()/param.value("stepvalue").toString().toDouble()/10);
+    }
+}
+
+void CustomShotParameterInterface::evaluateDialogSelection()
+{
+    dialog->exec();
+
+    if (dialog->selectedFiles().length()!=0){
+        setParamValueInShot(dialog->selectedFiles()[0]);
+        le->setText(dialog->selectedFiles()[0]);
+        cb->setChecked(true);
+    }
+}
+
+void CustomShotParameterInterface::evaluateFileCheckBox()
+{
+    qDebug()<<getParamValueFromShot();
+    if (getParamValueFromShot() == ""){
+        if (!cb->isChecked()){
+            cb->setChecked(false);
+        }
+        else
+        {
+            cb->setChecked(false);
+           evaluateDialogSelection();
+        }
+    }
+    else
+    {
+        if (!cb->isChecked()){
+            setParamValueInShot("");
+            le->setText("");
+            cb->setChecked(false);
+        }
+    }
 }
 
 void CustomShotParameterInterface::setValue()
@@ -189,13 +256,36 @@ void CustomShotParameterInterface::setValue()
 void CustomShotParameterInterface::updateFloatControllersFromCs()
 {
     sd->setValue(cs->value()*param.value("stepvalue").toString().toDouble());
+    if (param.value("name").toString()=="Glow Intensity")
+    {
+        qDebug()<<"in evaluateglow display intensity";
+        QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(shot->graphicsEffect());
+        effect->setYOffset(sd->value()*2);
+    }
+    else if(param.value("name").toString()=="Glow Power")
+    {
+        qDebug()<<"in evaluateglow display power";
+        QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(shot->graphicsEffect());
+        effect->setBlurRadius(10 - sd->value());
+    }
 }
 
 void CustomShotParameterInterface::updateFloatControllersFromSd()
 {
     cs->setValue(sd->value()/param.value("stepvalue").toString().toDouble());
+    if (param.value("name").toString()=="Glow Intensity")
+    {
+        qDebug()<<"in evaluateglow display intensity";
+        QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(shot->graphicsEffect());
+        effect->setYOffset(sd->value()*2);
+    }
+    else if(param.value("name").toString()=="Glow Power")
+    {
+        qDebug()<<"in evaluateglow display power";
+        QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(shot->graphicsEffect());
+        effect->setBlurRadius(10 - sd->value());
+    }
 }
-
 void CustomShotParameterInterface::focusOutEvent(QFocusEvent *event)
 {
     qDebug()<<"i focused out a parameter widget";
