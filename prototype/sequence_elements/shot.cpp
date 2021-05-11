@@ -20,7 +20,7 @@ Shot::Shot(): QGraphicsRectItem()
     QRandomGenerator rdm(std::time(0));
     QPen pen (Qt::white);
     QColor a;
-    a.setRgb(rdm.bounded(0,74)+180,rdm.bounded(0,74)+180,150);
+    a.setRgb(rdm.bounded(0,74)+180,rdm.bounded(0,74)+180,100);
     setPen(pen);
     setBrush(a);
     setAcceptHoverEvents(true);
@@ -221,6 +221,11 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
         painter->setBrush(this->brush());
         painter->setPen(this->pen());
     }
+//    if (animated)
+//        {
+//        painter->setPen(QColor(Qt::yellow));
+//        painter->setBrush(QColor(255,0,0));
+//    }
     painter->drawRoundedRect(rect(),5,5);
 
     // Drawing the fadin / fadeout triangles;

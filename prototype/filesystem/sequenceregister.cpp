@@ -53,6 +53,28 @@ QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir) // th
     return ret;
 }
 
+QList<TbeSoundData *> SequenceRegister::GeneratesTbeFilesFromDir(QDir *dir)
+{
+
+    QList<TbeSoundData*> ret;
+    QStringList paths = dir->entryList(QStringList()<<"*.tbe", QDir::Files);
+
+
+
+    TbeSoundData *temp;
+
+    for (int i = 0; i <paths.size(); i ++){
+        temp = new TbeSoundData();
+           temp->filename = paths[i];
+           temp->path = dir->absolutePath();
+           ret.append(temp);
+    }
+    currentExpandedFolderSounds->insert(dir->absolutePath(), ret);
+    printStoredSounds();
+    qDebug()<<ret<<"soundfiles found";
+    return ret;
+}
+
 inline fileInf SequenceRegister::getReleventInfo(QString* path)
 {
     if (path->length() != 0){
@@ -83,6 +105,19 @@ void SequenceRegister::printStoredSequences()
         foreach (SequenceData* data, i.value())
             {
             qDebug()<< data->name<<" integrity is "<< data->CheckIntegrity();
+        }
+        qDebug() << i.key() << ": " << i.value();
+        ++i;
+    }
+}
+
+void SequenceRegister::printStoredSounds()
+{
+    QHash<QString, QList<TbeSoundData*>>::const_iterator i = currentExpandedFolderSounds->constBegin();
+    while (i != currentExpandedFolderSounds->constEnd()) {
+        foreach (TbeSoundData* data, i.value())
+            {
+            qDebug()<< data->filename<< "in the currentfolder";
         }
         qDebug() << i.key() << ": " << i.value();
         ++i;

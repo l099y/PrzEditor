@@ -15,6 +15,7 @@ class TimelineScene : public QGraphicsScene
     Q_OBJECT
     public:
     bool isPastLimit = false;
+    QGraphicsItem* selection = nullptr;
 
     TimelineScene(SequenceRegister*,QGraphicsView*, QObject* parent = nullptr);
     ~TimelineScene();
@@ -31,11 +32,8 @@ class TimelineScene : public QGraphicsScene
     void resetToPrevious();
 
 
-    void behaveOnSelectionSwitchPosMove(float e);
-    void behaveOnSelectionSwitchPosMoveFinal(float e);
-
-    void handleSelectionMoveFinal(float e);
-    void handleSelectionMove(float e);
+    void behaveOnSelectionSwitchPosMove(float mouseXPos, bool final);
+    void handleSelectionMove(float mouseXPos, bool final);
 
     void behaveOnSelectionDisplace();
     void placeInsertedShotInTimeline(float e);
@@ -61,12 +59,12 @@ public slots:
 
    void moveAllFrom(float from, float distance);
    void ExtendSceneWidth(float f);
-   void allign();
+   void align();
    void setdisp();
    void deleteSelection();
    void displaceSelection(int newPos);
    void changeSelectionSize(int newSize);
-   void setSingleSelectionToLast();
+   void handleSelectionChanged();
 
 
 signals:
@@ -80,6 +78,7 @@ signals:
 
 
 protected:
+   virtual void mousePressEvent(QGraphicsSceneMouseEvent *e);
    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *e);
    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
    virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *e);

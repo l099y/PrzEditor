@@ -34,7 +34,7 @@ QRectF Ruler::boundingRect() const
 
 void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    painter->fillRect(*background, QColor(80,150,150));
+    painter->fillRect(*background, QColor(255,255,180));
     double scaleValue =1/painter->transform().m11();
     QRect viewport_rect(0, 0, view->viewport()->width(), view->viewport()->height());
     QRectF visible_scene_rect = view->mapToScene(viewport_rect).boundingRect();

@@ -9,6 +9,7 @@
 #include <QJsonObject>
 #include <QResource>
 #include <filesystem/projectloader.h>
+#include <filesystem/tbesounddata.h>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -185,6 +186,7 @@ void MainWindow::inittimelinescene(){
     timelineView->setDragMode(QGraphicsView::RubberBandDrag);
     timelineView->setAlignment(Qt::AlignLeft);
     timelineView->acceptDrops();
+    //timelineView->setOptimizationFlags(QGraphicsView::DontSavePainterState|QGraphicsView::DontAdjustForAntialiasing);
     sublayouttimeline->addWidget(timelineView);
     sublayouttimeline->setAlignment(Qt::AlignTop);
     sublayoutbutton->setAlignment(Qt::AlignTop);
@@ -295,10 +297,6 @@ QJsonObject MainWindow::toJSON()
     return ret;
 }
 
-void MainWindow::changeButtonTxt(){
-
-}
-
 void MainWindow::scaleUpView()
 {
     if (currentTimelineScaling * 1.1 < 1 ){
@@ -311,8 +309,6 @@ void MainWindow::scaleUpView()
         currentTimelineScaling = 1;
         timeline->ruler.scale =1;
     }
-    qDebug()<<currentTimelineScaling;
-
 }
 
 void MainWindow::scaleDownView()
@@ -379,6 +375,7 @@ void MainWindow::displaySequences(QString path)
     {
         sequencesModel->clear();
         QList<SequenceData *> list = reg->currentExpandedFolderSequences->value(path);
+        QList<TbeSoundData *> list2 =  reg->currentExpandedFolderSounds->value(path);
         QStandardItem root (path);
         int i = 0;
 
@@ -387,6 +384,13 @@ void MainWindow::displaySequences(QString path)
             QPixmap logo (10,10);
             logo.fill(QColor(100,150,255));
             sequencesModel->item(i,0)->setData(logo, Qt::DecorationRole);
+        }
+        foreach (TbeSoundData* current, list2){
+            QPixmap a(":/images/360.png");
+            QIcon logo(a);
+            sequencesModel->insertRow(i, new QStandardItem(current->filename));
+            auto soundrep = sequencesModel->item(i,0);
+            soundrep->setData(logo, Qt::DecorationRole);
         }
         QStringList a;
         a.append(path);

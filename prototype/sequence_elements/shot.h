@@ -30,7 +30,7 @@ public:
 
     static QList<QColor> usedColor;
 
-    QTimeLine *timer = new QTimeLine(130);
+    QTimeLine *timer = new QTimeLine(110);
 
     QGraphicsItemAnimation *animation = new QGraphicsItemAnimation;
 
@@ -62,49 +62,25 @@ public:
 
     QJsonObject generateJson();
 
-    int roundedTo10(float x);
+    static int roundedTo10(float x);
 
-inline bool wasLeftOf(Shot* OtherCube)
+    inline bool wasLeftOf(Shot* OtherCube)
     {
         return  previousxpos<OtherCube->previousxpos;
     }
-inline bool rightSideIsInFirstHalfOf (Shot* OtherCube)
-    {
-        return  scenePos().x() + rect().width() >= OtherCube->previousxpos &&
-                scenePos().x() + rect().width() < OtherCube->previousxpos+(OtherCube->previousboxwidth/2);
-    }
-inline bool rightSideIsAfterSecondHalfOf (Shot* OtherCube)
-    {
-        return  scenePos().x() + rect().width() >= OtherCube->previousxpos+(OtherCube->previousboxwidth/2);
-    }
 
-inline bool leftSideIsAfterFirstHalfOf (Shot* OtherCube)
-    {
-        return scenePos().x()< OtherCube->previousxpos+(OtherCube->previousboxwidth/2);
+    inline int posOfMidd(){
+        return previousxpos+(previousboxwidth/2);
     }
-inline bool leftSideIsInSecondHalfOf (Shot* OtherCube)
-    {
-        return  scenePos().x()>= OtherCube->previousxpos+(OtherCube->previousboxwidth/2) &&
-                scenePos().x()< OtherCube->previousxpos+OtherCube->previousboxwidth;
+    inline bool isMyMiddlePastOrEqual(float e){
+        return e >= previousxpos+(rect().width())/2;
     }
-inline bool leftSideIsInFirstHalfOf (Shot* OtherCube)
-    {
-        return  scenePos().x()>= OtherCube->previousxpos &&
-                scenePos().x()< OtherCube->previousxpos+(OtherCube->previousboxwidth/2);
+    inline bool isInMyFirstHalf(float e){
+        return e>= previousxpos && e < previousxpos+(rect().width())/2;
     }
-
-inline int posOfMidd(){
-    return previousxpos+(previousboxwidth/2);
-}
-inline bool isMyMiddlePastOrEqual(float e){
-    return e >= previousxpos+(rect().width())/2;
-}
-inline bool isInMyFirstHalf(float e){
-    return e>= previousxpos && e < previousxpos+(rect().width())/2;
-}
-inline bool isInMySecondHalf(float e){
-    return e>= previousxpos+(rect().width())/2 && e < previousxpos+rect().width();
-}
+    inline bool isInMySecondHalf(float e){
+        return e >= previousxpos+(rect().width())/2 && e < previousxpos+rect().width();
+    }
 public slots:
     void setAnimatedFalse();
 
@@ -117,6 +93,6 @@ protected:
     virtual void mousePressEvent (QGraphicsSceneMouseEvent *e);
     virtual void mouseMoveEvent (QGraphicsSceneMouseEvent *e);
 
-     QRectF boundingRect() const;
+    QRectF boundingRect() const;
 };
 #endif // SHOT_H

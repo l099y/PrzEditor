@@ -7,6 +7,7 @@
         <file>sweeping.png</file>
         <file>displace.png</file>
         <file>align.png</file>
+        <file>360.png</file>
     </qresource>
     <qresource prefix="/">
         <file>sweeping.png</file>

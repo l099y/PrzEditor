@@ -14,6 +14,7 @@ SOURCES += \
     filesystem/projectloader.cpp \
     filesystem/sequencedata.cpp \
     filesystem/sequenceregister.cpp \
+    filesystem/tbesounddata.cpp \
     parameters_interfaces/customqslider.cpp \
     parameters_interfaces/customshotparameterinterface.cpp \
     parameters_interfaces/shotparametersinterface.cpp \
@@ -30,6 +31,7 @@ HEADERS += \
     filesystem/projectloader.h \
     filesystem/sequencedata.h \
     filesystem/sequenceregister.h \
+    filesystem/tbesounddata.h \
     parameters_interfaces/customqslider.h \
     parameters_interfaces/customshotparameterinterface.h \
     parameters_interfaces/shotparametersinterface.h \
