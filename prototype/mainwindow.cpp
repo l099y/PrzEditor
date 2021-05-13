@@ -10,6 +10,7 @@
 #include <QResource>
 #include <filesystem/projectloader.h>
 #include <filesystem/tbesounddata.h>
+#include <sequence_elements/soundtrack.h>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -38,8 +39,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     }
     this->showMaximized();
-
+    this->statusBar()->setFixedHeight(30);
+    this->statusBar()->setStyleSheet("QStatusBar{padding-left:8px;background:rgba(55,55,55,255);color:red;font-weight:bold; font-size:20px}");
     connect(timeline, SIGNAL(selectionChanged()), this, SLOT(changeSelectedShotInParametersInterface()));
+    showMaximized();
 }
 void MainWindow :: initButtons(){
 
@@ -144,7 +147,7 @@ void MainWindow::initwidgetsparams(){
 }
 void MainWindow :: bindLayoutsToWidgets(){
     timelineNutils->setLayout(sublayoutsplit0);
-    timelineNutils->setMaximumHeight(400);
+    timelineNutils->setMaximumHeight(600);
     supposedtimeslider->setLayout(sublayouttimeline);
     timelineButtons->setLayout(sublayoutbutton);
     parameters->setLayout(sublayoutsplit);
@@ -182,19 +185,23 @@ void MainWindow::setupTreeItem(){
 void MainWindow::inittimelinescene(){
 
     timelineView->setScene(timeline);
-    timelineView->setStyleSheet(QString("QScrollBar:horizontal { border: 2px solid grey; background: #505050; height: 15px; margin: 1px; }"));
+
     timelineView->setDragMode(QGraphicsView::RubberBandDrag);
-    timelineView->setAlignment(Qt::AlignLeft);
     timelineView->acceptDrops();
     //timelineView->setOptimizationFlags(QGraphicsView::DontSavePainterState|QGraphicsView::DontAdjustForAntialiasing);
     sublayouttimeline->addWidget(timelineView);
     sublayouttimeline->setAlignment(Qt::AlignTop);
     sublayoutbutton->setAlignment(Qt::AlignTop);
-    timelineView->setMinimumHeight(300);
+    timelineView->setMinimumHeight(400);
     timelineView->setRenderHint(QPainter::Antialiasing);
+    timelineView->setAlignment(Qt::AlignTop|Qt::AlignLeft);
+    timelineView->setStyleSheet(QString("QScrollBar:horizontal { border: 2px solid grey; background: #505050; height: 15px; margin: 1px; }"));
+    timelineView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     connect(timeline, SIGNAL(scaleUp()), this, SLOT(scaleUpView()));
     connect(timeline, SIGNAL(scaleDown()),this, SLOT(scaleDownView()));
+    connect(timeline, SIGNAL(displayError(QString, int)), this, SLOT(displayStatusBarMessage(QString, int)));
+
 }
 MainWindow::~MainWindow()
 {
@@ -253,10 +260,16 @@ void MainWindow::createUndoView()
 
 void MainWindow::bindUndoElements()
 {
+
+
+    //TbeSoundData*, int xpos, int length, TimelineScene* timeline, QVector<SoundTrack*>
+
     connect (timeline, SIGNAL(deleteSelectionSignal()), this, SLOT(deleteSelection()));
     connect (timeline, SIGNAL(createShot(QList<SequenceData*>, int , int , TimelineScene*, QVector<Shot*>)), this, SLOT(createdShot(QList<SequenceData*>, int, int, TimelineScene*, QVector<Shot*>)));
     connect (timeline, SIGNAL(moveShotss(TimelineScene*, QVector<Shot*>,int, int)), this, SLOT(movedShots(TimelineScene*, QVector<Shot*>, int, int)));
     connect (timeline, SIGNAL(clearTimeline(TimelineScene*, QVector<Shot*>, int)), this, SLOT(clearedTimeline(TimelineScene*, QVector<Shot*>, int)));
+    connect (timeline, SIGNAL(babar(TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>)), this, SLOT(createdSound(TbeSoundData*,int, int, TimelineScene*,QVector<SoundTrack*>)));
+    connect (timeline, SIGNAL(moveSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int)), this, SLOT(movedSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int)));//TbeSoundData*, int xpos, int length, TimelineScene* timeline,
 }
 
 void MainWindow::changeEvent(QEvent *event)
@@ -283,6 +296,9 @@ void MainWindow::generateData()
 
 void MainWindow::enableParameterInterface(bool mod)
 {
+    connect (shotparams, SIGNAL (changeShotSize(int, QString)), timeline, SLOT( changeSelectionSize(int, QString)));
+    connect (shotparams, SIGNAL (changeShotPosition(int, QString)), timeline, SLOT(displaceSelection(int, QString)));
+    connect (timeline, SIGNAL(selectionXChanged()), shotparams, SLOT(updateShotPos()));
         shotparams->setVisible(mod);
         shotparams->setEnabled(mod);
         scrollArea->setVisible(mod);
@@ -460,12 +476,34 @@ void MainWindow::createdShot(QList<SequenceData *> seq, int xpos, int length, Ti
     undoStack->push(createCommand);
 }
 
+void MainWindow::createdSound(TbeSoundData* sd, int xpos, int length, TimelineScene* timeline, QVector<SoundTrack*> movedSounds)
+{
+    sequencesStorageView->clearSelection();
+    QUndoCommand *createCommand = new AddSoundCommand(sd, xpos, length, timeline , movedSounds);
+    isSaved = false;
+    undoStack->push(createCommand);
+}
+
+
+
+
+//void MainWindow::createdSound(SoundTrack, int xpos, int length, TimelineScene *timeline, QVector<SoundTrack *> movedSounds)
+//{
+//    qDebug()<<"createdSoundTriggered";
+//}
+
 void MainWindow::movedShots(TimelineScene* timeline,QVector<Shot *> movedShots, int prevscenesize, int currentscenesize)
 {
     qDebug()<<"reached moveshots in main";
     QUndoCommand *moveCommand = new MoveCommand(timeline, movedShots, prevscenesize, currentscenesize);
     isSaved = false;
     undoStack->push(moveCommand);
+}
+void MainWindow::movedSoundtracks(TimelineScene * timeline, QVector<SoundTrack *> movedsounds, int prevscenesize, int currentscenesize)
+{
+    QUndoCommand *moveSoundsCommand = new MoveSoundsCommand(timeline, movedsounds, prevscenesize, currentscenesize);
+    isSaved = false;
+    undoStack->push(moveSoundsCommand);
 }
 
 void MainWindow::clearedTimeline(TimelineScene *timeline, QVector<Shot *> removedshots, int previtimelinesize)
@@ -639,6 +677,11 @@ void MainWindow::changeSelectedShotInParametersInterface()
     else{
         enableParameterInterface(false);
     }
+}
+
+void MainWindow::displayStatusBarMessage(QString message , int durationInMs)
+{
+    this->statusBar()->showMessage(message, durationInMs);
 }
 
 

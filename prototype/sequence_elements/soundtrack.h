@@ -1,8 +1,5 @@
-#ifndef SHOT_H
-#define SHOT_H
-
-#include <QGraphicsRectItem>
-#include <QObject>
+#ifndef SOUNDTRACK_H
+#define SOUNDTRACK_H
 #include <QWidget>
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>
@@ -13,15 +10,18 @@
 #include <QHash>
 #include <QJsonArray>
 
-enum class BoxState {REGULAR, DISPLACE};
+#include <QGraphicsRectItem>
+#include <QObject>
+#include <filesystem/tbesounddata.h>
+#include <sequence_elements/shot.h>
 
-class Shot : public QObject, public QGraphicsRectItem
+class SoundTrack : public QObject, public QGraphicsRectItem
 {
     Q_OBJECT
 public:
-    Shot();
-    Shot(QJsonObject);
-    ~Shot();
+    SoundTrack();
+    SoundTrack(QJsonObject);
+    ~SoundTrack();
 
     // collection of json parameters, name as the key
 
@@ -30,16 +30,16 @@ public:
     static QList<QColor> usedColor;
 
     QTimeLine *timer = new QTimeLine(110);
-
     QGraphicsItemAnimation *animation = new QGraphicsItemAnimation;
 
     BoxState mod = BoxState::REGULAR;
 
     bool inserted = false;
-
     bool animated = false;
+
     bool prevposresetrequested = false;
-    QList <SequenceData*> seqs;
+
+    TbeSoundData* soundfile;
     float previousxpos;
     float previousboxwidth;
     float mousePosXonClick;
@@ -62,7 +62,7 @@ public:
 
     static int roundedTo10(float x);
 
-    inline bool wasLeftOf(Shot* OtherCube)
+    inline bool wasLeftOf(SoundTrack* OtherCube)
     {
         return  previousxpos<OtherCube->previousxpos;
     }
@@ -81,10 +81,6 @@ public:
     }
 
     bool validateSizeChange(int);
-    int smallestSequence();
-
-
-
 public slots:
     void setAnimatedFalse();
 
@@ -98,5 +94,7 @@ protected:
     virtual void mouseMoveEvent (QGraphicsSceneMouseEvent *e);
 
     QRectF boundingRect() const;
+
 };
-#endif // SHOT_H
+
+#endif // SOUNDTRACK_H

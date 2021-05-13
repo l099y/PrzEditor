@@ -13,7 +13,7 @@ DeleteCommand::DeleteCommand(TimelineScene *scene, QUndoCommand *parent)
     timeline = scene;
     QList<QGraphicsItem *> list = timeline->selectedItems();
     list.first()->setSelected(false);
-    shot = static_cast<Shot *>(list.first());
+    shot = list.first();
     setText(QObject::tr("Delete %1")
             .arg(" created "));
 }
@@ -28,6 +28,7 @@ void DeleteCommand::redo()
 {
     timeline->removeItem(shot);
 }
+
 
 AddCommand::AddCommand(QList<SequenceData*> seq, int xpos, int length, TimelineScene *scene, QVector<Shot*> movedShots ,QUndoCommand *parent)
     : QUndoCommand(parent)
@@ -88,6 +89,8 @@ void AddCommand::redo()
     timeline->przreg->usedSequences.insert(seqs[0]->name, seqs[0]);
     shot->setXToFrame(xpos);
     shot->setRect(0, 0, length, 100);
+    shot->setY(160);
+    qDebug()<<shot->rect() << "in redo"<< shot->scenePos().y();;
     shot->setPreviousToCurrent();
     timeline->clearSelection();
     shot->setSelected(true);
@@ -103,7 +106,7 @@ MoveCommand::MoveCommand(TimelineScene* timeline, QVector<Shot *> movedShots, in
     this->timeline = timeline;
     this->prevscenesize = prevscenepos;
     this->currentscenesize = currentscenepos;
-    setText(QObject::tr("shots movements"));
+    setText(QObject::tr("shots mouvements"));
 }
 
 void MoveCommand::undo()
@@ -223,4 +226,101 @@ void ChangeParameterInShotCommand::redo()
     sh->scene()->clearSelection();
     sh->setSelected(true);
     sh->update();
+}
+
+
+
+AddSoundCommand::AddSoundCommand(TbeSoundData * sounddata, int xpos, int length, TimelineScene *timeline, QVector<SoundTrack * > movedSounds, QUndoCommand *parent)
+{
+    foreach(SoundTrack* current, movedSounds){
+        movedSoundsOldPos.insert(current, current->previousxpos);
+        movedSoundsNewPos.insert(current, current->scenePos().x());
+    }
+    this->timeline = timeline;
+    sound = new SoundTrack();
+    this->sounddata = sounddata;
+    this->xpos = xpos;
+    this->length = length;
+
+    setText(QObject::tr("Add %1")
+            .arg(sounddata->filename));
+}
+
+AddSoundCommand::~AddSoundCommand()
+{
+    if (!sound->scene())
+        delete sound;
+}
+
+void AddSoundCommand::undo()
+{
+    timeline->removeItem(sound);
+    timeline->update();
+    QHash<SoundTrack*, int>::const_iterator i = movedSoundsOldPos.constBegin();
+    while (i != movedSoundsOldPos.constEnd()) {
+
+        auto  sh =i.key();
+        sh->setX(i.value());
+        sh->setPreviousToCurrent();
+        i++;
+    }
+}
+
+void AddSoundCommand::redo()
+{
+
+    QHash<SoundTrack*, int>::const_iterator i = movedSoundsNewPos.constBegin();
+    while (i != movedSoundsNewPos.constEnd()) {
+
+        auto  sh =i.key();
+        sh->setXToFrame(i.value());
+        sh->setPreviousToCurrent();
+        i++;
+    }
+    timeline->addItem(sound);
+    sound->setXToFrame(xpos);
+    sound->setRect(0, 0, length, 20);
+    sound->setY(260);
+    sound->setPreviousToCurrent();
+    timeline->clearSelection();
+    sound->setSelected(true);
+    timeline->update();
+}
+
+MoveSoundsCommand::MoveSoundsCommand(TimelineScene* timeline, QVector<SoundTrack *> movedShots, int prevscenepos, int currentscenepos, QUndoCommand *parent) : QUndoCommand(parent)
+{
+    foreach(SoundTrack* current, movedShots){
+        movedSoundsOldPos.insert(current, current->scenePos().x());
+        movedSoundsNewPos.insert(current, current->previousxpos);
+    }
+    this->timeline = timeline;
+    this->prevscenesize = prevscenepos;
+    this->currentscenesize = currentscenepos;
+    setText(QObject::tr("soundtracks mouvements"));
+}
+
+void MoveSoundsCommand::undo()
+{
+    QHash<SoundTrack*, int>::const_iterator i = movedSoundsNewPos.constBegin();
+    while (i != movedSoundsNewPos.constEnd()) {
+
+        auto  sh =i.key();
+        sh->setXToFrame(i.value());
+        sh->setPreviousToCurrent();
+        i++;
+    }
+    timeline->setSceneRect(0,0,prevscenesize,100);
+}
+
+void MoveSoundsCommand::redo()
+{
+    QHash<SoundTrack*, int>::const_iterator i = movedSoundsOldPos.constBegin();
+    while (i != movedSoundsOldPos.constEnd()) {
+
+        auto  sh =i.key();
+        sh->setX(i.value());
+        sh->setPreviousToCurrent();
+        i++;
+    }
+    timeline->setSceneRect(0,0,currentscenesize,100);
 }

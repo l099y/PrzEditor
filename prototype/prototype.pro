@@ -18,10 +18,10 @@ SOURCES += \
     parameters_interfaces/customqslider.cpp \
     parameters_interfaces/customshotparameterinterface.cpp \
     parameters_interfaces/shotparametersinterface.cpp \
+    sequence_elements/soundtrack.cpp \
     sequence_elements\shot.cpp \
     main.cpp \
     mainwindow.cpp \
-    emitter.cpp \
     sequence_elements\ruler.cpp \
     sequence_elements\timelinescene.cpp \
     undo_framework/commands.cpp
@@ -35,9 +35,9 @@ HEADERS += \
     parameters_interfaces/customqslider.h \
     parameters_interfaces/customshotparameterinterface.h \
     parameters_interfaces/shotparametersinterface.h \
+    sequence_elements/soundtrack.h \
     sequence_elements\shot.h \
     mainwindow.h \
-    emitter.h \
     sequence_elements\ruler.h \
     sequence_elements\timelinescene.h \
     undo_framework/commands.h

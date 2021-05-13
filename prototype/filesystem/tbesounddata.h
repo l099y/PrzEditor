@@ -7,7 +7,7 @@ class TbeSoundData : public QObject
 {
     Q_OBJECT
 public:
-    explicit TbeSoundData(QObject *parent = nullptr);
+    TbeSoundData(QObject *parent = nullptr);
     TbeSoundData(QJsonObject, QObject *parent = nullptr);
     ~TbeSoundData();
 

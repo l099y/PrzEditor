@@ -8,6 +8,7 @@
 #include <QHash>
 #include <QJsonObject>
 #include <mainwindow.h>
+#include <sequence_elements/soundtrack.h>
 
 class DeleteCommand : public QUndoCommand
 {
@@ -18,7 +19,7 @@ public:
     void redo() override;
 
 private:
-    Shot *shot;
+    QGraphicsItem *shot;
     TimelineScene *timeline;
 };
 //! [1]
@@ -44,6 +45,26 @@ private:
     int length;
 };
 
+class AddSoundCommand : public QUndoCommand
+{
+public:
+    AddSoundCommand(TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>,
+               QUndoCommand *parent = nullptr);
+    ~AddSoundCommand();
+
+    void undo() override;
+    void redo() override;
+
+private:
+    SoundTrack *sound;
+    QHash<SoundTrack*, int> movedSoundsOldPos;
+    QHash<SoundTrack*, int> movedSoundsNewPos;
+    TimelineScene *timeline;
+    TbeSoundData* sounddata;
+    int xpos;
+    int length;
+};
+
 class MoveCommand : public QUndoCommand
 {
 public:
@@ -56,6 +77,22 @@ private:
     TimelineScene* timeline;
     QHash<Shot*, int> movedShotOldPos;
     QHash<Shot*, int> movedShotNewPos;
+    int prevscenesize;
+    int currentscenesize;
+};
+
+class MoveSoundsCommand : public QUndoCommand
+{
+public:
+    MoveSoundsCommand(TimelineScene* timeline, QVector<SoundTrack*> movedShots, int previoustimelineWidth, int timelineWidth, QUndoCommand *parent = nullptr);
+
+    void undo() override;
+    void redo() override;
+
+private:
+    TimelineScene* timeline;
+    QHash<SoundTrack*, int> movedSoundsOldPos;
+    QHash<SoundTrack*, int> movedSoundsNewPos;
     int prevscenesize;
     int currentscenesize;
 };

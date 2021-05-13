@@ -5,7 +5,7 @@
 Ruler::Ruler(float rulerSize):QGraphicsItem()
 {
     setSize(rulerSize);
-    background->setHeight(240);
+    background->setHeight(60);
 }
 
 void Ruler::xtand(float f)
@@ -46,7 +46,7 @@ void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
         if(i>= visible_scene_rect.x() && i <= visible_scene_rect.x()+visible_scene_rect.width()){
         if (i % framesize == 0){
             if (scale >0.5 || (i%(framesize*10) == 0 && scale > 0.05)|| (i%(framesize*100)==0 && scale > 0.007) || i%(framesize*1000) == 0){
-                QLineF* l = new QLineF (i*scale, -60, i*scale, -65);
+                QLineF* l = new QLineF (i*scale, 55, i*scale, 60);
                 painter->drawLine(*l);
                 delete(l);
             }
@@ -55,7 +55,7 @@ void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
         if (i%(framesize*10)==0){
             if (scale > 0.3 || (i%(framesize*50)==0 && scale >  0.05) || (i%(framesize*500)==0 && scale > 0.007) || i%(framesize*5000)==0){
             QString t = QVariant(i/framesize).toString();
-            painter->drawText((i-((5.5*t.length())/2/scale))*scale, -78, t);
+            painter->drawText((i-((5.5*t.length())/2/scale))*scale, 48, t);
             }
         }
         }

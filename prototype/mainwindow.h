@@ -41,6 +41,8 @@
 
 //
 #include <parameters_interfaces/shotparametersinterface.h>
+#include <sequence_elements/soundtrack.h>
+#include <filesystem/tbesounddata.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -169,6 +171,9 @@ public slots:
 
     void deleteSelection();
     void createdShot(QList<SequenceData*> seq, int xpos, int length, TimelineScene* timeline , QVector<Shot*> movedShots);
+    void createdSound(TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>);
+    // int xpos, int length, TimelineScene* timeline,
+    void movedSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int);
     void movedShots(TimelineScene*, QVector<Shot*> movedShots, int prevscenewidth, int currentscenewidth);
     void clearedTimeline(TimelineScene*, QVector<Shot*>, int);
     void changeParameterInAShot(Shot*, QJsonObject);
@@ -187,6 +192,7 @@ public slots:
 
     // attempt to change the target of the parameter interface
     void changeSelectedShotInParametersInterface();
+    void displayStatusBarMessage(QString, int);
 
 private:
     void createActions();

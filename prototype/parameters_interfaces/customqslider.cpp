@@ -13,7 +13,9 @@ bool CustomQSlider::event(QEvent * e)
 {
     if (e->type()==QEvent::Wheel || e->type()==QEvent::KeyPress){
         qDebug()<<"specific event in slider triggered";
+        e->ignore();
         return false;
+
     }
     QSlider::event(e);
     return true ;

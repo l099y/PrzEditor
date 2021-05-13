@@ -2,6 +2,7 @@
 #include <QVBoxLayout>
 #include "customshotparameterinterface.h"
 #include <QSizePolicy>
+#include <QGraphicsScene>
 
 ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *parent) : QWidget(parent)
 {
@@ -69,6 +70,32 @@ void ShotParametersInterface::setShot(Shot *shot)
     foreach (CustomShotParameterInterface* current, parameters){
         current->setShot(shot);
     }
+
+    positionInput->setMaximum(shot->scene()->sceneRect().width()/10);
+    positionInput->setValue(shot->previousxpos/10);
+    positionInput->setMinimum(0);
+
+    widthInput->setMaximum(shot->smallestSequence());
+    widthInput->setValue(shot->previousboxwidth/10);
+    widthInput->setMinimum(0);
+
+    connect (positionInput, SIGNAL(editingFinished()), this, SLOT(changedShotPosition()));
+    connect (widthInput, SIGNAL(editingFinished()), this, SLOT(changedShotSize()));
+}
+
+void ShotParametersInterface::updateShotPos()
+{
+    positionInput->setValue(shot->scenePos().x()/10);
+}
+
+void ShotParametersInterface::changedShotSize()
+{
+    emit (changeShotSize(widthInput->value(), "shot"));
+}
+
+void ShotParametersInterface::changedShotPosition()
+{
+    emit (changeShotPosition(positionInput->value()*10, "shot"));
 }
 
 void ShotParametersInterface::RequestValueChanged(QJsonObject newparam)

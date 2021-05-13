@@ -34,7 +34,7 @@ Shot::Shot(): QGraphicsRectItem()
     dse->setYOffset(0);
     setGraphicsEffect(dse);
     connect(timer, SIGNAL(finished()), this, SLOT(setAnimatedFalse()));
-
+    scenePos().setY(160);
     animation->setItem(this);
     animation->setTimeLine(timer);
 }
@@ -67,19 +67,14 @@ Shot::Shot(QJsonObject jsonShot)
     setRect(0,0, jsonShot.value("width").toInt(), 100);
     setPreviousToCurrent();
     setBrush(QColor(jsonShot.value("bred").toInt(), jsonShot.value("bgreen").toInt(), jsonShot.value("bblue").toInt()));
-
+    scenePos().setY(160);
     QPen pen (Qt::white);
     setPen(pen);
     setAcceptHoverEvents(true);
     setFlag(QGraphicsItem :: ItemIsMovable);
     setFlag(QGraphicsItem :: ItemIsSelectable);
 
-    QGraphicsDropShadowEffect * dse = new QGraphicsDropShadowEffect();
-    dse->setBlurRadius(10);
-    dse->setColor(QColor(255,255,255,50));
-    dse->setXOffset(0);
-    dse->setYOffset(0);
-    setGraphicsEffect(dse);
+
 
     connect(timer, SIGNAL(finished()), this, SLOT(setAnimatedFalse()));
 
@@ -87,6 +82,13 @@ Shot::Shot(QJsonObject jsonShot)
     animation->setTimeLine(timer);
 
     generateParamsFromJsonShot(jsonShot);
+
+    QGraphicsDropShadowEffect * dse = new QGraphicsDropShadowEffect();
+    dse->setBlurRadius(10);
+    dse->setColor(QColor(255,255,255,50));
+    dse->setXOffset(0);
+    dse->setYOffset(0);
+    setGraphicsEffect(dse);
 }
 
 
@@ -95,7 +97,6 @@ Shot::~Shot()
 {
     delete(animation);
     delete(timer);
-    delete(emitter);
 }
 
 
@@ -113,8 +114,8 @@ void Shot::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
 {
     QGraphicsItem :: mouseReleaseEvent(e);
     mod = BoxState::REGULAR;
-    if (scenePos().y()!=0){
-        setPos(scenePos().x(), 0);
+    if (scenePos().y()!=160){
+       scenePos().setY(160);
     }
     setPreviousToCurrent();
 }
@@ -138,12 +139,15 @@ QRectF Shot::boundingRect() const
 void Shot::setPreviousToCurrent(){
     previousboxwidth = rect().width();
     previousxpos = scenePos().x();
+    setY(160);
 }
 
 void Shot::restore()
 {
     setX(previousxpos);
+
     setRect(0,0,previousboxwidth, 100);
+    setY(160);
     setVisible(true);
 }
 
@@ -156,7 +160,7 @@ void Shot::animatedMove(float pos)
         animated=true;
         timer->setFrameRange(0, 15);
         for (int i = 0; i < 15; ++i)
-            animation->setPosAt(i / 15.0, QPointF(prev+=(dist/15), 0));
+            animation->setPosAt(i / 15.0, QPointF(prev+=(dist/15), 160));
         timer->start();
     }
 }
@@ -201,6 +205,34 @@ int Shot::roundedTo10(float xf)
     x = x % 10 > 5? x + (10-x%10): x - x%10;
     return x % 10 > 5? x + (10-x%10): x - x%10;
 
+}
+
+bool Shot::validateSizeChange(int newSize)
+{
+    return newSize<=smallestSequence();
+}
+
+int Shot::smallestSequence()
+{
+
+    if (seqs.isEmpty())
+            return 0;
+    else{
+        int min = seqs[0]->sequencelength();
+        qDebug()<< seqs[0]->sequencelength() << "in min size eval";
+        foreach (SequenceData* current, seqs){
+            SequenceData* seq = dynamic_cast<SequenceData*>(current);
+            if (seq)
+            {
+                if (seq->sequencelength()< min)
+                {
+                    min = seq->sequencelength();
+                }
+            }
+        }
+        qDebug()<< min << "in min size eval";
+        return min;
+    }
 }
 
 void Shot::setAnimatedFalse()

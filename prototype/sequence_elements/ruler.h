@@ -12,7 +12,7 @@ class Ruler : public QGraphicsItem
 {
 public:
     float scale = 1;
-    QRectF *background = new QRectF(0,-300,0,0);
+    QRectF *background = new QRectF(0,0,0,0);
     QGraphicsView* view;
 //    QList<QLineF*> grades;
 //    QList<QLabel*> gradestext;

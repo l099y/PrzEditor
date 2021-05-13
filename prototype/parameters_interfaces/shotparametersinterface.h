@@ -26,7 +26,12 @@ public:
 
 signals:
     void valueChangedRequest(Shot*, QJsonObject);
+    void changeShotSize(int, QString);
+    void changeShotPosition(int, QString);
 public slots:
+    void updateShotPos();
+    void changedShotSize();
+    void changedShotPosition();
     void RequestValueChanged(QJsonObject);
 };
 

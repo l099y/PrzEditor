@@ -9,6 +9,8 @@
 #include "ruler.h"
 #include "filesystem/sequenceregister.h"
 #include <QJsonObject>
+#include <sequence_elements/soundtrack.h>
+#include <filesystem/tbesounddata.h>
 
 class TimelineScene : public QGraphicsScene
 {
@@ -24,25 +26,43 @@ class TimelineScene : public QGraphicsScene
     Ruler ruler;
     float previousSceneWidth;
 
-    QHash<Shot*, int> imageOfPositions;
+    QHash<Shot*, int> imageOfShotsPositions;
+    QHash<SoundTrack*, int> imageOfSoundPositions;
+
 
     QJsonObject generateJson();
 
     void resetBoxStates();
-    void resetToPrevious();
+    void resetToPrevious(QString);
 
+    //redirect to sound of shot displacement functions
 
-    void behaveOnSelectionSwitchPosMove(float mouseXPos, bool final);
     void handleSelectionMove(float mouseXPos, bool final);
 
-    void behaveOnSelectionDisplace();
+    //shot displacement functions
+
+    void behaveOnSelectionSwitchPosMove(float mouseXPos, bool final);
     void placeInsertedShotInTimeline(float e);
-    void resetShotDisplacedByInsertion();
-    void resetShotDisplacedFinal();
-    void generateImageOfPosition();
-    float rectXAndWBefore(Shot *rect);
+    void behaveOnSelectedShotDisplace();
+    void resetShotsDisplacedByInsertion();
+    void resetShotsDisplacedFinal();
+    float ShotXAndWBefore(Shot *rect);
     QVector<Shot*> getMovedShots();
-    Shot* dropRepresentation;
+    //sound displacement functions
+
+    void behaveOnSelectionSwitchPosMoveSound(float mouseXPos, bool final);
+    void placeInsertedSoundTrackInTimeline(float e);
+    void behaveOnSelectedSoundDisplace();
+    void resetSoundsDisplacedByInsertion();
+    void resetSoundsDisplacedFinal();
+    float SoundXAndWBefore(SoundTrack *rect);
+    QVector<SoundTrack*> getMovedSounds();
+
+    void generateImageOfShotsPositions();
+    void generateImageOfSoundsPositions();
+
+    Shot* shotDropRepresentation = nullptr;
+    SoundTrack* soundDropRepresentation = nullptr;
     SequenceRegister* przreg;
 
     // check if the condition to assign selection to the the interface Panel
@@ -57,14 +77,13 @@ public slots:
    void debugItems();
    void clearItems();
 
-   void moveAllFrom(float from, float distance);
+   void moveAllFrom(float from, float distance, QString);
    void ExtendSceneWidth(float f);
    void align();
    void setdisp();
    void deleteSelection();
-   void displaceSelection(int newPos);
-   void changeSelectionSize(int newSize);
-   void handleSelectionChanged();
+   void displaceSelection(int newPos, QString);
+   void changeSelectionSize(int newSize, QString);
 
 
 signals:
@@ -74,7 +93,11 @@ signals:
    void deleteSelectionSignal();
    void createShot(QList<SequenceData*> seq, int xpos, int length, TimelineScene* timeline, QVector<Shot*> movedShot);
    void moveShotss(TimelineScene*, QVector<Shot*>, int, int);
+   void moveSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int);
    void clearTimeline(TimelineScene*, QVector<Shot*>, int);
+   void babar(TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>); // int xpos, int length, TimelineScene* timeline,
+   void displayError(QString, int);
+   void selectionXChanged();
 
 
 protected:
