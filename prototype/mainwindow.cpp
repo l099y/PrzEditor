@@ -38,7 +38,6 @@ MainWindow::MainWindow(QWidget *parent)
         scaleDownView();
 
     }
-    this->showMaximized();
     this->statusBar()->setFixedHeight(30);
     this->statusBar()->setStyleSheet("QStatusBar{padding-left:8px;background:rgba(55,55,55,255);color:red;font-weight:bold; font-size:20px}");
     connect(timeline, SIGNAL(selectionChanged()), this, SLOT(changeSelectedShotInParametersInterface()));
@@ -266,10 +265,11 @@ void MainWindow::bindUndoElements()
 
     connect (timeline, SIGNAL(deleteSelectionSignal()), this, SLOT(deleteSelection()));
     connect (timeline, SIGNAL(createShot(QList<SequenceData*>, int , int , TimelineScene*, QVector<Shot*>)), this, SLOT(createdShot(QList<SequenceData*>, int, int, TimelineScene*, QVector<Shot*>)));
-    connect (timeline, SIGNAL(moveShotss(TimelineScene*, QVector<Shot*>,int, int)), this, SLOT(movedShots(TimelineScene*, QVector<Shot*>, int, int)));
+    connect (timeline, SIGNAL(moveShots(TimelineScene*, QVector<Shot*>,int, int)), this, SLOT(movedShots(TimelineScene*, QVector<Shot*>, int, int)));
     connect (timeline, SIGNAL(clearTimeline(TimelineScene*, QVector<Shot*>, int)), this, SLOT(clearedTimeline(TimelineScene*, QVector<Shot*>, int)));
     connect (timeline, SIGNAL(babar(TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>)), this, SLOT(createdSound(TbeSoundData*,int, int, TimelineScene*,QVector<SoundTrack*>)));
     connect (timeline, SIGNAL(moveSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int)), this, SLOT(movedSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int)));//TbeSoundData*, int xpos, int length, TimelineScene* timeline,
+    connect (timeline, SIGNAL(resizeShot(TimelineScene*, QVector<Shot*>, Shot* ,int, int, int)), this, SLOT(resizedShot(TimelineScene*, QVector<Shot*>, Shot* ,int, int, int)));
 }
 
 void MainWindow::changeEvent(QEvent *event)
@@ -296,9 +296,6 @@ void MainWindow::generateData()
 
 void MainWindow::enableParameterInterface(bool mod)
 {
-    connect (shotparams, SIGNAL (changeShotSize(int, QString)), timeline, SLOT( changeSelectionSize(int, QString)));
-    connect (shotparams, SIGNAL (changeShotPosition(int, QString)), timeline, SLOT(displaceSelection(int, QString)));
-    connect (timeline, SIGNAL(selectionXChanged()), shotparams, SLOT(updateShotPos()));
         shotparams->setVisible(mod);
         shotparams->setEnabled(mod);
         scrollArea->setVisible(mod);
@@ -512,6 +509,18 @@ void MainWindow::clearedTimeline(TimelineScene *timeline, QVector<Shot *> remove
     undoStack->push(clear);
 }
 
+void MainWindow::resizedShot(TimelineScene *timeline ,  QVector<Shot *>movedshot, Shot* resizedshot, int  newsize, int oldscenesize, int newscenesize)
+{
+    QUndoCommand* resizeShot=  new ResizeShotCommand(timeline, movedshot, resizedshot, newsize, oldscenesize, newscenesize);
+    undoStack->push(resizeShot);
+}
+
+void MainWindow::resizedSound(TimelineScene *, QVector<SoundTrack *>, SoundTrack *, int, int, int)
+{
+
+}
+
+
 void MainWindow::changeParameterInAShot(Shot * sh, QJsonObject obj)
 {
     qDebug()<<"arrived in main"<< obj.value("value").toString();
@@ -591,6 +600,9 @@ void MainWindow::initShotsParameters()
         shotparams = new ShotParametersInterface(configJson.object(), this);
         sublayoutparams1->addWidget(shotparams);
         scrollArea->setWidget(shotparams);
+        connect (shotparams, SIGNAL (changeShotSize(int, QString)), timeline, SLOT( changeSelectionSize(int, QString)));
+        connect (shotparams, SIGNAL (changeShotPosition(int, QString)), timeline, SLOT(displaceSelection(int, QString)));
+        connect (timeline, SIGNAL(selectionXChanged()), shotparams, SLOT(updateShotPos()));
         scrollArea->setLayout(sublayoutparams1);
         enableParameterInterface(false);
         connect(shotparams, SIGNAL(valueChangedRequest(Shot*, QJsonObject)), this, SLOT(changeParameterInAShot(Shot*, QJsonObject)));

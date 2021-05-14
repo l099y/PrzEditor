@@ -49,6 +49,8 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
       layout()->setAlignment(param, Qt::AlignLeft);
       parameters.append(param);
   }
+  connect (positionInput, SIGNAL(editingFinished()), this, SLOT(changedShotPosition()));
+  connect (widthInput, SIGNAL(editingFinished()), this, SLOT(changedShotSize()));
 }
 
 void ShotParametersInterface::setShot(Shot *shot)
@@ -79,8 +81,7 @@ void ShotParametersInterface::setShot(Shot *shot)
     widthInput->setValue(shot->previousboxwidth/10);
     widthInput->setMinimum(0);
 
-    connect (positionInput, SIGNAL(editingFinished()), this, SLOT(changedShotPosition()));
-    connect (widthInput, SIGNAL(editingFinished()), this, SLOT(changedShotSize()));
+
 }
 
 void ShotParametersInterface::updateShotPos()
@@ -90,11 +91,14 @@ void ShotParametersInterface::updateShotPos()
 
 void ShotParametersInterface::changedShotSize()
 {
+    if (shot->rect().width()!=widthInput->value()*10)
     emit (changeShotSize(widthInput->value(), "shot"));
 }
 
 void ShotParametersInterface::changedShotPosition()
 {
+    qDebug()<<shot->scenePos().x() <<"- shotpos" << positionInput->value()*10 << "input pos in interface updateshotpos";
+    if (shot->scenePos().x()!=positionInput->value()*10)
     emit (changeShotPosition(positionInput->value()*10, "shot"));
 }
 

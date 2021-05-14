@@ -81,6 +81,7 @@ public:
     }
 
     bool validateSizeChange(int);
+    bool validatePosChange(int);
 public slots:
     void setAnimatedFalse();
 

@@ -11,6 +11,7 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QGraphicsDropShadowEffect>
+#include <QGraphicsScene>
 
 
 Shot::Shot(): QGraphicsRectItem()
@@ -212,6 +213,19 @@ bool Shot::validateSizeChange(int newSize)
     return newSize<=smallestSequence();
 }
 
+bool Shot::validatePosChange(int pos)
+{
+        bool validated = true;
+        foreach (QGraphicsItem* current, this->scene()->items()){
+            auto* shot = dynamic_cast<Shot*>(current);
+            if (shot && shot != this && inXRange(pos, shot)){
+                shot->displayError();
+                validated = false;
+            }
+        }
+        return validated;
+}
+
 int Shot::smallestSequence()
 {
 
@@ -233,6 +247,18 @@ int Shot::smallestSequence()
         qDebug()<< min << "in min size eval";
         return min;
     }
+}
+
+bool Shot::inXRange(int pos, Shot* other)
+{
+    return ((pos + this->rect().width() > other->scenePos().x() && pos+this->rect().width() < other->scenePos().x()+other->rect().width())
+                ||(pos <= other->scenePos().x()+other->rect().width() && pos > other->scenePos().x()))
+            ||(pos<= other->scenePos().x() && pos+this->rect().width()>=other->scenePos().x()+other->rect().width());
+}
+
+void Shot::displayError()
+{
+    qDebug()<<"erroranim should trigger";
 }
 
 void Shot::setAnimatedFalse()

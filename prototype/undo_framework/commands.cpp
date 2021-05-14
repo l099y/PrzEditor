@@ -119,7 +119,7 @@ void MoveCommand::undo()
         sh->setPreviousToCurrent();
         i++;
     }
-    timeline->setSceneRect(0,0,prevscenesize,100);
+    timeline->setSceneRect(0,0,prevscenesize,400);
 }
 
 void MoveCommand::redo()
@@ -132,7 +132,7 @@ void MoveCommand::redo()
         sh->setPreviousToCurrent();
         i++;
     }
-    timeline->setSceneRect(0,0,currentscenesize,100);
+    timeline->setSceneRect(0,0,currentscenesize,400);
 }
 
 
@@ -150,7 +150,7 @@ void ClearCommand::undo()
     foreach (Shot* current, removedShots){
         timeline->addItem(current);
     }
-    timeline->setSceneRect(0,0,prevtimelinesize,100);
+    timeline->setSceneRect(0,0,prevtimelinesize,400);
     timeline->ruler.setSize(prevtimelinesize*10);
 }
 
@@ -161,7 +161,7 @@ void ClearCommand::redo()
     {
         timeline->removeItem(current);
     }
-    timeline->setSceneRect(0,0, 200000, 300);
+    timeline->setSceneRect(0,0, 200000, 400);
     timeline->ruler.setSize(2000000);
     timeline->newRect();
 }
@@ -188,7 +188,7 @@ void LoadCommand::undo()
             timeline->removeItem(sh);
         }
     }
-    timeline->setSceneRect(0,0, 200000, 300);
+    timeline->setSceneRect(0,0, 200000, 400);
     timeline->ruler.setSize(2000000);
     timeline->przreg->usedSequences.clear();
     timeline->newRect();
@@ -323,4 +323,50 @@ void MoveSoundsCommand::redo()
         i++;
     }
     timeline->setSceneRect(0,0,currentscenesize,100);
+}
+
+ResizeShotCommand::ResizeShotCommand(TimelineScene *timeline, QVector<Shot *> movedShots, Shot* shot,int newShotSize, int previoustimelineWidth, int timelineWidth, QUndoCommand *parent)
+{
+    foreach(Shot* current, movedShots){
+        movedShotOldPos.insert(current, current->scenePos().x());
+        movedShotNewPos.insert(current, current->previousxpos);
+    }
+    this->resizedShot = shot;
+    this->timeline = timeline;
+    this->prevscenesize = previoustimelineWidth;
+    this->currentscenesize = timelineWidth;
+    this->previousShotWidth = shot->previousboxwidth;
+    this->newShotWidth = newShotSize;
+    setText(QObject::tr("shot resize"));
+
+}
+
+void ResizeShotCommand::undo()
+{
+    QHash<Shot*, int>::const_iterator i = movedShotNewPos.constBegin();
+    while (i != movedShotNewPos.constEnd()) {
+
+        auto  sh =i.key();
+        sh->setXToFrame(i.value());
+        sh->setPreviousToCurrent();
+        i++;
+    }
+    resizedShot->setSize(previousShotWidth);
+    resizedShot->setPreviousToCurrent();
+    timeline->setSceneRect(0,0,prevscenesize,400);
+}
+
+void ResizeShotCommand::redo()
+{
+    QHash<Shot*, int>::const_iterator i = movedShotOldPos.constBegin();
+    while (i != movedShotOldPos.constEnd()) {
+
+        auto  sh =i.key();
+        sh->setX(i.value());
+        sh->setPreviousToCurrent();
+        i++;
+    }
+    resizedShot->setSize(newShotWidth);
+    resizedShot->setPreviousToCurrent();
+    timeline->setSceneRect(0,0,currentscenesize,400);
 }

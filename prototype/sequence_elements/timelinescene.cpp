@@ -584,7 +584,7 @@ void TimelineScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
             handleSelectionMove(e->scenePos().x(), true);
             //resetBoxStates();
             if (selection->scenePos().x()!=selection->previousxpos){
-                emit (moveShotss(this,  getMovedShots(), previousSceneWidth, this->sceneRect().width()));
+                emit (moveShots(this,  getMovedShots(), previousSceneWidth, this->sceneRect().width()));
                 previousSceneWidth = this->width();
             }
 
@@ -903,7 +903,7 @@ void TimelineScene::align()
     QTime dieTime= QTime::currentTime().addMSecs(250);
     while (QTime::currentTime() < dieTime)
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-    emit (moveShotss(this, getMovedShots(), previousSceneWidth, previousSceneWidth));
+    emit (moveShots(this, getMovedShots(), previousSceneWidth, previousSceneWidth));
 }
 
 
@@ -930,11 +930,35 @@ void TimelineScene::deleteSelection()
 void TimelineScene::displaceSelection(int framePos, QString type)
 {
     if (!selectedItems().isEmpty()){
-        Shot* selection= dynamic_cast<Shot *>(selectedItems().at(0));
-        selection->setX(framePos*10);
-        handleSelectionMove(framePos*10, false);
-        resetBoxStates();
-        update();
+
+        Shot* shot= dynamic_cast<Shot *>(selectedItems().at(0));
+        SoundTrack* sound = dynamic_cast<SoundTrack*>(selectedItems().at(0));
+
+        if (shot){
+            if (shot->validatePosChange(framePos)){
+                shot->setPreviousToCurrent();
+                shot->setX(framePos);
+                QVector<Shot*> moved;
+                moved.append(shot);
+                emit (moveShots(this,  moved, previousSceneWidth, this->sceneRect().width()));
+            }
+            else{
+                emit (displayError("Invalid position, this shot will collide with other shots", 10000));
+            }
+        }
+
+        else if (sound){
+               if (sound->validatePosChange(framePos)){
+                   sound->setPreviousToCurrent();
+                   sound->setX(framePos*10);
+                   QVector<SoundTrack*> moved;
+                   moved.append(sound);
+                   emit (moveSoundtracks(this,moved, previousSceneWidth, this->sceneRect().width()));
+            }
+            else{
+                emit (displayError("Invalid position, this sounds will collide with other sounds", 10000));
+            }
+        }
     }
 }
 
@@ -946,9 +970,9 @@ void TimelineScene::changeSelectionSize(int newSize, QString type)
 
         if (shot){
             if (shot->validateSizeChange(newSize)){
-                shot->setSize(newSize *10);
+                shot->setSize(newSize*10);
                 moveAllFrom(shot->previousxpos+1, newSize*10 - shot->previousboxwidth, type);
-                shot->setPreviousToCurrent();
+                emit (resizeShot(this, getMovedShots(),shot, shot->rect().width(), previousSceneWidth, this->sceneRect().width()));
                 ExtendSceneWidth(newSize*10 - shot->previousboxwidth);
             }
             else{
@@ -958,8 +982,8 @@ void TimelineScene::changeSelectionSize(int newSize, QString type)
         else if (sound){
                if (sound->validateSizeChange(newSize *10)){
                 sound->setSize(newSize *10);
-                moveAllFrom(shot->previousxpos+1, newSize*10 - shot->previousboxwidth, type);
-                sound->setPreviousToCurrent();
+                moveAllFrom(shot->previousxpos+1, newSize*10 - sound->previousboxwidth, type);
+                emit (resizeSound(this, getMovedSounds(),sound, sound->rect().width(), previousSceneWidth, this->sceneRect().width()));
                 ExtendSceneWidth(newSize*10 - sound->previousboxwidth);
             }
             else{

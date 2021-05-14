@@ -131,4 +131,27 @@ private:
     QJsonObject oldconfig;
     QJsonObject newconfig;
 };
+
+class ResizeShotCommand: public QUndoCommand
+{
+public:
+    ResizeShotCommand(TimelineScene* timeline, QVector<Shot*> movedShots,Shot* resizedShot, int newShotSize, int previoustimelineWidth, int timelineWidth, QUndoCommand *parent = nullptr);
+
+    void undo() override;
+    void redo() override;
+
+private:
+    TimelineScene* timeline;
+    QHash<Shot*, int> movedShotOldPos;
+    QHash<Shot*, int> movedShotNewPos;
+
+    Shot* resizedShot;
+    int previousShotWidth;
+    int newShotWidth;
+
+    int prevscenesize;
+    int currentscenesize;
+};
+
+
 #endif // COMMANDS_H

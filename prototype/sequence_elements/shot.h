@@ -81,8 +81,11 @@ public:
     }
 
     bool validateSizeChange(int);
+    bool validatePosChange(int);
     int smallestSequence();
 
+    bool inXRange(int, Shot* other);
+    void displayError();
 
 
 public slots:

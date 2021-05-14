@@ -81,6 +81,8 @@ public slots:
    void ExtendSceneWidth(float f);
    void align();
    void setdisp();
+
+
    void deleteSelection();
    void displaceSelection(int newPos, QString);
    void changeSelectionSize(int newSize, QString);
@@ -92,8 +94,10 @@ signals:
    void scaleDown();
    void deleteSelectionSignal();
    void createShot(QList<SequenceData*> seq, int xpos, int length, TimelineScene* timeline, QVector<Shot*> movedShot);
-   void moveShotss(TimelineScene*, QVector<Shot*>, int, int);
+   void moveShots(TimelineScene*, QVector<Shot*>, int, int);
+   void resizeShot(TimelineScene*, QVector<Shot*>,Shot*, int, int, int);
    void moveSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int);
+   void resizeSound(TimelineScene*, QVector<SoundTrack*>,SoundTrack*, int, int, int);
    void clearTimeline(TimelineScene*, QVector<Shot*>, int);
    void babar(TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>); // int xpos, int length, TimelineScene* timeline,
    void displayError(QString, int);

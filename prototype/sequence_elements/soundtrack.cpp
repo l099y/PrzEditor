@@ -201,6 +201,11 @@ bool SoundTrack::validateSizeChange(int)
     return true;
 }
 
+bool SoundTrack::validatePosChange(int)
+{
+    return true;
+}
+
 void SoundTrack::setAnimatedFalse()
 {
     animated=false;

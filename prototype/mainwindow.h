@@ -176,6 +176,8 @@ public slots:
     void movedSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int);
     void movedShots(TimelineScene*, QVector<Shot*> movedShots, int prevscenewidth, int currentscenewidth);
     void clearedTimeline(TimelineScene*, QVector<Shot*>, int);
+    void resizedShot(TimelineScene*, QVector<Shot*>,Shot*, int, int, int);
+    void resizedSound(TimelineScene*, QVector<SoundTrack*>, SoundTrack* ,int, int, int);
     void changeParameterInAShot(Shot*, QJsonObject);
 
     // Saving and Loading projet related slots
