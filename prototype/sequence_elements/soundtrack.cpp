@@ -47,7 +47,7 @@ void SoundTrack::generateParamsFromTemplate()
     QJsonDocument configJson = QJsonDocument::fromJson(stringContent.toUtf8());
     auto config = configJson.object();
 
-    foreach (QJsonValue val, config.value("shot").toArray()){
+    foreach (QJsonValue val, config.value("tbefile").toArray()){
         templateParams.insert(val.toObject().value("name").toString(), val.toObject());
     }
 }
@@ -84,7 +84,7 @@ SoundTrack::SoundTrack(QJsonObject jsonShot)
 
     animation->setItem(this);
     animation->setTimeLine(timer);
-    setY(360);
+    setY(260);
     generateParamsFromJsonShot(jsonShot);
 }
 
@@ -180,7 +180,7 @@ QJsonObject SoundTrack::generateJson()
 
     ret.insert("x", roundedTo10(previousxpos));
     ret.insert("width", roundedTo10(previousboxwidth));
-    ret.insert("sequences", soundfile->generateJson());
+    ret.insert("soundfile", soundfile->generateJson());
     ret.insert("bred", this->brush().color().red());
     ret.insert("bgreen", this->brush().color().green());
     ret.insert("bblue", this->brush().color().blue());

@@ -545,8 +545,7 @@ void MainWindow::saveAsTriggered()
     saveDialog = new ProjectLoader(true, "", this);
     saveDialog->setModal(true);
     saveDialog->exec();
-    qDebug()<<saveDialog->selectedFiles();
-    if (saveDialog->selectedFiles().length() == 1){
+    if (saveDialog->result()){
         savepath = saveDialog->selectedFiles().at(0);
         saveRequestExecuted(saveDialog->selectedFiles().at(0));
 
@@ -634,9 +633,14 @@ void MainWindow::loadRequestExecuted(QString filepath)
                 reg->corruptedSequences.clear();
                 foreach (QGraphicsItem* current, timeline->items()){
                     Shot* sh = dynamic_cast<Shot*>(current);
+                    SoundTrack* sound = dynamic_cast<SoundTrack*>(current);
                     if (sh){
                        timeline->removeItem(sh);
                        //delete(&sh);
+                    }
+                    else if(sound)
+                            {
+                      timeline->removeItem(sound);
                     }
                 }
                 timeline->setSceneRect(0,0,obj.value("size").toInt(), 300);
@@ -660,6 +664,25 @@ void MainWindow::loadRequestExecuted(QString filepath)
 
                     }
                     timeline->addItem(shotToBeInsert);
+                }
+
+                QJsonArray sounds = obj.value("soundtracks").toArray();
+                foreach (QJsonValue current, sounds){
+                    auto obj =  current.toObject();
+                    SoundTrack* soundToBeInsert = new SoundTrack(obj);
+                    auto currentsoundfile = obj.value("soundfile").toObject();
+                        if (reg->usedSoundFiles.contains(currentsoundfile.value("name").toString())){
+                            soundToBeInsert->soundfile = new TbeSoundData(currentsoundfile);
+                        }
+                        else
+                        {
+                            auto sf = new TbeSoundData(currentsoundfile);
+                            soundToBeInsert->soundfile = sf;
+                            reg->usedSoundFiles.insert(sf->filename, sf);
+                        }
+
+
+                    timeline->addItem(soundToBeInsert);
                 }
             }
             else

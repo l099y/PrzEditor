@@ -41,16 +41,23 @@ TimelineScene::~TimelineScene(){
 QJsonObject TimelineScene::generateJson()
 {
     QJsonArray array;
+    QJsonArray soundArray;
     foreach (QGraphicsItem* current, items()){
         Shot* sh = dynamic_cast<Shot*>(current);
         if (sh)
         {
             array.push_back(sh->generateJson());
         }
+        else{
+          SoundTrack* sound = dynamic_cast<SoundTrack*>(current);
+          if (sound){
+              soundArray.push_back(sound->generateJson());
+          }
+       }
     }
-
     QJsonObject ret;
     ret.insert("shots", array);
+    ret.insert("soundtracks", soundArray);
     ret.insert("size", sceneRect().width());
     return ret;
 }
@@ -111,11 +118,12 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                         if (rect->collidesWithItem(selection)){
                             selection->setXToFrame(rect->previousxpos-sW) ;
                         }
+                        if (rect->scenePos().x()!=rect->previousxpos)
                         final? rect->setXToFrame(rect->previousxpos):rect->animatedMove(rect->previousxpos);
                     }
                     else {
 
-                        if(!rect->animated)
+                        if(!rect->animated && rect->scenePos().x()!=rect->previousxpos-sW)
                         {
                             final? rect->setXToFrame(rect->previousxpos-sW):rect->animatedMove(rect->previousxpos-sW);
                         }
@@ -131,12 +139,13 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                         if (rect->collidesWithItem(selection)){
                             selection->setXToFrame(rect->previousboxwidth+rect->previousxpos);
                         }
+                        if (rect->scenePos().x()!=rect->previousxpos)
                         final? rect->setXToFrame(rect->previousxpos):rect->animatedMove(rect->previousxpos);
                     }
 
                     else
                     {
-                        if(!rect->animated){
+                        if(!rect->animated && rect->scenePos().x()!=rect->previousxpos+sW){
                             final? rect->setXToFrame(rect->previousxpos+sW):rect->animatedMove(rect->previousxpos+sW);
 
                         }
@@ -153,6 +162,9 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
         if (final)
             if (sceneRect().width() < selection->scenePos().x())
                 this->setSceneRect(0,0,previousSceneWidth+(selection->scenePos().x()-selection->previousxpos),100);
+    }
+    else if (selectedItems().length()>1){
+        realignSelectionOn260();
     }
 }
 
@@ -477,6 +489,15 @@ void TimelineScene::generateImageOfSoundsPositions()
         SoundTrack* sound = dynamic_cast<SoundTrack*>(current);
         if (sound && sound!= soundDropRepresentation)
             imageOfSoundPositions.insert(sound, sound->previousxpos);
+    }
+}
+
+void TimelineScene::realignSelectionOn260()
+{
+    foreach (QGraphicsItem *current, selectedItems()){
+        Shot *shot = dynamic_cast<Shot*>(current);
+        if (shot)
+            shot->setY(140);
     }
 }
 
@@ -943,7 +964,7 @@ void TimelineScene::displaceSelection(int framePos, QString type)
                 emit (moveShots(this,  moved, previousSceneWidth, this->sceneRect().width()));
             }
             else{
-                emit (displayError("Invalid position, this shot will collide with other shots", 10000));
+                emit (displayError("Invalid position, this shot will collide with other shots", 3000));
             }
         }
 
@@ -976,7 +997,7 @@ void TimelineScene::changeSelectionSize(int newSize, QString type)
                 ExtendSceneWidth(newSize*10 - shot->previousboxwidth);
             }
             else{
-                emit (displayError("Invalid size, this shot contains shorter sequences", 10000));
+                emit (displayError("Invalid size, this shot contains shorter sequences", 3000));
             }
         }
         else if (sound){

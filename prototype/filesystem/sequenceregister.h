@@ -22,6 +22,7 @@ public:
     QHash<QString, QList<TbeSoundData*>>* currentExpandedFolderSounds = new QHash<QString, QList<TbeSoundData*>>();
     QSet<QString> corruptedSequences;
     QHash<QString, SequenceData*> usedSequences;
+    QHash<QString, TbeSoundData*> usedSoundFiles;
     QList<SequenceData*> GenerateSequencesFromDir(QDir* dir);
     QList<TbeSoundData *> GeneratesTbeFilesFromDir(QDir* dir);
     inline fileInf getReleventInfo(QString* path);

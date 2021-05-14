@@ -73,6 +73,9 @@ void AddCommand::undo()
         sh->setPreviousToCurrent();
         i++;
     }
+
+//    timeline->sceneRect().setWidth(timeline->sceneRect().width()-shot->rect().width());
+//    timeline->previousSceneWidth = timeline->sceneRect().width();
 }
 
 void AddCommand::redo()
@@ -95,6 +98,10 @@ void AddCommand::redo()
     timeline->clearSelection();
     shot->setSelected(true);
     timeline->update();
+
+//    timeline->sceneRect().setWidth(timeline->sceneRect().width()+shot->rect().width());
+//    timeline->previousSceneWidth = timeline->sceneRect().width();
+
 }
 
 MoveCommand::MoveCommand(TimelineScene* timeline, QVector<Shot *> movedShots, int prevscenepos, int currentscenepos, QUndoCommand *parent) : QUndoCommand(parent)
@@ -161,7 +168,7 @@ void ClearCommand::redo()
     {
         timeline->removeItem(current);
     }
-    timeline->setSceneRect(0,0, 200000, 400);
+    timeline->setSceneRect(0,0, 2000000, 400);
     timeline->ruler.setSize(2000000);
     timeline->newRect();
 }
@@ -188,7 +195,7 @@ void LoadCommand::undo()
             timeline->removeItem(sh);
         }
     }
-    timeline->setSceneRect(0,0, 200000, 400);
+    timeline->setSceneRect(0,0, 2000000, 400);
     timeline->ruler.setSize(2000000);
     timeline->przreg->usedSequences.clear();
     timeline->newRect();
@@ -282,6 +289,7 @@ void AddSoundCommand::redo()
     sound->setRect(0, 0, length, 20);
     sound->setY(260);
     sound->setPreviousToCurrent();
+    sound->soundfile=sounddata;
     timeline->clearSelection();
     sound->setSelected(true);
     timeline->update();
@@ -354,6 +362,8 @@ void ResizeShotCommand::undo()
     resizedShot->setSize(previousShotWidth);
     resizedShot->setPreviousToCurrent();
     timeline->setSceneRect(0,0,prevscenesize,400);
+    timeline->clearSelection();
+    resizedShot->setSelected(true);
 }
 
 void ResizeShotCommand::redo()
@@ -369,4 +379,6 @@ void ResizeShotCommand::redo()
     resizedShot->setSize(newShotWidth);
     resizedShot->setPreviousToCurrent();
     timeline->setSceneRect(0,0,currentscenesize,400);
+    timeline->clearSelection();
+    resizedShot->setSelected(true);
 }

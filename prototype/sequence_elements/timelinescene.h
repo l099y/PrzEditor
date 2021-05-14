@@ -65,6 +65,7 @@ class TimelineScene : public QGraphicsScene
     SoundTrack* soundDropRepresentation = nullptr;
     SequenceRegister* przreg;
 
+    void realignSelectionOn260();
     // check if the condition to assign selection to the the interface Panel
 
     bool validateParameterTargetChange();
