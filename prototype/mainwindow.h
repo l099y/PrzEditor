@@ -166,12 +166,13 @@ public slots:
     void clearSequencesAndCollapse(QModelIndex);
     void collapseChildrens(QModelIndex);
     void collapseAllAndExpand(QModelIndex);
+    void insertComponentAtEndOfTimeline(QModelIndex);
 
     // QUndo functions allowing the stack of action to operate
 
     void deleteSelection();
     void createdShot(QList<SequenceData*> seq, int xpos, int length, TimelineScene* timeline , QVector<Shot*> movedShots);
-    void createdSound(TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>);
+    void createdSound(SoundTrack*, TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>);
     // int xpos, int length, TimelineScene* timeline,
     void movedSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int);
     void movedShots(TimelineScene*, QVector<Shot*> movedShots, int prevscenewidth, int currentscenewidth);

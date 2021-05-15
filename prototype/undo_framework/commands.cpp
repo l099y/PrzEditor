@@ -73,7 +73,8 @@ void AddCommand::undo()
         sh->setPreviousToCurrent();
         i++;
     }
-
+    timeline->setSceneRect(0,0,timeline->sceneRect().width()-shot->rect().width(),400);
+    timeline->previousSceneWidth=timeline->sceneRect().width()-shot->rect().width();
 //    timeline->sceneRect().setWidth(timeline->sceneRect().width()-shot->rect().width());
 //    timeline->previousSceneWidth = timeline->sceneRect().width();
 }
@@ -97,6 +98,8 @@ void AddCommand::redo()
     shot->setPreviousToCurrent();
     timeline->clearSelection();
     shot->setSelected(true);
+    timeline->setSceneRect(0,0,timeline->sceneRect().width()+shot->rect().width(),400);
+    timeline->previousSceneWidth=timeline->sceneRect().width()+shot->rect().width();
     timeline->update();
 
 //    timeline->sceneRect().setWidth(timeline->sceneRect().width()+shot->rect().width());
@@ -237,12 +240,13 @@ void ChangeParameterInShotCommand::redo()
 
 
 
-AddSoundCommand::AddSoundCommand(TbeSoundData * sounddata, int xpos, int length, TimelineScene *timeline, QVector<SoundTrack * > movedSounds, QUndoCommand *parent)
+AddSoundCommand::AddSoundCommand(SoundTrack* suppressedSound,TbeSoundData * sounddata, int xpos, int length, TimelineScene *timeline, QVector<SoundTrack * > movedSounds, QUndoCommand *parent)
 {
     foreach(SoundTrack* current, movedSounds){
         movedSoundsOldPos.insert(current, current->previousxpos);
         movedSoundsNewPos.insert(current, current->scenePos().x());
     }
+    this->suppressedSound = suppressedSound;
     this->timeline = timeline;
     sound = new SoundTrack();
     this->sounddata = sounddata;
@@ -262,6 +266,7 @@ AddSoundCommand::~AddSoundCommand()
 void AddSoundCommand::undo()
 {
     timeline->removeItem(sound);
+    timeline->addItem(suppressedSound);
     timeline->update();
     QHash<SoundTrack*, int>::const_iterator i = movedSoundsOldPos.constBegin();
     while (i != movedSoundsOldPos.constEnd()) {
@@ -284,6 +289,7 @@ void AddSoundCommand::redo()
         sh->setPreviousToCurrent();
         i++;
     }
+    timeline->removeItem(suppressedSound);
     timeline->addItem(sound);
     sound->setXToFrame(xpos);
     sound->setRect(0, 0, length, 20);

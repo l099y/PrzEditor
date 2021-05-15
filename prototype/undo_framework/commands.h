@@ -48,7 +48,7 @@ private:
 class AddSoundCommand : public QUndoCommand
 {
 public:
-    AddSoundCommand(TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>,
+    AddSoundCommand(SoundTrack*, TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>,
                QUndoCommand *parent = nullptr);
     ~AddSoundCommand();
 
@@ -57,6 +57,7 @@ public:
 
 private:
     SoundTrack *sound;
+    SoundTrack* suppressedSound;
     QHash<SoundTrack*, int> movedSoundsOldPos;
     QHash<SoundTrack*, int> movedSoundsNewPos;
     TimelineScene *timeline;

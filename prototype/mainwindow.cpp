@@ -11,6 +11,7 @@
 #include <filesystem/projectloader.h>
 #include <filesystem/tbesounddata.h>
 #include <sequence_elements/soundtrack.h>
+#include <QScrollBar>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -33,15 +34,22 @@ MainWindow::MainWindow(QWidget *parent)
     createUndoView();
     bindUndoElements();
     this->setWindowTitle("Presenz movie editor");
-    for (int i = 0; i <40 ; i++)
-    {
-        scaleDownView();
 
-    }
+
+
     this->statusBar()->setFixedHeight(30);
     this->statusBar()->setStyleSheet("QStatusBar{padding-left:8px;background:rgba(55,55,55,255);color:red;font-weight:bold; font-size:20px}");
     connect(timeline, SIGNAL(selectionChanged()), this, SLOT(changeSelectedShotInParametersInterface()));
     showMaximized();
+
+    QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
+    QRectF visible_scene_rect = timelineView->mapToScene(viewport_rect).boundingRect();
+    float resizefactor = visible_scene_rect.width()/timeline->sceneRect().width();
+    timelineView->scale(resizefactor , 1);
+    currentTimelineScaling *= resizefactor;
+    timeline->ruler.scale *=resizefactor;
+    scaleDownView();
+
 }
 void MainWindow :: initButtons(){
 
@@ -127,7 +135,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     if (!isSaved)
     {
         if (ProjectLoader::confirm("do you want to save modified document","unsaved modifications"))
-        saveActionTriggered();
+            saveActionTriggered();
     }
 }
 void MainWindow::initwidgetsparams(){
@@ -173,7 +181,7 @@ void MainWindow::setupTreeItem(){
     tree->setStyleSheet("background: rgb(120,120,120);");
 
     // generateData(); //well you only need to do it once...
-
+    connect (sequencesStorageView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(insertComponentAtEndOfTimeline(QModelIndex)));
     connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequencesAndCollapse(QModelIndex)));
     connect (tree, SIGNAL(clicked(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
     connect (TreeModel, SIGNAL(clearSequences()), this, SLOT(clearSequences()));
@@ -191,7 +199,7 @@ void MainWindow::inittimelinescene(){
     sublayouttimeline->addWidget(timelineView);
     sublayouttimeline->setAlignment(Qt::AlignTop);
     sublayoutbutton->setAlignment(Qt::AlignTop);
-    timelineView->setMinimumHeight(400);
+    timelineView->setMinimumHeight(450);
     timelineView->setRenderHint(QPainter::Antialiasing);
     timelineView->setAlignment(Qt::AlignTop|Qt::AlignLeft);
     timelineView->setStyleSheet(QString("QScrollBar:horizontal { border: 2px solid grey; background: #505050; height: 15px; margin: 1px; }"));
@@ -200,6 +208,10 @@ void MainWindow::inittimelinescene(){
     connect(timeline, SIGNAL(scaleUp()), this, SLOT(scaleUpView()));
     connect(timeline, SIGNAL(scaleDown()),this, SLOT(scaleDownView()));
     connect(timeline, SIGNAL(displayError(QString, int)), this, SLOT(displayStatusBarMessage(QString, int)));
+
+    auto hsb = timelineView->horizontalScrollBar();
+
+    connect(hsb, SIGNAL(sliderMoved(int)), timeline, SLOT(refreshRuler(int)));
 
 }
 MainWindow::~MainWindow()
@@ -267,7 +279,7 @@ void MainWindow::bindUndoElements()
     connect (timeline, SIGNAL(createShot(QList<SequenceData*>, int , int , TimelineScene*, QVector<Shot*>)), this, SLOT(createdShot(QList<SequenceData*>, int, int, TimelineScene*, QVector<Shot*>)));
     connect (timeline, SIGNAL(moveShots(TimelineScene*, QVector<Shot*>,int, int)), this, SLOT(movedShots(TimelineScene*, QVector<Shot*>, int, int)));
     connect (timeline, SIGNAL(clearTimeline(TimelineScene*, QVector<Shot*>, int)), this, SLOT(clearedTimeline(TimelineScene*, QVector<Shot*>, int)));
-    connect (timeline, SIGNAL(babar(TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>)), this, SLOT(createdSound(TbeSoundData*,int, int, TimelineScene*,QVector<SoundTrack*>)));
+    connect (timeline, SIGNAL(babar(SoundTrack*, TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>)), this, SLOT(createdSound(SoundTrack*, TbeSoundData*,int, int, TimelineScene*,QVector<SoundTrack*>)));
     connect (timeline, SIGNAL(moveSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int)), this, SLOT(movedSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int)));//TbeSoundData*, int xpos, int length, TimelineScene* timeline,
     connect (timeline, SIGNAL(resizeShot(TimelineScene*, QVector<Shot*>, Shot* ,int, int, int)), this, SLOT(resizedShot(TimelineScene*, QVector<Shot*>, Shot* ,int, int, int)));
 }
@@ -296,9 +308,9 @@ void MainWindow::generateData()
 
 void MainWindow::enableParameterInterface(bool mod)
 {
-        shotparams->setVisible(mod);
-        shotparams->setEnabled(mod);
-        scrollArea->setVisible(mod);
+    shotparams->setVisible(mod);
+    shotparams->setEnabled(mod);
+    scrollArea->setVisible(mod);
 }
 
 QJsonObject MainWindow::toJSON()
@@ -312,10 +324,11 @@ QJsonObject MainWindow::toJSON()
 
 void MainWindow::scaleUpView()
 {
-    if (currentTimelineScaling * 1.1 < 1 ){
-        timelineView->scale(1.1 , 1);
-        currentTimelineScaling *= 1.1;
-        timeline->ruler.scale *=1.1;
+
+    if (currentTimelineScaling * 1.111 < 1 ){
+        timelineView->scale(1.111 , 1);
+        currentTimelineScaling *= 1.111;
+        timeline->ruler.scale *=1.111;
     }
     else{
         timelineView->resetTransform();
@@ -326,10 +339,23 @@ void MainWindow::scaleUpView()
 
 void MainWindow::scaleDownView()
 {
-    if (currentTimelineScaling * 0.9 > 0.001 ){
+    QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
+    QRectF visible_scene_rect = timelineView->mapToScene(viewport_rect).boundingRect();
+
+    if (visible_scene_rect.width()*1.111< timeline->sceneRect().width() ){
         timelineView->scale(0.9 , 1);
         currentTimelineScaling *= 0.9;
         timeline->ruler.scale *=0.9;
+    }
+    else
+    {
+        QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
+        QRectF visible_scene_rect = timelineView->mapToScene(viewport_rect).boundingRect();
+        float resizefactor = visible_scene_rect.width()/timeline->sceneRect().width();
+        timelineView->scale(resizefactor , 1);
+        currentTimelineScaling *= resizefactor;
+        timeline->ruler.scale *=resizefactor;
+
     }
     qDebug()<<currentTimelineScaling;
 }
@@ -455,6 +481,32 @@ void MainWindow::collapseAllAndExpand(QModelIndex index)
     connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequencesAndCollapse(QModelIndex)));
 }
 
+void MainWindow::insertComponentAtEndOfTimeline(QModelIndex)
+{
+    auto parent = sequencesStorageView;
+    auto file = parent->selectionModel()->selectedIndexes()[0].data().toString();
+    auto path =  parent->model()->headerData(0, Qt::Horizontal, 0).toString();
+
+    qDebug()<< file <<"insertcomp in main ";
+    if (file.right(3)=="tbe") // this evaluation should be done differently
+    {
+
+        auto list = reg->currentExpandedFolderSounds->value(path);
+        foreach (TbeSoundData* current, list){
+            if(current->filename == file){
+                timeline->insertSoundAtEnd(current);
+            }
+        }
+    }
+    else{
+        auto list = reg->currentExpandedFolderSequences->value(path);
+        foreach (SequenceData* current, list){
+            if(current->name == file){
+                timeline->insertShotAtEnd({current});
+            }
+        }
+    }
+}
 void MainWindow::deleteSelection()
 {
     if (timeline->selectedItems().isEmpty())
@@ -473,10 +525,10 @@ void MainWindow::createdShot(QList<SequenceData *> seq, int xpos, int length, Ti
     undoStack->push(createCommand);
 }
 
-void MainWindow::createdSound(TbeSoundData* sd, int xpos, int length, TimelineScene* timeline, QVector<SoundTrack*> movedSounds)
+void MainWindow::createdSound(SoundTrack* suppressedSound, TbeSoundData* sd, int xpos, int length, TimelineScene* timeline, QVector<SoundTrack*> movedSounds)
 {
     sequencesStorageView->clearSelection();
-    QUndoCommand *createCommand = new AddSoundCommand(sd, xpos, length, timeline , movedSounds);
+    QUndoCommand *createCommand = new AddSoundCommand(suppressedSound, sd, xpos, length, timeline , movedSounds);
     isSaved = false;
     undoStack->push(createCommand);
 }
@@ -557,7 +609,7 @@ void MainWindow::loadActionTriggered()
     if (!isSaved)
     {
         if (ProjectLoader::confirm("do you want to save modified document","unsaved modifications"))
-        saveActionTriggered();
+            saveActionTriggered();
     }
     saveDialog = new ProjectLoader(false, "", this);
     saveDialog->setModal(true);
@@ -635,12 +687,12 @@ void MainWindow::loadRequestExecuted(QString filepath)
                     Shot* sh = dynamic_cast<Shot*>(current);
                     SoundTrack* sound = dynamic_cast<SoundTrack*>(current);
                     if (sh){
-                       timeline->removeItem(sh);
-                       //delete(&sh);
+                        timeline->removeItem(sh);
+                        //delete(&sh);
                     }
                     else if(sound)
-                            {
-                      timeline->removeItem(sound);
+                    {
+                        timeline->removeItem(sound);
                     }
                 }
                 timeline->setSceneRect(0,0,obj.value("size").toInt(), 300);
@@ -671,15 +723,15 @@ void MainWindow::loadRequestExecuted(QString filepath)
                     auto obj =  current.toObject();
                     SoundTrack* soundToBeInsert = new SoundTrack(obj);
                     auto currentsoundfile = obj.value("soundfile").toObject();
-                        if (reg->usedSoundFiles.contains(currentsoundfile.value("name").toString())){
-                            soundToBeInsert->soundfile = new TbeSoundData(currentsoundfile);
-                        }
-                        else
-                        {
-                            auto sf = new TbeSoundData(currentsoundfile);
-                            soundToBeInsert->soundfile = sf;
-                            reg->usedSoundFiles.insert(sf->filename, sf);
-                        }
+                    if (reg->usedSoundFiles.contains(currentsoundfile.value("name").toString())){
+                        soundToBeInsert->soundfile = new TbeSoundData(currentsoundfile);
+                    }
+                    else
+                    {
+                        auto sf = new TbeSoundData(currentsoundfile);
+                        soundToBeInsert->soundfile = sf;
+                        reg->usedSoundFiles.insert(sf->filename, sf);
+                    }
 
 
                     timeline->addItem(soundToBeInsert);

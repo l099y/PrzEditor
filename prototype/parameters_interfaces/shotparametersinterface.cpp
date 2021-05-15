@@ -73,7 +73,7 @@ void ShotParametersInterface::setShot(Shot *shot)
         current->setShot(shot);
     }
 
-    positionInput->setMaximum(shot->scene()->sceneRect().width()/10);
+    positionInput->setMaximum((shot->scene()->sceneRect().width()/10)-(shot->rect().width()/10));
     positionInput->setValue(shot->previousxpos/10);
     positionInput->setMinimum(0);
 

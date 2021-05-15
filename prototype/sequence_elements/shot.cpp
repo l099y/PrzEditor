@@ -353,17 +353,24 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     //disable scaling on painter, to have fix representation of graphics
 
     painter->scale(scaleValue, 1);
+    painter->setPen(QColor(0,0,0,50));
+    QLineF* ll = new QLineF (0, 0, 0, 100);
+    painter->drawLine(*ll);
+    QLineF* lll = new QLineF (rect().width(), 0, rect().width(), 100);
+    painter->drawLine(*lll);
+
         painter->setPen(QColor(0,0,100));
         painter->setBrush(QColor(0,0,0));
         QString qs = templateParams.value("Shot designation").value("value").toString();
-        if (qs.length()*6<visiblerectsize){
+        if (qs.length()*6.5<visiblerectsize){
         painter->drawText(5, 90, qs);
         this->setToolTip("");
         }
         else{
         this->setToolTip(qs);
-
         }
+    delete(ll);
+    delete(lll);
     painter->restore();
 }
 

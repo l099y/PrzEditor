@@ -11,6 +11,7 @@
 #include <QJsonObject>
 #include <sequence_elements/soundtrack.h>
 #include <filesystem/tbesounddata.h>
+#include <QModelIndex>
 
 class TimelineScene : public QGraphicsScene
 {
@@ -28,6 +29,7 @@ class TimelineScene : public QGraphicsScene
 
     QHash<Shot*, int> imageOfShotsPositions;
     QHash<SoundTrack*, int> imageOfSoundPositions;
+    SoundTrack* soundRemovedByInsertion = nullptr;
 
 
     QJsonObject generateJson();
@@ -46,6 +48,8 @@ class TimelineScene : public QGraphicsScene
     void behaveOnSelectedShotDisplace();
     void resetShotsDisplacedByInsertion();
     void resetShotsDisplacedFinal();
+    int findLastXWShot();
+    int findLastXWSound();
     float ShotXAndWBefore(Shot *rect);
     QVector<Shot*> getMovedShots();
     //sound displacement functions
@@ -87,6 +91,10 @@ public slots:
    void deleteSelection();
    void displaceSelection(int newPos, QString);
    void changeSelectionSize(int newSize, QString);
+   void insertShotAtEnd(QList<SequenceData*>);
+   void insertSoundAtEnd(TbeSoundData*);
+
+   void refreshRuler(int);
 
 
 signals:
@@ -94,28 +102,32 @@ signals:
    void scaleUp();
    void scaleDown();
    void deleteSelectionSignal();
+
    void createShot(QList<SequenceData*> seq, int xpos, int length, TimelineScene* timeline, QVector<Shot*> movedShot);
    void moveShots(TimelineScene*, QVector<Shot*>, int, int);
    void resizeShot(TimelineScene*, QVector<Shot*>,Shot*, int, int, int);
+
    void moveSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int);
    void resizeSound(TimelineScene*, QVector<SoundTrack*>,SoundTrack*, int, int, int);
-   void clearTimeline(TimelineScene*, QVector<Shot*>, int);
-   void babar(TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>); // int xpos, int length, TimelineScene* timeline,
+   void babar(SoundTrack*, TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>); // int xpos, int length, TimelineScene* timeline,
+
    void displayError(QString, int);
    void selectionXChanged();
 
+   void clearTimeline(TimelineScene*, QVector<Shot*>, int);
 
 protected:
    virtual void mousePressEvent(QGraphicsSceneMouseEvent *e);
    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *e);
    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
-   virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *e);
-   virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *e);
+
    virtual void wheelEvent(QGraphicsSceneWheelEvent *e);
    virtual void keyPressEvent(QKeyEvent *keyEvent);
+
+   virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *e);
+   virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *e);
    virtual void dropEvent(QGraphicsSceneDragDropEvent*);
    virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent* e);
-
 };
 
 #endif // TIMELINESCENE_H
