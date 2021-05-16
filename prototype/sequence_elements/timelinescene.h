@@ -61,6 +61,7 @@ class TimelineScene : public QGraphicsScene
     void resetSoundsDisplacedFinal();
     float SoundXAndWBefore(SoundTrack *rect);
     QVector<SoundTrack*> getMovedSounds();
+    float findClosestShot(float);
 
     void generateImageOfShotsPositions();
     void generateImageOfSoundsPositions();
@@ -73,6 +74,8 @@ class TimelineScene : public QGraphicsScene
     // check if the condition to assign selection to the the interface Panel
 
     bool validateParameterTargetChange();
+
+    QRectF getVisibleRect();
 
 public slots:
     void activatelxt();
@@ -91,6 +94,7 @@ public slots:
    void deleteSelection();
    void displaceSelection(int newPos, QString);
    void changeSelectionSize(int newSize, QString);
+
    void insertShotAtEnd(QList<SequenceData*>);
    void insertSoundAtEnd(TbeSoundData*);
 

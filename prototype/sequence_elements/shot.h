@@ -12,6 +12,8 @@
 #include <QDataStream>
 #include <QHash>
 #include <QJsonArray>
+#include <QTimer>
+
 
 enum class BoxState {REGULAR, DISPLACE};
 
@@ -22,6 +24,8 @@ public:
     Shot();
     Shot(QJsonObject);
     ~Shot();
+
+    QTimer* paintTimer = new QTimer(this);
 
     // collection of json parameters, name as the key
 

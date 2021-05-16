@@ -12,6 +12,9 @@
 #include <QJsonDocument>
 #include <QGraphicsDropShadowEffect>
 #include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QScrollBar>
+#include <sequence_elements/timelinescene.h>
 
 
 Shot::Shot(): QGraphicsRectItem()
@@ -134,7 +137,58 @@ void Shot::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 
 QRectF Shot::boundingRect() const
 {
-    return this->rect();
+
+
+    auto timelineView = scene()->views()[0];
+
+    QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
+    QRectF visible_scene_rect = timelineView->mapToScene(viewport_rect).boundingRect();
+    auto timeline = dynamic_cast<TimelineScene*>(scene());
+
+
+
+    auto sceneStart = timeline->getVisibleRect().x();
+    auto sceneWidth = visible_scene_rect.width();
+    auto sceneEnd = sceneStart+ sceneWidth;
+
+
+ // if current shot is in the visible scene
+
+    if (((scenePos().x() + this->rect().width() >= sceneStart && scenePos().x()+this->rect().width() < sceneEnd)
+            ||(scenePos().x() <= sceneEnd && scenePos().x() >= sceneStart)) ||(scenePos().x()<= sceneStart && scenePos().x()+this->rect().width()>=sceneEnd)){
+
+        // if current shot is smaller than the visible scene.. yes this could be better but to avoid small calculs and save few ressources is a balance
+
+        if (this->rect().width()<visible_scene_rect.width())
+            return this->rect();
+         else{
+             if (scenePos().x()<sceneEnd && scenePos().x()>=sceneStart){
+                 return QRectF(0,0,sceneEnd-scenePos().x(),100);
+             }
+             else if (scenePos().x()+rect().width()>=sceneStart && scenePos().x()+rect().width() <= sceneEnd){
+                 return QRectF(rect().width()-(scenePos().x()+rect().width()-sceneStart),0, scenePos().x()+rect().width()-sceneStart, 100);
+
+             }
+             else {
+                 return QRectF(sceneStart-scenePos().x(), 0, sceneWidth, 100);
+             }
+         }
+    }
+    else
+    {
+       return QRectF(0,0,0,0);
+    }
+
+//    qDebug()<<( std::max(scenePos().x(), scenePos().x()+rect().width()) >= std::min(sceneStart, sceneStart+sceneWidth) && std::min(scenePos().x(),  scenePos().x()+rect().width()) <= std::max(sceneStart, sceneWidth));
+
+//    if ( std::max(sceneStart, sceneEnd) >= std::min(scenePos().x(), scenePos().x()+rect().width()) && std::min(sceneStart, sceneEnd) <= std::max(scenePos().x(),  scenePos().x()+rect().width())){
+//        qDebug()<<"sound in visible part of the scene with std";
+
+//    }
+//      qDebug()<<scenePos().x()<<"rect scenepos" << this->rect().width() ;
+//      qDebug()<< sceneStart << "starting point of the view"<< sceneEnd << "in bounding rect";
+
+
 }
 
 void Shot::setPreviousToCurrent(){
@@ -284,7 +338,13 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 //        painter->setPen(QColor(Qt::yellow));
 //        painter->setBrush(QColor(255,0,0));
 //    }
-    painter->drawRoundedRect(rect(),5,5);
+    auto timelineView =this->scene()->views()[0];
+    QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
+    QRectF visible_scene_rect = timelineView->mapToScene(viewport_rect).boundingRect();
+
+    auto visiblerectsize = static_cast<int>((rect().width()*painter->transform().m11()));
+
+        painter->drawRoundedRect(rect(),5,5);
 
     // Drawing the fadin / fadeout triangles;
 
@@ -346,7 +406,6 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 
     // retrieving the size of the visible shot
 
-    auto visiblerectsize = static_cast<int>((rect().width()*painter->transform().m11()));
     double scaleValue =1/painter->transform().m11();
     painter->save();
 

@@ -11,6 +11,10 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QGraphicsDropShadowEffect>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QStyleOptionGraphicsItem>
+#include <sequence_elements/timelinescene.h>
 
 SoundTrack::SoundTrack(): QGraphicsRectItem()
 {
@@ -130,7 +134,45 @@ void SoundTrack::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 
 QRectF SoundTrack::boundingRect() const
 {
-    return this->rect();
+    auto timelineView = scene()->views()[0];
+
+    QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
+    QRectF visible_scene_rect = timelineView->mapToScene(viewport_rect).boundingRect();
+    auto timeline = dynamic_cast<TimelineScene*>(scene());
+
+
+
+    auto sceneStart = timeline->getVisibleRect().x();
+    auto sceneWidth = visible_scene_rect.width();
+    auto sceneEnd = sceneStart+ sceneWidth;
+
+
+ // if current shot is in the visible scene
+
+    if (((scenePos().x() + this->rect().width() >= sceneStart && scenePos().x()+this->rect().width() < sceneEnd)
+            ||(scenePos().x() <= sceneEnd && scenePos().x() >= sceneStart)) ||(scenePos().x()<= sceneStart && scenePos().x()+this->rect().width()>=sceneEnd)){
+
+        // if current shot is smaller than the visible scene.. yes this could be better but to avoid small calculs and save few ressources is a balance
+
+        if (this->rect().width()<visible_scene_rect.width())
+            return this->rect();
+         else{
+             if (scenePos().x()<sceneEnd && scenePos().x()>=sceneStart){
+                 return QRectF(0,0,sceneEnd-scenePos().x(),100);
+             }
+             else if (scenePos().x()+rect().width()>=sceneStart && scenePos().x()+rect().width() <= sceneEnd){
+                 return QRectF(rect().width()-(scenePos().x()+rect().width()-sceneStart),0, scenePos().x()+rect().width()-sceneStart, 100);
+
+             }
+             else {
+                 return QRectF(sceneStart-scenePos().x(), 0, sceneWidth, 100);
+             }
+         }
+    }
+    else
+    {
+       return QRectF(0,0,0,0);
+    }
 }
 
 void SoundTrack::setPreviousToCurrent(){
@@ -213,6 +255,7 @@ void SoundTrack::setAnimatedFalse()
 
 void SoundTrack::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+    painter->setClipRect( option->exposedRect );
     if (isSelected()){
         setZValue(1);
         painter->setPen(QColor(Qt::yellow));
@@ -224,12 +267,37 @@ void SoundTrack::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
         painter->setBrush(this->brush());
         painter->setPen(this->pen());
     }
-//    if (animated)
-//        {
-//        painter->setPen(QColor(Qt::yellow));
-//        painter->setBrush(QColor(255,0,0));
-//    }
-    painter->drawRoundedRect(rect(),5,5);
-}
+        auto timelineView =this->scene()->views()[0];
+        QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
+        QRectF visible_scene_rect = timelineView->mapToScene(viewport_rect).boundingRect();
 
+        auto visiblerectsize = static_cast<int>((rect().width()*painter->transform().m11()));
+
+            painter->drawRoundedRect(rect(),5,5);
+
+            double scaleValue =1/painter->transform().m11();
+            painter->save();
+
+            //disable scaling on painter, to have fix representation of graphics
+
+            painter->scale(scaleValue, 1);
+
+
+                painter->setPen(QColor(0,0,0));
+                painter->setBrush(QColor(0,0,0));
+                QString qs = soundfile->filename;
+                qDebug()<<(qs.length()*6.5<visiblerectsize) << soundfile->filename;
+
+                        if (qs.length()*6.5<visiblerectsize){
+                painter->drawText(5, 13, qs);
+                this->setToolTip("");
+                }
+                else{
+                this->setToolTip(qs);
+                }
+
+            painter->restore();
+
+
+}
 

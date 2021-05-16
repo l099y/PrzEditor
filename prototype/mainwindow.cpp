@@ -195,7 +195,7 @@ void MainWindow::inittimelinescene(){
 
     timelineView->setDragMode(QGraphicsView::RubberBandDrag);
     timelineView->acceptDrops();
-    //timelineView->setOptimizationFlags(QGraphicsView::DontSavePainterState|QGraphicsView::DontAdjustForAntialiasing);
+    timelineView->setOptimizationFlags(QGraphicsView::DontSavePainterState|QGraphicsView::DontAdjustForAntialiasing);
     sublayouttimeline->addWidget(timelineView);
     sublayouttimeline->setAlignment(Qt::AlignTop);
     sublayoutbutton->setAlignment(Qt::AlignTop);
@@ -212,6 +212,7 @@ void MainWindow::inittimelinescene(){
     auto hsb = timelineView->horizontalScrollBar();
 
     connect(hsb, SIGNAL(sliderMoved(int)), timeline, SLOT(refreshRuler(int)));
+    connect(hsb, SIGNAL(sliderReleased()), timeline, SLOT(update()));
 
 }
 MainWindow::~MainWindow()
@@ -334,6 +335,12 @@ void MainWindow::scaleUpView()
         timelineView->resetTransform();
         currentTimelineScaling = 1;
         timeline->ruler.scale =1;
+
+        //on no scaling timeline, i encounter bugs, so its a dirty trick, i don't think i will have the time to figure out the reason.
+
+        timelineView->scale(0.999 , 1);
+        currentTimelineScaling *= 0.999;
+        timeline->ruler.scale *=0.999;
     }
 }
 

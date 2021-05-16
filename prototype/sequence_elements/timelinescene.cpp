@@ -19,6 +19,9 @@
 #include <QCoreApplication>
 #include <QHash>
 #include <QJsonArray>
+#include <QtMath>
+#include <QGraphicsView>
+#include <QScrollBar>
 
 
 TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObject* parent): QGraphicsScene(parent), ruler(0)
@@ -28,6 +31,7 @@ TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObjec
     view = vview;
     ruler.setSize(10400000);
     setSceneRect(0,0, 200000, 400);
+    setItemIndexMethod(QGraphicsScene::ItemIndexMethod(NoIndex));
     QBrush brush(QColor(50,150,200));
     setBackgroundBrush(brush);
     newRect();
@@ -180,16 +184,21 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
 void TimelineScene::behaveOnSelectionSwitchPosMoveSound(float e, bool final)
 {
     SoundTrack* selection = dynamic_cast<SoundTrack*>(selectedItems().at(0));
+    int pos = 200000000;
     selection->setY(260);
     foreach (QGraphicsItem* current, items()){
                 Shot* sh = dynamic_cast<Shot*>(current);
                 if (sh){
                     if (e < sh->scenePos().x()+sh->rect().width() && e >=  sh->scenePos().x()){
-                        qDebug()<<"i'm in the range of this shot";
-                        selection->setXToFrame(sh->scenePos().x());
+                        pos=sh->scenePos().x();
+
                     }
                 }
             }
+    if (pos==200000000){
+       pos = findClosestShot(e);
+    }
+    selection->setXToFrame(pos);
 }
 
 void TimelineScene::behaveOnSelectedShotDisplace()
@@ -668,7 +677,7 @@ void TimelineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *e)
         foreach (TbeSoundData* current, list){
             if(current->filename == file){
                 soundDropRepresentation = new SoundTrack ();
-                soundDropRepresentation->setRect(0,0,2000000,20);
+                soundDropRepresentation->setRect(0,0,1000000,20);
                 soundDropRepresentation->setX(e->scenePos().x());
                 if (!selectedItems().isEmpty()){
                     QGraphicsItem* selection= selectedItems().at(0);
@@ -794,10 +803,41 @@ QVector<SoundTrack *> TimelineScene::getMovedSounds()
     return ret;
 }
 
+float TimelineScene::findClosestShot(float e)
+{
+    int dist = 20000000;
+    int xpos = 0;
+    foreach (QGraphicsItem* current, items()){
+        Shot* sh= dynamic_cast<Shot*>(current);
+        if (sh)
+        {
+            if (qFabs((sh->scenePos().x()+(sh->rect().width()/2))-e)<dist){
+               dist = qFabs((sh->scenePos().x()+(sh->rect().width()/2))-e);
+               xpos = sh->scenePos().x();
+            }
+        }
+    }
+    if (dist ==  20000000)
+    return 0;
+    else
+    return xpos;
+}
+
 
 bool TimelineScene::validateParameterTargetChange()
 {
     return (selectedItems().length() != 0 && selectedItems().at(0)!= shotDropRepresentation && selectedItems().at(0)!= soundDropRepresentation);
+}
+
+QRectF TimelineScene::getVisibleRect()
+{
+
+        QPointF A = view->mapToScene( QPoint(0, 0) );
+        QPointF B = view->mapToScene( QPoint(
+            view->viewport()->width(),
+            view->viewport()->height() ));
+        return QRectF( A, B );
+
 }
 
 void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
@@ -1033,12 +1073,21 @@ void TimelineScene::insertSoundAtEnd(TbeSoundData* soundfile)
                         suppressedSound = sh;
                     }
                 }
-    emit (babar(suppressedSound, soundfile, findLastXWSound(), 2000000, this, {}));
+    emit (babar(suppressedSound, soundfile, 0, 1000000, this, {}));
 }
 
-void TimelineScene::refreshRuler(int value)
+void TimelineScene::refreshRuler(int)
 {
-    qDebug ()<< value << " in refreshruler";
+
+
+
+    auto timelineView = views()[0];
+
+    QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
+    QRectF visible_scene_rect = timelineView->mapToScene(viewport_rect).boundingRect();
+
+
+    qDebug()<< (getVisibleRect().x() + visible_scene_rect.width());
     ruler.update();
 }
 
@@ -1052,3 +1101,4 @@ void TimelineScene :: newRect(){
     qDebug()<<generateJson();
     qDebug()<<"sequences"<<endl<<przreg->usedSequences;
 }
+
