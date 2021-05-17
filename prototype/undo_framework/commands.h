@@ -108,6 +108,7 @@ private:
     TimelineScene* timeline;
     QVector<Shot*> removedShots;
     int prevtimelinesize;
+    SoundTrack* removedSound = nullptr;
 };
 
 class LoadCommand : public QUndoCommand{
@@ -123,14 +124,13 @@ private:
 
 class ChangeParameterInShotCommand : public QUndoCommand{
 public:
-    ChangeParameterInShotCommand(MainWindow*, Shot*, QJsonObject,  QUndoCommand *parent = nullptr);
+    ChangeParameterInShotCommand(MainWindow*, QList<Shot*>, QJsonObject,  QUndoCommand *parent = nullptr);
     void undo() override;
     void redo() override;
 private:
     MainWindow* app;
-    Shot* sh;
-    QJsonObject oldconfig;
-    QJsonObject newconfig;
+    QHash<Shot*, QJsonObject> oldconfig;
+    QHash<Shot*, QJsonObject> newconfig;
 };
 
 class ResizeShotCommand: public QUndoCommand
@@ -152,6 +152,12 @@ private:
 
     int prevscenesize;
     int currentscenesize;
+
+    int previousGlowToFade = 0;
+    int newGlowToFade = 0;
+
+    int previousGlowFromFade = 0;
+    int newGlowFromFade = 0;
 };
 
 

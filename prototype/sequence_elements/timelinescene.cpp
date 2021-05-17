@@ -503,6 +503,11 @@ void TimelineScene::generateImageOfSoundsPositions()
     }
 }
 
+void TimelineScene::setPreviousToCurrent()
+{
+    previousSceneWidth = sceneRect().width();
+}
+
 void TimelineScene::realignSelectionOn260()
 {
     foreach (QGraphicsItem *current, selectedItems()){
@@ -677,7 +682,7 @@ void TimelineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *e)
         foreach (TbeSoundData* current, list){
             if(current->filename == file){
                 soundDropRepresentation = new SoundTrack ();
-                soundDropRepresentation->setRect(0,0,1000000,20);
+                soundDropRepresentation->setRect(0,0,100000000,20);
                 soundDropRepresentation->setX(e->scenePos().x());
                 if (!selectedItems().isEmpty()){
                     QGraphicsItem* selection= selectedItems().at(0);
@@ -1035,22 +1040,19 @@ void TimelineScene::changeSelectionSize(int newSize, QString type)
         SoundTrack* sound = dynamic_cast<SoundTrack*>(selectedItems().at(0));
 
         if (shot){
-            if (shot->validateSizeChange(newSize)){
                 shot->setSize(newSize*10);
                 moveAllFrom(shot->previousxpos+1, newSize*10 - shot->previousboxwidth, type);
-                emit (resizeShot(this, getMovedShots(),shot, shot->rect().width(), previousSceneWidth, this->sceneRect().width()));
                 ExtendSceneWidth(newSize*10 - shot->previousboxwidth);
-            }
-            else{
-                emit (displayError("Invalid size, this shot contains shorter sequences", 3000));
-            }
+                emit (resizeShot(this, getMovedShots(),shot, shot->rect().width(), previousSceneWidth, this->sceneRect().width()));
+
         }
         else if (sound){
                if (sound->validateSizeChange(newSize *10)){
                 sound->setSize(newSize *10);
                 moveAllFrom(shot->previousxpos+1, newSize*10 - sound->previousboxwidth, type);
-                emit (resizeSound(this, getMovedSounds(),sound, sound->rect().width(), previousSceneWidth, this->sceneRect().width()));
                 ExtendSceneWidth(newSize*10 - sound->previousboxwidth);
+                emit (resizeSound(this, getMovedSounds(),sound, sound->rect().width(), previousSceneWidth, this->sceneRect().width()));
+
             }
             else{
                 emit (displayError("Invalid size, this shot contains shorter soundfile", 10000));
@@ -1089,6 +1091,11 @@ void TimelineScene::refreshRuler(int)
 
     qDebug()<< (getVisibleRect().x() + visible_scene_rect.width());
     ruler.update();
+}
+
+void TimelineScene::scaleViewToScene()
+{
+    emit (scaleToViewRequest());
 }
 
 void TimelineScene::mousePressEvent(QGraphicsSceneMouseEvent *e)

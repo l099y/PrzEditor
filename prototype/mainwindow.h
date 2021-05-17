@@ -157,6 +157,7 @@ public:
 public slots:
     void scaleUpView();
     void scaleDownView();
+    void scaleViewToScene();
 
 //    void displaceSelectionInTimeline();
 //    void changeSelectionSizeInTimeline();
@@ -167,6 +168,7 @@ public slots:
     void collapseChildrens(QModelIndex);
     void collapseAllAndExpand(QModelIndex);
     void insertComponentAtEndOfTimeline(QModelIndex);
+
 
     // QUndo functions allowing the stack of action to operate
 
@@ -179,7 +181,7 @@ public slots:
     void clearedTimeline(TimelineScene*, QVector<Shot*>, int);
     void resizedShot(TimelineScene*, QVector<Shot*>,Shot*, int, int, int);
     void resizedSound(TimelineScene*, QVector<SoundTrack*>, SoundTrack* ,int, int, int);
-    void changeParameterInAShot(Shot*, QJsonObject);
+    void changeParameterInAShot(QList<Shot*>, QJsonObject);
 
     // Saving and Loading projet related slots
 

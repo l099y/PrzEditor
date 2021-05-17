@@ -13,6 +13,8 @@
 #include <QHash>
 #include <QJsonArray>
 #include <QTimer>
+#include <QResource>
+#include <QPixmap>
 
 
 enum class BoxState {REGULAR, DISPLACE};
@@ -21,6 +23,7 @@ class Shot : public QObject, public QGraphicsRectItem
 {
     Q_OBJECT
 public:
+    QPixmap* pixmap = new QPixmap(100 ,100);
     Shot();
     Shot(QJsonObject);
     ~Shot();

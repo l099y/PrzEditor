@@ -42,14 +42,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(timeline, SIGNAL(selectionChanged()), this, SLOT(changeSelectedShotInParametersInterface()));
     showMaximized();
 
-    QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
-    QRectF visible_scene_rect = timelineView->mapToScene(viewport_rect).boundingRect();
-    float resizefactor = visible_scene_rect.width()/timeline->sceneRect().width();
-    timelineView->scale(resizefactor , 1);
-    currentTimelineScaling *= resizefactor;
-    timeline->ruler.scale *=resizefactor;
-    scaleDownView();
-
+    scaleViewToScene();
 }
 void MainWindow :: initButtons(){
 
@@ -211,6 +204,7 @@ void MainWindow::inittimelinescene(){
 
     auto hsb = timelineView->horizontalScrollBar();
 
+    connect(timeline, SIGNAL(scaleToViewRequest()), this, SLOT(scaleViewToScene()));
     connect(hsb, SIGNAL(sliderMoved(int)), timeline, SLOT(refreshRuler(int)));
     connect(hsb, SIGNAL(sliderReleased()), timeline, SLOT(update()));
 
@@ -356,13 +350,8 @@ void MainWindow::scaleDownView()
     }
     else
     {
-        QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
-        QRectF visible_scene_rect = timelineView->mapToScene(viewport_rect).boundingRect();
-        float resizefactor = visible_scene_rect.width()/timeline->sceneRect().width();
-        timelineView->scale(resizefactor , 1);
-        currentTimelineScaling *= resizefactor;
-        timeline->ruler.scale *=resizefactor;
 
+        timeline->scaleViewToScene();
     }
     qDebug()<<currentTimelineScaling;
 }
@@ -514,6 +503,18 @@ void MainWindow::insertComponentAtEndOfTimeline(QModelIndex)
         }
     }
 }
+
+void MainWindow::scaleViewToScene()
+{
+    QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
+    QRectF visible_scene_rect = timelineView->mapToScene(viewport_rect).boundingRect();
+    float resizefactor = visible_scene_rect.width()/timeline->sceneRect().width();
+    timelineView->scale(resizefactor , 1);
+    currentTimelineScaling *= resizefactor;
+    timeline->ruler.scale *=resizefactor;
+}
+
+
 void MainWindow::deleteSelection()
 {
     if (timeline->selectedItems().isEmpty())
@@ -580,7 +581,7 @@ void MainWindow::resizedSound(TimelineScene *, QVector<SoundTrack *>, SoundTrack
 }
 
 
-void MainWindow::changeParameterInAShot(Shot * sh, QJsonObject obj)
+void MainWindow::changeParameterInAShot(QList<Shot *> sh, QJsonObject obj)
 {
     qDebug()<<"arrived in main"<< obj.value("value").toString();
     QUndoCommand *changeparam = new ChangeParameterInShotCommand(this, sh, obj);
@@ -658,12 +659,13 @@ void MainWindow::initShotsParameters()
         shotparams = new ShotParametersInterface(configJson.object(), this);
         sublayoutparams1->addWidget(shotparams);
         scrollArea->setWidget(shotparams);
+        connect (shotparams, SIGNAL(errorDisplay(QString, int)), this, SLOT(displayStatusBarMessage(QString, int)));
         connect (shotparams, SIGNAL (changeShotSize(int, QString)), timeline, SLOT( changeSelectionSize(int, QString)));
         connect (shotparams, SIGNAL (changeShotPosition(int, QString)), timeline, SLOT(displaceSelection(int, QString)));
         connect (timeline, SIGNAL(selectionXChanged()), shotparams, SLOT(updateShotPos()));
         scrollArea->setLayout(sublayoutparams1);
         enableParameterInterface(false);
-        connect(shotparams, SIGNAL(valueChangedRequest(Shot*, QJsonObject)), this, SLOT(changeParameterInAShot(Shot*, QJsonObject)));
+        connect(shotparams, SIGNAL(valueChangedRequest(QList<Shot*>, QJsonObject)), this, SLOT(changeParameterInAShot(QList<Shot*>, QJsonObject)));
     }
 
 }
@@ -759,13 +761,35 @@ void MainWindow::loadRequestExecuted(QString filepath)
 
 void MainWindow::changeSelectedShotInParametersInterface()
 {
+
     if (timeline->validateParameterTargetChange())
     {
-        Shot* sh = dynamic_cast<Shot*>(timeline->selectedItems().at(0));
-        if (sh){
+        if (timeline->selectedItems().length()==1){
+            auto* sound = dynamic_cast<SoundTrack*>(timeline->selectedItems()[0]);
+            if (sound){
+                enableParameterInterface(false);
+            }
+            else{
+                auto* sh = dynamic_cast<Shot*>(timeline->selectedItems()[0]);
+                shotparams->setShot({sh});
+                 enableParameterInterface(true);
+            }
+        }
+        else{
+            QList<Shot*> selectedShots;
+            foreach(QGraphicsItem* current, timeline->selectedItems()){
+                auto* shot = dynamic_cast<Shot*>(current);
+                auto* sound = dynamic_cast<SoundTrack*>(timeline->selectedItems()[0]);
+                if (sound){
+                    sound->setSelected(false);
+                }
+                else if (shot){
+                selectedShots.append(shot);
+            }
 
-            shotparams->setShot(sh);
-            enableParameterInterface(true);
+        }
+        shotparams->setShot(selectedShots);
+        enableParameterInterface(true);
         }
     }
     else{

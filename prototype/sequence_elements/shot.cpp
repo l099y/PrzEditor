@@ -15,13 +15,19 @@
 #include <QGraphicsView>
 #include <QScrollBar>
 #include <sequence_elements/timelinescene.h>
+#include <QImage>
+
+
 
 
 Shot::Shot(): QGraphicsRectItem()
 {
+    QImage aaa(":/images/dv.jpg");
 
+    pixmap->convertFromImage(aaa.scaled(80,80, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    QTime time = time.currentTime();
     generateParamsFromTemplate();
-    QRandomGenerator rdm(std::time(0));
+    QRandomGenerator rdm((uint)time.msec());
     QPen pen (Qt::white);
     QColor a;
     a.setRgb(rdm.bounded(0,74)+180,rdm.bounded(0,74)+180,100);
@@ -340,7 +346,6 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 //    }
     auto timelineView =this->scene()->views()[0];
     QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
-    QRectF visible_scene_rect = timelineView->mapToScene(viewport_rect).boundingRect();
 
     auto visiblerectsize = static_cast<int>((rect().width()*painter->transform().m11()));
 
@@ -387,7 +392,7 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     qreal endPointY1   = 100.0;
 
     qreal endPointX2 = rect().width()-(val)*10;
-    qreal endPointY2 = 100;//fadin size;
+    qreal endPointY2 = 0;//fadin size;
 
     QPainterPath path;
 
@@ -412,17 +417,23 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     //disable scaling on painter, to have fix representation of graphics
 
     painter->scale(scaleValue, 1);
-    painter->setPen(QColor(0,0,0,50));
-    QLineF* ll = new QLineF (0, 0, 0, 100);
-    painter->drawLine(*ll);
-    QLineF* lll = new QLineF (rect().width(), 0, rect().width(), 100);
-    painter->drawLine(*lll);
+        painter->setPen(QColor(0,0,0,50));
+        QLineF* ll = new QLineF (0, 0, 0, 100);
+        painter->drawLine(*ll);
+        QLineF* lll = new QLineF (rect().width(), 0, rect().width(), 100);
+        painter->drawLine(*lll);
+
+//        if (visiblerectsize>pixmap->width())
+//        painter->drawPixmap(0,0, *pixmap,0,0,100,100);
+//        else{
+//        painter->drawPixmap(0,0, *pixmap,0,0,visiblerectsize, 100);
+//        }
 
         painter->setPen(QColor(0,0,100));
         painter->setBrush(QColor(0,0,0));
         QString qs = templateParams.value("Shot designation").value("value").toString();
         if (qs.length()*6.5<visiblerectsize){
-        painter->drawText(5, 90, qs);
+        painter->drawText(5, 92, qs);
         this->setToolTip("");
         }
         else{

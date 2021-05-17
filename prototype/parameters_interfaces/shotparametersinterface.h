@@ -15,8 +15,8 @@ public:
     explicit ShotParametersInterface(QJsonObject config, QWidget *parent = nullptr);
 
     // Parameters window elements
-    Shot* shot = nullptr;
-    void setShot(Shot* shot);
+    QList<Shot*> shots;
+    void setShot(QList<Shot*> shot);
     QList<CustomShotParameterInterface*> parameters;
     QLabel* title = new QLabel(this);
     QLineEdit* path = new QLineEdit(this);
@@ -25,9 +25,10 @@ public:
     QSpinBox* positionInput = new QSpinBox(this);
 
 signals:
-    void valueChangedRequest(Shot*, QJsonObject);
+    void valueChangedRequest(QList<Shot*>, QJsonObject);
     void changeShotSize(int, QString);
     void changeShotPosition(int, QString);
+    void displayError(QString, int);
 public slots:
     void updateShotPos();
     void changedShotSize();

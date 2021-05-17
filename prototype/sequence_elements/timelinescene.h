@@ -69,7 +69,7 @@ class TimelineScene : public QGraphicsScene
     Shot* shotDropRepresentation = nullptr;
     SoundTrack* soundDropRepresentation = nullptr;
     SequenceRegister* przreg;
-
+    void setPreviousToCurrent();
     void realignSelectionOn260();
     // check if the condition to assign selection to the the interface Panel
 
@@ -99,10 +99,10 @@ public slots:
    void insertSoundAtEnd(TbeSoundData*);
 
    void refreshRuler(int);
-
+   void scaleViewToScene();
 
 signals:
-
+   void scaleToViewRequest();
    void scaleUp();
    void scaleDown();
    void deleteSelectionSignal();

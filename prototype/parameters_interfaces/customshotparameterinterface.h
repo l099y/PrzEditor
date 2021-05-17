@@ -20,7 +20,7 @@ class CustomShotParameterInterface : public QWidget
 public:
     explicit CustomShotParameterInterface(QJsonObject, QWidget *parent = nullptr);
     QJsonObject param;
-    Shot* shot = nullptr;
+    QList<Shot*> shots;
 
     CustomQSlider* cs = nullptr;
     QSpinBox* sb  = nullptr;
@@ -34,7 +34,7 @@ public:
     QFileDialog* dialog = nullptr;
     QString selectedFile = "";
 
-    void setShot(Shot*);
+    void setShot(QList<Shot*>);
     void InitInt();
     void InitFloat();
     void InitBool();

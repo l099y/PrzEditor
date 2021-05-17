@@ -6,6 +6,8 @@
 #include <QDataStream>
 #include <QHash>
 #include <mainwindow.h>
+#include <QJsonObject>
+#include <QGraphicsItem>
 
 DeleteCommand::DeleteCommand(TimelineScene *scene, QUndoCommand *parent)
     : QUndoCommand(parent)
@@ -75,6 +77,7 @@ void AddCommand::undo()
     }
     timeline->setSceneRect(0,0,timeline->sceneRect().width()-shot->rect().width(),400);
     timeline->previousSceneWidth=timeline->sceneRect().width()-shot->rect().width();
+    timeline->scaleViewToScene();
 //    timeline->sceneRect().setWidth(timeline->sceneRect().width()-shot->rect().width());
 //    timeline->previousSceneWidth = timeline->sceneRect().width();
 }
@@ -101,6 +104,7 @@ void AddCommand::redo()
     timeline->setSceneRect(0,0,timeline->sceneRect().width()+shot->rect().width(),400);
     timeline->previousSceneWidth=timeline->sceneRect().width()+shot->rect().width();
     timeline->update();
+    timeline->scaleViewToScene();
 
 //    timeline->sceneRect().setWidth(timeline->sceneRect().width()+shot->rect().width());
 //    timeline->previousSceneWidth = timeline->sceneRect().width();
@@ -150,6 +154,11 @@ void MoveCommand::redo()
 ClearCommand::ClearCommand(TimelineScene* timeline, QVector<Shot *> removedshots, int prevtimelinewidth, QUndoCommand *parent) : QUndoCommand(parent)
 {
     this->timeline = timeline;
+    foreach(QGraphicsItem* current, this->timeline->items()){
+        auto sound = dynamic_cast<SoundTrack*>(current);
+        if (sound)
+            removedSound = sound;
+    }
     this->removedShots = removedshots;
     this->prevtimelinesize = prevtimelinewidth;
     setText(QObject::tr("clear command"));
@@ -161,7 +170,13 @@ void ClearCommand::undo()
         timeline->addItem(current);
     }
     timeline->setSceneRect(0,0,prevtimelinesize,400);
-    timeline->ruler.setSize(prevtimelinesize*10);
+
+    if (removedSound != nullptr){
+        timeline->addItem(removedSound);
+    }
+    timeline->setPreviousToCurrent();
+    timeline->scaleViewToScene();
+
 }
 
 
@@ -171,8 +186,12 @@ void ClearCommand::redo()
     {
         timeline->removeItem(current);
     }
-    timeline->setSceneRect(0,0, 2000000, 400);
-    timeline->ruler.setSize(2000000);
+    if (removedSound != nullptr){
+        timeline->removeItem(removedSound);
+    }
+    timeline->setSceneRect(0,0, 200000, 400);
+    timeline->setPreviousToCurrent();
+    timeline->scaleViewToScene();
     timeline->newRect();
 }
 
@@ -210,32 +229,60 @@ void LoadCommand::redo(){
     }
 }
 
-ChangeParameterInShotCommand::ChangeParameterInShotCommand(MainWindow* app, Shot * shot, QJsonObject obj, QUndoCommand *parent) : QUndoCommand(parent)
+ChangeParameterInShotCommand::ChangeParameterInShotCommand(MainWindow* app, QList<Shot*>shot, QJsonObject obj, QUndoCommand *parent) : QUndoCommand(parent)
 {
    this->app = app;
-   sh = shot;
    QString name = obj.value("name").toString();
-   oldconfig = shot->templateParams.value(name);
-   newconfig = obj;
+   foreach (Shot* current, shot){
+       oldconfig.insert(current, current->templateParams.value(name));
+       newconfig.insert(current, obj);
+   }
+
+
    setText(QObject::tr("change parameter %1").arg(name));
 }
 
 void ChangeParameterInShotCommand::undo()
 {
-   QString name = oldconfig.value("name").toString();
-   sh->templateParams.insert(name, oldconfig);
-   sh->scene()->clearSelection();
-   sh->setSelected(true);
-   sh->update();
-}
+    Shot* sh = nullptr;
+    QHash<Shot*, QJsonObject>::const_iterator i = oldconfig.constBegin();
+    while (i != oldconfig.constEnd()) {
+        auto  shot =i.key();
+        if (sh == nullptr)
+            sh = shot;
+        shot->templateParams.insert(i.value().value("name").toString(), i.value());
+        i++;
+    }
 
+   sh->scene()->clearSelection();
+
+   i = newconfig.constBegin();
+      while (i != newconfig.constEnd()) {
+          auto  shot =i.key();
+          shot->setSelected(true);
+          i++;
+   }
+}
 void ChangeParameterInShotCommand::redo()
 {
-    QString name = oldconfig.value("name").toString();
-    sh->templateParams.insert(name, newconfig);
+
+    Shot* sh = nullptr;
+    QHash<Shot*, QJsonObject>::const_iterator i = newconfig.constBegin();
+    while (i != newconfig.constEnd()) {
+        auto  shot =i.key();
+        if (sh == nullptr)
+            sh = shot;
+        shot->templateParams.insert(i.value().value("name").toString(), i.value());
+        i++;
+    }
     sh->scene()->clearSelection();
-    sh->setSelected(true);
-    sh->update();
+
+    i = newconfig.constBegin();
+       while (i != newconfig.constEnd()) {
+           auto  shot =i.key();
+           shot->setSelected(true);
+           i++;
+    }
 }
 
 
@@ -265,6 +312,7 @@ AddSoundCommand::~AddSoundCommand()
 
 void AddSoundCommand::undo()
 {
+    timeline->przreg->usedSoundFiles.remove(sounddata->filename);
     timeline->removeItem(sound);
     timeline->addItem(suppressedSound);
     timeline->update();
@@ -289,10 +337,11 @@ void AddSoundCommand::redo()
         sh->setPreviousToCurrent();
         i++;
     }
+    timeline->przreg->usedSoundFiles.insert(sounddata->filename, sounddata);
     timeline->removeItem(suppressedSound);
     timeline->addItem(sound);
     sound->setXToFrame(xpos);
-    sound->setRect(0, 0, length, 20);
+    sound->setRect(0, 0, 10000000, 20);
     sound->setY(260);
     sound->setPreviousToCurrent();
     sound->soundfile=sounddata;
@@ -353,6 +402,15 @@ ResizeShotCommand::ResizeShotCommand(TimelineScene *timeline, QVector<Shot *> mo
     this->newShotWidth = newShotSize;
     setText(QObject::tr("shot resize"));
 
+        previousGlowFromFade = resizedShot->templateParams.value("Fade From Black Frame Out").value("value").toString().toInt();
+        previousGlowToFade = resizedShot->templateParams.value("Fade To Black Frame Out").value("value").toString().toInt();
+
+    if (previousGlowFromFade>=newShotSize/10){
+        newGlowFromFade = newShotSize/20;
+    }
+    if (previousGlowToFade>=newShotSize/10){
+        newGlowToFade = newShotSize/20;
+    }
 }
 
 void ResizeShotCommand::undo()
@@ -365,11 +423,24 @@ void ResizeShotCommand::undo()
         sh->setPreviousToCurrent();
         i++;
     }
+    if (newGlowFromFade != 0){
+        qDebug()<<"redone";
+        auto obj = resizedShot->templateParams.value("Fade From Black Frame Out");
+        obj.insert("value", QString::number(previousGlowFromFade));
+        resizedShot->templateParams.insert("Fade From Black Frame Out", obj);
+        qDebug()<<resizedShot->templateParams.value("Fade From Black Frame Out");
+    }
+    if (newGlowToFade != 0){
+        auto obj = resizedShot->templateParams.value("Fade To Black Frame Out");
+        obj.insert("value", QString::number(previousGlowToFade));
+        resizedShot->templateParams.insert("Fade To Black Frame Out", obj);
+    }
     resizedShot->setSize(previousShotWidth);
     resizedShot->setPreviousToCurrent();
     timeline->setSceneRect(0,0,prevscenesize,400);
     timeline->clearSelection();
     resizedShot->setSelected(true);
+    timeline->scaleViewToScene();
 }
 
 void ResizeShotCommand::redo()
@@ -382,9 +453,24 @@ void ResizeShotCommand::redo()
         sh->setPreviousToCurrent();
         i++;
     }
+    if (newGlowFromFade != 0){
+        auto obj = resizedShot->templateParams.value("Fade From Black Frame Out");
+        obj.insert("value", QString::number(newGlowFromFade));
+        resizedShot->templateParams.insert("Fade From Black Frame Out", obj);
+
+
+    }
+    if (newGlowToFade != 0){
+        auto obj = resizedShot->templateParams.value("Fade To Black Frame Out");
+        obj.insert("value", QString::number(newGlowToFade));
+        resizedShot->templateParams.insert("Fade To Black Frame Out", obj);
+    }
     resizedShot->setSize(newShotWidth);
     resizedShot->setPreviousToCurrent();
+    resizedShot->update();
     timeline->setSceneRect(0,0,currentscenesize,400);
     timeline->clearSelection();
     resizedShot->setSelected(true);
+    timeline->scaleViewToScene();
+
 }

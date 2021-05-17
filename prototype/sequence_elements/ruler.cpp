@@ -1,6 +1,7 @@
     #include "ruler.h"
 #include "QDebug"
 #include <QGraphicsLineItem>
+#include <sequence_elements/timelinescene.h>
 
 Ruler::Ruler(float rulerSize):QGraphicsItem()
 {
@@ -29,7 +30,23 @@ Ruler::~Ruler()
 
 QRectF Ruler::boundingRect() const
 {
-    return *background;
+    auto timelineView = scene()->views()[0];
+
+    QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
+    QRectF visible_scene_rect = timelineView->mapToScene(viewport_rect).boundingRect();
+    auto timeline = dynamic_cast<TimelineScene*>(scene());
+
+
+
+    auto sceneStart = timeline->getVisibleRect().x();
+    auto sceneWidth = visible_scene_rect.width();
+    auto sceneEnd = sceneStart+ sceneWidth;
+
+
+
+    return QRectF(background->width()-(scenePos().x()+background->width()-sceneStart),0, scenePos().x()+background->width()-sceneStart, 150);
+
+
 }
 
 void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
