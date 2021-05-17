@@ -96,9 +96,10 @@ void CustomShotParameterInterface::setShot(QList<Shot*>  shot)
             int count = 0;
             foreach (Shot* shot, shots){
                 count++;
-                avg+=shot->templateParams.value(paramName()).value("value").toString().toInt();
+                avg+=shot->templateParams.value(paramName()).value("value").toString().toDouble();
                 evaluateGlowDisplay();
             }
+            qDebug()<<avg<<"-"<<count<<"in setShotparams float";
             sd->setValue(avg/count);
             cs->setValue(avg/count/param.value("stepvalue").toString().toDouble());
 

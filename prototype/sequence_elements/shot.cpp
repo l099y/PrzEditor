@@ -73,6 +73,9 @@ void Shot::generateParamsFromJsonShot(QJsonObject jsonShot)
 
 Shot::Shot(QJsonObject jsonShot)
 {
+    QImage aaa(":/images/dv.jpg");
+
+    pixmap->convertFromImage(aaa.scaled(80,80, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     setXToFrame(jsonShot.value("x").toInt());
     setRect(0,0, jsonShot.value("width").toInt(), 100);
     setPreviousToCurrent();
@@ -423,11 +426,11 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
         QLineF* lll = new QLineF (rect().width(), 0, rect().width(), 100);
         painter->drawLine(*lll);
 
-//        if (visiblerectsize>pixmap->width())
-//        painter->drawPixmap(0,0, *pixmap,0,0,100,100);
-//        else{
-//        painter->drawPixmap(0,0, *pixmap,0,0,visiblerectsize, 100);
-//        }
+        if (visiblerectsize>pixmap->width())
+        painter->drawPixmap(0,0, *pixmap,0,0,100,100);
+        else{
+        painter->drawPixmap(0,0, *pixmap,0,0,visiblerectsize, 100);
+        }
 
         painter->setPen(QColor(0,0,100));
         painter->setBrush(QColor(0,0,0));

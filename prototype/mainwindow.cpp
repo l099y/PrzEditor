@@ -195,7 +195,7 @@ void MainWindow::inittimelinescene(){
     timelineView->setMinimumHeight(450);
     timelineView->setRenderHint(QPainter::Antialiasing);
     timelineView->setAlignment(Qt::AlignTop|Qt::AlignLeft);
-    timelineView->setStyleSheet(QString("QScrollBar:horizontal { border: 2px solid grey; background: #505050; height: 15px; margin: 1px; }"));
+    timelineView->setStyleSheet(QString("QScrollBar:horizontal { border: 2px solid grey; background: #505050; height: 20px; margin: 1px; }"));
     timelineView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     connect(timeline, SIGNAL(scaleUp()), this, SLOT(scaleUpView()));
