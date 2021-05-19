@@ -54,9 +54,12 @@ void CustomShotParameterInterface::setShot(QList<Shot*>  shot)
                 qDebug()<<shots[0]->templateParams.value("Fade From Black Frame Out")<<"in setshot";
                 sb->setMaximum(shots[0]->rect().width()/10);
             }
+            if (param.value("name").toString()=="Fade From Black Frame Out" || param.value("name").toString()=="Fade To Black Frame Out"){
+                sb->setDisabled(false);
+            }
         }
         else if (param.value("type").toString()=="1"){ //FLOAT type
-            sd->setValue(getParamValueFromShot().toFloat());
+            sd->setValue(getParamValueFromShot().toFloat()+0.05);
             cs->setValue(getParamValueFromShot().toFloat()/param.value("stepvalue").toString().toDouble());
             evaluateGlowDisplay();
         }
@@ -67,6 +70,9 @@ void CustomShotParameterInterface::setShot(QList<Shot*>  shot)
             le->setText(getParamValueFromShot());
             cb->setChecked(getParamValueFromShot()==""? false: true);
             dialog->selectFile(getParamValueFromShot());
+            le->setDisabled(false);
+            cb->setDisabled(false);
+            dialog->setDisabled(false);
         }
         else if (param.value("type").toString()=="4"){ //PLAYMOD type
             combb->setCurrentIndex(getParamValueFromShot().toInt());
@@ -74,6 +80,7 @@ void CustomShotParameterInterface::setShot(QList<Shot*>  shot)
         }
         else if (param.value("type").toString()=="5"){ //QString type
             le->setText(getParamValueFromShot());
+            le->setDisabled(false);
         }
     }
     else{
@@ -166,11 +173,12 @@ void CustomShotParameterInterface::InitFloat()
     cs->setMinimumWidth(150);
     layout()->addWidget(sd);
     layout()->addWidget(cs);
-    connect (sd, SIGNAL(editingFinished()), this, SLOT(setValue()));
-    connect (cs, SIGNAL(sliderReleased()), this, SLOT(setValue()));
+
     connect (sd, SIGNAL(valueChanged(double)), this, SLOT(updateFloatControllersFromSd()));
     connect (cs, SIGNAL(valueChanged(int)), this, SLOT(updateFloatControllersFromCs()));
-    connect (cs, SIGNAL(clicked()), this, SLOT(updateFloatControllersFromCs()));
+    connect (sd, SIGNAL(editingFinished()), this, SLOT(setValue()));
+    connect (cs, SIGNAL(sliderReleased()), this, SLOT(setValue()));
+    connect (cs, SIGNAL(clicked()), this, SLOT(setValue()));
 }
 
 void CustomShotParameterInterface::InitBool()
@@ -246,13 +254,13 @@ void CustomShotParameterInterface::evaluateGlowDisplay()
     foreach(Shot* current, shots){
         if (param.value("name").toString()=="Glow Intensity")
         {
-            qDebug()<<"in evaluateglow display intensity";
+
             QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(current->graphicsEffect());
             effect->setYOffset((getParamValueFromShot().toFloat()/param.value("stepvalue").toString().toDouble()/10)*2);
         }
         else if(param.value("name").toString()=="Glow Power")
         {
-            qDebug()<<"in evaluateglow display power";
+
             QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(current->graphicsEffect());
             effect->setBlurRadius(10 - getParamValueFromShot().toFloat()/param.value("stepvalue").toString().toDouble()/10);
         }
@@ -271,7 +279,7 @@ void CustomShotParameterInterface::evaluateDialogSelection()
 
 void CustomShotParameterInterface::evaluateFileCheckBox()
 {
-    qDebug()<<getParamValueFromShot();
+
     if (getParamValueFromShot() == ""){
         if (!cb->isChecked()){
             cb->setChecked(false);
@@ -299,7 +307,9 @@ void CustomShotParameterInterface::setValue()
         setParamValueInShot(QString::fromStdString(std::to_string(sb->value())));
     }
     else if (param.value("type").toString()=="1"){ //FLOAT type
-        setParamValueInShot(QString::fromStdString(std::to_string(cs->value()*param.value("stepvalue").toString().toDouble())));
+        updateFloatControllersFromCs();
+        qDebug()<<QString::fromStdString(std::to_string(sd->value()))<<"in setvalue float";
+        setParamValueInShot(QString::fromStdString(std::to_string(sd->value())));
     }
     else if (param.value("type").toString()=="2"){ //BOOL type
         setParamValueInShot(QString::fromStdString(std::to_string(!cb->isChecked())));
@@ -318,13 +328,13 @@ void CustomShotParameterInterface::updateFloatControllersFromCs()
     foreach(Shot* current, shots){
     if (param.value("name").toString()=="Glow Intensity")
     {
-        qDebug()<<"in evaluateglow display intensity";
+
         QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(current->graphicsEffect());
         effect->setYOffset(sd->value()*2);
     }
     else if(param.value("name").toString()=="Glow Power")
     {
-        qDebug()<<"in evaluateglow display power";
+
         QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(current->graphicsEffect());
         effect->setBlurRadius(10 - sd->value());
     }
@@ -337,13 +347,13 @@ void CustomShotParameterInterface::updateFloatControllersFromSd()
     foreach(Shot* current, shots){
     if (param.value("name").toString()=="Glow Intensity")
     {
-        qDebug()<<"in evaluateglow display intensity";
+
         QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(current->graphicsEffect());
         effect->setYOffset(sd->value()*2);
     }
     else if(param.value("name").toString()=="Glow Power")
     {
-        qDebug()<<"in evaluateglow display power";
+
         QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(current->graphicsEffect());
         effect->setBlurRadius(10 - sd->value());
     }

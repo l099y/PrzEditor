@@ -30,7 +30,7 @@ void ExtendedQFileSystemModel::parseExpandedDir(QModelIndex idx){
         else if(fInfo.suffix()=="tbe")
         {
             containsTbe = true;
-            qDebug()<<"contains tbe";
+            qDebug()<<currentDir<<"contains tbe";
         }
     }
         if (containsPdf){
@@ -46,19 +46,6 @@ void ExtendedQFileSystemModel::parseExpandedDir(QModelIndex idx){
 
 QVariant ExtendedQFileSystemModel::data(const QModelIndex &index,
                                         int role) const {
-    const QFileInfo& fInfo = fileInfo(index);
-    if(role == Qt::TextColorRole){
-        if(przreg->currentExpandedFolderSequences->contains(fInfo.filePath()))
-            return QColor(100,200,255);
-    }
-    else if( role == Qt::DecorationRole )
-    {
-        if(przreg->currentExpandedFolderSequences->contains(fInfo.filePath())){
-            QPixmap logo(15,15);
-            logo.fill(QColor(100,200,255));
-            return logo;
-        }
-    }
     return QFileSystemModel::data(index, role);
 }
 

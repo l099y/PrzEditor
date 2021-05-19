@@ -1,6 +1,7 @@
 #include "tbesounddata.h"
 #include <QJsonObject>
 #include <QFile>
+#include <QDebug>
 
 TbeSoundData::TbeSoundData(QObject *parent) : QObject(parent)
 {
@@ -23,7 +24,8 @@ TbeSoundData::~TbeSoundData()
 
 bool TbeSoundData::checkIntegrity()
 {
-    return QFile::exists(path.append("/").append(filename));
+    corrupted = !(QFile::exists(path+"/"+filename));
+    return !corrupted;
 }
 
 QJsonObject TbeSoundData::generateJson()

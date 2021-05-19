@@ -57,6 +57,8 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
 
 void ShotParametersInterface::setShot(QList<Shot *>shot)
 {
+    qDebug()<<"request setShot in main panel";
+
     this->shots=shot;
     title->setVisible(true);
     QFont font = title->font();
@@ -72,6 +74,9 @@ void ShotParametersInterface::setShot(QList<Shot *>shot)
     if (shots.length()==1){
         title->setText(shot[0]->seqs[0]->name);
         path->setText(shot[0]->seqs[0]->path);
+        if (shots[0]->seqs[0]->corrupted){
+            path->setText("corrupted");
+        }
     }
     else{
         title->setText("Multiple selection");
@@ -131,5 +136,4 @@ void ShotParametersInterface::changedShotPosition()
 void ShotParametersInterface::RequestValueChanged(QJsonObject newparam)
 {
     emit (valueChangedRequest(shots, newparam));
-    qDebug()<<"request paramchange";
 }

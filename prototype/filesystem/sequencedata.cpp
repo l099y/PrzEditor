@@ -1,6 +1,8 @@
 #include "sequencedata.h"
 #include "QFile"
 #include <QtDebug>
+#include <QDir>
+#include <filesystem/sequenceregister.h>
 
 SequenceData::SequenceData(QObject* parent): QObject(parent)
 {
@@ -26,9 +28,90 @@ int SequenceData::sequencelength()
     return (endIdx+1)-startIdx;
 }
 
-bool SequenceData::CheckIntegrity()
+bool SequenceData::checkIntegrity()
 {
-    return true;
+    corruptedSubSequences.clear();
+    int startPosInList= 0;
+    int seqIndex= 0;
+
+    QList<QList<int>> missingIndexesList;
+
+    QDir dir (path);
+    if (dir.exists()){
+        QStringList przlist = dir.entryList(QStringList()<<"*.prz", QDir::Files);
+        for (int i = 0; i <przlist.size(); i ++){
+            auto current =  getReleventInfo(&przlist[i]);
+            if (current.name == this->sequencefilename){
+                if (current.idx == this->startIdx){
+                    qDebug()<<"found the begining of the sequence in path"<< current.idx << this -> startIdx;
+                    seqIndex++;
+                    startPosInList=i;
+                }
+                else if (seqIndex == 0 && (current.idx>startIdx && current.idx<=endIdx)){
+                    seqIndex++;
+                    startPosInList = i - (current.idx);
+                    QList<int> missingIndexes;
+                    for (int c = 0; c<(current.idx - startIdx); c++){
+                        missingIndexes.append(startIdx+c);
+                    }
+                    missingIndexesList.append(missingIndexes);
+                }
+                else if(seqIndex != 0){
+                    if (current.idx == (i - startPosInList) + startIdx)
+                        seqIndex++;
+                    else{
+
+
+                        qDebug()<<startPosInList<<"in finding nesterd missing sequences";
+                        QList<int> missingIndexes;
+
+                        int missingindexcount = 0;
+                        foreach (QList<int> current, missingIndexesList)
+                            missingindexcount+=current.length();
+                        for (int c = 0; c< current.idx-seqIndex-missingindexcount; c++){
+                            missingIndexes.append(( seqIndex+missingindexcount)+c);
+                        }
+
+                        missingIndexesList.append(missingIndexes);
+
+                        startPosInList = (seqIndex - current.idx);
+                        seqIndex++;
+                    }
+                }
+            }
+        }
+
+        foreach (QList<int> current, missingIndexesList)
+            corruptedSubSequences.insert(current[0], current.length());
+        corrupted = !(seqIndex==sequencelength());
+        return seqIndex==sequencelength();
+    }
+    else
+        return false;
+}
+
+fileInf SequenceData::getReleventInfo(QString* path)
+{
+    if (path->length() != 0){
+
+        fileInf ret;
+        ret.padding=0;
+        int posInString = 0;
+        while (path->at(posInString)!="."){
+            ret.name.append(path->at(posInString));
+            posInString++;
+        }
+        posInString++;
+        QString idxString;
+        while (path->at(posInString) != "."){
+            idxString.append(path->at(posInString));
+            posInString++;
+            ret.padding++;
+        }
+        bool ok;
+        ret.idx= idxString.toUInt(&ok, 10);
+        return ret;
+    }
 }
 
 QJsonObject SequenceData::generateJson()

@@ -8,10 +8,6 @@
 #include <QSet>
 #include <QDir>
 
-struct fileInf{
-    QString name;
-    int idx;
-};
 
 class SequenceRegister : public QObject
 {
@@ -25,11 +21,19 @@ public:
     QHash<QString, TbeSoundData*> usedSoundFiles;
     QList<SequenceData*> GenerateSequencesFromDir(QDir* dir);
     QList<TbeSoundData *> GeneratesTbeFilesFromDir(QDir* dir);
-    inline fileInf getReleventInfo(QString* path);
+    static fileInf getReleventInfo(QString* path);
 
     void printStoredSequences();
     void printStoredSounds();
+
+    void validateUsedContent();
+    void validateSequences();
+    void validateSounds();
+
     void clearSequencesInDir();
+
+    signals:
+    void displayError(QString, int);
 };
 
 #endif // SEQUENCEREGISTER_H

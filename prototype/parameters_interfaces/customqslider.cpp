@@ -31,7 +31,8 @@ void CustomQSlider::mousePressEvent(QMouseEvent* event)
            else
                setValue(minimum() + ((maximum()-minimum()) * event->x()) / width() ) ;
        }
-    QSlider::mousePressEvent(event);
+
 
     emit(clicked());
+    QSlider::mousePressEvent(event);
 }

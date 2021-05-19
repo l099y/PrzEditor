@@ -40,6 +40,7 @@ TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObjec
     QGraphicsRectItem*  marginbackgrounds = addRect(c, QColor(150,255,180,50), QColor(150,255,180,20));
     QRect a (0, 160,20000000, 100);
     QGraphicsRectItem*  shotsbackground = addRect(a, QColor(255,255,180,50), QColor(255,255,180,50));
+    shotsbackground->setZValue(-1);
     QRect b (0, 260,20000000, 20);
     QGraphicsRectItem*  soundbackgrounds = addRect(b, QColor(150,255,180,50), QColor(150,255,180,50));
 
@@ -47,6 +48,11 @@ TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObjec
 }
 
 TimelineScene::~TimelineScene(){
+}
+
+bool TimelineScene::isMultiSelectingByCtr()
+{
+    return MultiSelectingByCtrl;
 }
 
 QJsonObject TimelineScene::generateJson()
@@ -101,6 +107,13 @@ void TimelineScene::handleSelectionMove(float e, bool final){
             }
         }
 
+    }
+    else if (isMultiSelectingByCtr()){
+        foreach(QGraphicsItem* current, selectedItems()){
+            auto shot = dynamic_cast<Shot*>(current);
+            if (shot)
+               shot->restore();
+        }
     }
 }
 
@@ -691,7 +704,7 @@ void TimelineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *e)
                 soundDropRepresentation->setSelected(true);
                 soundDropRepresentation->setPreviousToCurrent();
                 soundDropRepresentation->soundfile = current;
-                qDebug()<<current->filename << "inserted in dragenter sound";
+                qDebug()<<current->filename << "inserted in dragenter sound" << current->path;
                 addItem(soundDropRepresentation);
             }
         }
@@ -845,6 +858,22 @@ QRectF TimelineScene::getVisibleRect()
 
 }
 
+void TimelineScene::validateDataIntegrity()
+{
+    foreach(QGraphicsItem* current, items()){
+        auto sh = dynamic_cast<Shot*>(current);
+        auto sound = dynamic_cast<SoundTrack*>(current);
+        if (sh){
+            sh->seqs[0]->checkIntegrity();
+            sh->update();
+        }
+        else if (sound){
+            sound->soundfile->checkIntegrity();
+            sound->update();
+        }
+   }
+}
+
 void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
 {
 
@@ -877,6 +906,7 @@ void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
             resetSoundsDisplacedFinal();
             auto list = getMovedSounds();
             //resetBoxStates();
+            qDebug()<<soundDropRepresentation->soundfile->filename << "inserted in dragenter sound" << soundDropRepresentation->soundfile->path;
             emit (babar(soundRemovedByInsertion, soundDropRepresentation->soundfile,soundDropRepresentation->scenePos().x(), soundDropRepresentation->rect().width(), this, list));//,
             //
             soundRemovedByInsertion = nullptr;
@@ -923,11 +953,21 @@ void TimelineScene::wheelEvent(QGraphicsSceneWheelEvent *e)
 
 void TimelineScene::keyPressEvent(QKeyEvent *e)
 {
+    qDebug()<<e->key();
     if (e->key()==16777223)
     {
         deleteSelection();
     }
+    else if(e->key()==16777249){
+        MultiSelectingByCtrl=true;
+    }
+}
 
+void TimelineScene::keyReleaseEvent(QKeyEvent *e)
+{
+    if(e->key()==16777249){
+        MultiSelectingByCtrl=false;
+    }
 }
 
 

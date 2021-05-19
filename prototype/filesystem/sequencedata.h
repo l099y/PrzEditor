@@ -1,8 +1,16 @@
-    #ifndef SEQUENCEDATA_H
+#ifndef SEQUENCEDATA_H
 #define SEQUENCEDATA_H
 
 #include <QObject>
 #include <QJsonObject>
+#include <QHash>
+
+
+struct fileInf{
+    QString name;
+    int idx;
+    int padding;
+};
 
 class SequenceData : public QObject
 {
@@ -15,12 +23,16 @@ public:
     QString path;
     QString name;
     int startIdx;
+    int padding;
     int endIdx;
     bool corrupted = false;
 
     int sequencelength();
-    bool CheckIntegrity();
+    bool checkIntegrity();
 
+    fileInf getReleventInfo(QString* path);
+
+    QHash<int,int> corruptedSubSequences;
     QJsonObject generateJson();
 };
 #endif // SEQUENCEDATA_H

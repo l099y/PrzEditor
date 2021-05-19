@@ -175,11 +175,12 @@ void MainWindow::setupTreeItem(){
 
     // generateData(); //well you only need to do it once...
     connect (sequencesStorageView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(insertComponentAtEndOfTimeline(QModelIndex)));
-    connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequencesAndCollapse(QModelIndex)));
+    //connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequencesAndCollapse(QModelIndex)));
     connect (tree, SIGNAL(clicked(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
     connect (TreeModel, SIGNAL(clearSequences()), this, SLOT(clearSequences()));
     connect (TreeModel, SIGNAL(displaySequences(QString)), this, SLOT(displaySequences(QString)));
     connect (TreeModel, SIGNAL(setOnlyCurrentFolderExpanded(QModelIndex)), this, SLOT(collapseAllAndExpand(QModelIndex)));
+    connect (reg, SIGNAL(displayError(QString, int)), this, SLOT(displayStatusBarMessage(QString, int)));
 }
 
 void MainWindow::inittimelinescene(){
@@ -195,7 +196,7 @@ void MainWindow::inittimelinescene(){
     timelineView->setMinimumHeight(450);
     timelineView->setRenderHint(QPainter::Antialiasing);
     timelineView->setAlignment(Qt::AlignTop|Qt::AlignLeft);
-    timelineView->setStyleSheet(QString("QScrollBar:horizontal { border: 2px solid grey; background: #505050; height: 20px; margin: 1px; }"));
+    timelineView->horizontalScrollBar()->setBackgroundRole(QPalette::Highlight);
     timelineView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     connect(timeline, SIGNAL(scaleUp()), this, SLOT(scaleUpView()));
@@ -283,6 +284,8 @@ void MainWindow::changeEvent(QEvent *event)
 {
     if(event->type() == QEvent::ActivationChange && this->isActiveWindow()) {
         qDebug()<<"retrieve the focus";
+        validateSequenceIntegrity();
+        timeline->update();
     }
     QWidget :: changeEvent(event);
 }
@@ -406,7 +409,7 @@ void MainWindow::scaleDownView()
 void MainWindow::displaySequences(QString path)
 {
 
-    if (reg->currentExpandedFolderSequences->contains(path))
+    if (reg->currentExpandedFolderSequences->contains(path)||reg->currentExpandedFolderSounds->contains(path))
     {
         sequencesModel->clear();
         QList<SequenceData *> list = reg->currentExpandedFolderSequences->value(path);
@@ -465,8 +468,8 @@ void MainWindow::collapseChildrens(QModelIndex index)
 
 void MainWindow::collapseAllAndExpand(QModelIndex index)
 {
-    disconnect(tree, SIGNAL(expanded(QModelIndex)), 0, 0);
-    disconnect(tree, SIGNAL(collapsed(QModelIndex)), 0, 0);
+    disconnect(tree, SIGNAL(expanded(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
+    disconnect(tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequencesAndCollapse(QModelIndex)));
     if (!index.isValid()) {
         return;
     }
@@ -474,7 +477,7 @@ void MainWindow::collapseAllAndExpand(QModelIndex index)
     tree->scrollTo(index);
     tree->setExpanded(index, true);
     connect (tree, SIGNAL(expanded(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
-    connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequencesAndCollapse(QModelIndex)));
+    //connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequencesAndCollapse(QModelIndex)));
 }
 
 void MainWindow::insertComponentAtEndOfTimeline(QModelIndex)
@@ -514,12 +517,18 @@ void MainWindow::scaleViewToScene()
     timeline->ruler.scale *=resizefactor;
 }
 
+void MainWindow::validateSequenceIntegrity()
+{
+    timeline->validateDataIntegrity();
+}
+
 
 void MainWindow::deleteSelection()
 {
     if (timeline->selectedItems().isEmpty())
         return;
-
+    reg->validateUsedContent();
+    reg->printStoredSequences();
     QUndoCommand *deleteCommand = new DeleteCommand(timeline);
     isSaved = false;
     undoStack->push(deleteCommand);

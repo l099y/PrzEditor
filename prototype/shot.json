@@ -1,4 +1,5 @@
 {
+
    "shot":[
       {
       "name":"Shot designation",
@@ -7,6 +8,14 @@
       "default_value":"",
       "minval":"0",
       "maxval":"200"
+      },
+      {
+         "name":"Framerate",
+         "value":"30",
+         "type":"0",
+         "default_value":"0",
+         "minval":"0",
+         "maxval":"360"
       },
       {
          "name":"Playmode",

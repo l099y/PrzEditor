@@ -146,7 +146,7 @@ public:
 
     void createUndoView();
     void bindUndoElements();
-    void changeEvent(QEvent *event);
+    void changeEvent(QEvent *event) override;
     void generateData();
 
     inline void enableParameterInterface(bool);
@@ -161,6 +161,8 @@ public slots:
 
 //    void displaceSelectionInTimeline();
 //    void changeSelectionSizeInTimeline();
+
+    void validateSequenceIntegrity();
 
     void displaySequences(QString);
     void clearSequences();

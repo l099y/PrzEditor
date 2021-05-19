@@ -1,5 +1,6 @@
 #include "sequenceregister.h"
 #include "QDebug"
+#include <filesystem/sequencedata.h>
 
 
 SequenceRegister::SequenceRegister(QObject* parent): QObject(parent)
@@ -28,6 +29,7 @@ QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir) // th
             temp->name = current.name;
             temp->startIdx = current.idx;
             temp->path = dir->path();
+            temp->padding = current.padding;
             sequenceCurrentIdx = current.idx;
             newSeq = false;
         }
@@ -66,7 +68,7 @@ QList<TbeSoundData *> SequenceRegister::GeneratesTbeFilesFromDir(QDir *dir)
     for (int i = 0; i <paths.size(); i ++){
         temp = new TbeSoundData();
            temp->filename = paths[i];
-           temp->path = dir->absolutePath();
+           temp->path = dir->path();
            ret.append(temp);
     }
     currentExpandedFolderSounds->insert(dir->absolutePath(), ret);
@@ -80,6 +82,7 @@ inline fileInf SequenceRegister::getReleventInfo(QString* path)
     if (path->length() != 0){
 
         fileInf ret;
+        ret.padding=0;
         int posInString = 0;
         while (path->at(posInString)!="."){
             ret.name.append(path->at(posInString));
@@ -90,9 +93,9 @@ inline fileInf SequenceRegister::getReleventInfo(QString* path)
         while (path->at(posInString) != "."){
             idxString.append(path->at(posInString));
             posInString++;
+            ret.padding++;
         }
         bool ok;
-
         ret.idx= idxString.toUInt(&ok, 10);
         return ret;
     }
@@ -104,7 +107,7 @@ void SequenceRegister::printStoredSequences()
     while (i != currentExpandedFolderSequences->constEnd()) {
         foreach (SequenceData* data, i.value())
             {
-            qDebug()<< data->name<<" integrity is "<< data->CheckIntegrity();
+            qDebug()<< data->name<<" integrity is "<< data->checkIntegrity();
         }
         qDebug() << i.key() << ": " << i.value();
         ++i;
@@ -124,6 +127,34 @@ void SequenceRegister::printStoredSounds()
     }
 }
 
+void SequenceRegister::validateUsedContent()
+{
+    //validateSequences();
+    validateSounds();
+}
+
+void SequenceRegister::validateSequences()
+{
+    QHash<QString, SequenceData*>::const_iterator i = usedSequences.constBegin();
+    while (i !=usedSequences.constEnd()) {
+        if (!i.value()->checkIntegrity()){
+            emit(displayError(i.key(), 3000));
+        }
+        i++;
+    }
+}
+
+void SequenceRegister::validateSounds()
+{
+    QHash<QString, TbeSoundData*>::const_iterator i = usedSoundFiles.constBegin();
+    while (i != usedSoundFiles.constEnd()) {
+        if (!i.value()->checkIntegrity()){
+             emit(displayError(i.key(), 3000));
+        }
+        i++;
+    }
+}
+
 void SequenceRegister::clearSequencesInDir()
 {
     QHash<QString, QList<SequenceData*>>::const_iterator i = currentExpandedFolderSequences->constBegin();
@@ -134,5 +165,14 @@ void SequenceRegister::clearSequencesInDir()
         }
         ++i;
     }
+    QHash<QString, QList<TbeSoundData*>>::const_iterator j = currentExpandedFolderSounds->constBegin();
+    while (j != currentExpandedFolderSounds->constEnd()) {
+        foreach (TbeSoundData* data, j.value())
+            {
+            delete(data);
+        }
+        ++i;
+    }
     currentExpandedFolderSequences->clear();
+    currentExpandedFolderSounds->clear();
 }

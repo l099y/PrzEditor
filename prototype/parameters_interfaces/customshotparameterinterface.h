@@ -23,7 +23,7 @@ public:
     QList<Shot*> shots;
 
     CustomQSlider* cs = nullptr;
-    QSpinBox* sb  = nullptr;
+    QSpinBox*   sb  = nullptr;
     QCheckBox* cb = nullptr;
     QDoubleSpinBox* sd = nullptr;
     QPushButton* bt = nullptr;

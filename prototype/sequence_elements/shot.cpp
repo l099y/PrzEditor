@@ -354,6 +354,18 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 
         painter->drawRoundedRect(rect(),5,5);
 
+    // Drawing corrupted sequences
+
+        if (seqs[0]->corrupted)
+        {
+            painter->setBrush(QColor(Qt::red));
+            QHash<int, int>::const_iterator i = seqs[0]->corruptedSubSequences.constBegin();
+            while (i != seqs[0]->corruptedSubSequences.constEnd()) {
+                painter->drawRect(i.key()*10,0,i.value()*10, 100);
+                i++;
+            }
+        }
+
     // Drawing the fadin / fadeout triangles;
 
     int val =  templateParams.value("Fade From Black Frame Out").value("value").toString().toInt();

@@ -31,6 +31,9 @@ class TimelineScene : public QGraphicsScene
     QHash<SoundTrack*, int> imageOfSoundPositions;
     SoundTrack* soundRemovedByInsertion = nullptr;
 
+    bool MultiSelectingByCtrl;
+
+    inline bool isMultiSelectingByCtr();
 
     QJsonObject generateJson();
 
@@ -78,6 +81,8 @@ class TimelineScene : public QGraphicsScene
     QRectF getVisibleRect();
 
 public slots:
+
+    void validateDataIntegrity();
     void activatelxt();
     void activaterxt();
     void deactivatext();
@@ -126,12 +131,15 @@ protected:
    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
 
    virtual void wheelEvent(QGraphicsSceneWheelEvent *e);
+
    virtual void keyPressEvent(QKeyEvent *keyEvent);
+   virtual void keyReleaseEvent(QKeyEvent *keyEvent);
 
    virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *e);
    virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *e);
    virtual void dropEvent(QGraphicsSceneDragDropEvent*);
    virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent* e);
+
 };
 
 #endif // TIMELINESCENE_H

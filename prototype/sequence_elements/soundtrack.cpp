@@ -256,7 +256,12 @@ void SoundTrack::setAnimatedFalse()
 void SoundTrack::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     painter->setClipRect( option->exposedRect );
-    if (isSelected()){
+
+    if (soundfile->corrupted)
+    {
+        painter->setBrush(QColor(Qt::red));
+    }
+    else if (isSelected()){
         setZValue(1);
         painter->setPen(QColor(Qt::yellow));
         painter->setBrush(QColor(100,220,255));
