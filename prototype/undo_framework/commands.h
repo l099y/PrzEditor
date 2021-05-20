@@ -10,16 +10,19 @@
 #include <mainwindow.h>
 #include <sequence_elements/soundtrack.h>
 
-class DeleteCommand : public QUndoCommand
+class DeleteShotsCommand : public QUndoCommand
 {
 public:
-    explicit DeleteCommand(TimelineScene *timeline, QUndoCommand *parent = nullptr);
+    explicit DeleteShotsCommand(QList<Shot*> deletedShots, QList<SoundTrack*> deletedSounds, TimelineScene *timeline, QUndoCommand *parent = nullptr);
 
     void undo() override;
     void redo() override;
 
 private:
-    QGraphicsItem *shot;
+    QList<Shot*> deletedShots;
+    QList<SoundTrack*> deletedSounds;
+    QList<Shot*> movedShots;
+    int totalwidthremoved = 0;
     TimelineScene *timeline;
 };
 //! [1]
@@ -41,6 +44,7 @@ private:
     QHash<Shot*, int> movedShotNewPos;
     QList<SequenceData*> seqs;
     TimelineScene *timeline;
+    int scenelength;
     int xpos;
     int length;
 };

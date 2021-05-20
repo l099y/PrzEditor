@@ -30,7 +30,8 @@ TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObjec
     przreg = reg;
     view = vview;
     ruler.setSize(10400000);
-    setSceneRect(0,0, 200000, 400);
+    setSceneRect(0,0, 10000, 400);
+    setPreviousToCurrent();
     setItemIndexMethod(QGraphicsScene::ItemIndexMethod(NoIndex));
     QBrush brush(QColor(50,150,200));
     setBackgroundBrush(brush);
@@ -66,11 +67,11 @@ QJsonObject TimelineScene::generateJson()
             array.push_back(sh->generateJson());
         }
         else{
-          SoundTrack* sound = dynamic_cast<SoundTrack*>(current);
-          if (sound){
-              soundArray.push_back(sound->generateJson());
-          }
-       }
+            SoundTrack* sound = dynamic_cast<SoundTrack*>(current);
+            if (sound){
+                soundArray.push_back(sound->generateJson());
+            }
+        }
     }
     QJsonObject ret;
     ret.insert("shots", array);
@@ -112,7 +113,7 @@ void TimelineScene::handleSelectionMove(float e, bool final){
         foreach(QGraphicsItem* current, selectedItems()){
             auto shot = dynamic_cast<Shot*>(current);
             if (shot)
-               shot->restore();
+                shot->restore();
         }
     }
 }
@@ -145,7 +146,7 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                             selection->setXToFrame(rect->previousxpos-sW) ;
                         }
                         if (rect->scenePos().x()!=rect->previousxpos)
-                        final? rect->setXToFrame(rect->previousxpos):rect->animatedMove(rect->previousxpos);
+                            final? rect->setXToFrame(rect->previousxpos):rect->animatedMove(rect->previousxpos);
                     }
                     else {
 
@@ -166,7 +167,7 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                             selection->setXToFrame(rect->previousboxwidth+rect->previousxpos);
                         }
                         if (rect->scenePos().x()!=rect->previousxpos)
-                        final? rect->setXToFrame(rect->previousxpos):rect->animatedMove(rect->previousxpos);
+                            final? rect->setXToFrame(rect->previousxpos):rect->animatedMove(rect->previousxpos);
                     }
 
                     else
@@ -182,8 +183,8 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
             }
         }
         if (selection != shotDropRepresentation){
-        selection->setY(150);
-        emit(selectionXChanged());
+            selection->setY(150);
+            emit(selectionXChanged());
         }
         if (final)
             if (sceneRect().width() < selection->scenePos().x())
@@ -200,16 +201,16 @@ void TimelineScene::behaveOnSelectionSwitchPosMoveSound(float e, bool final)
     int pos = 200000000;
     selection->setY(260);
     foreach (QGraphicsItem* current, items()){
-                Shot* sh = dynamic_cast<Shot*>(current);
-                if (sh){
-                    if (e < sh->scenePos().x()+sh->rect().width() && e >=  sh->scenePos().x()){
-                        pos=sh->scenePos().x();
+        Shot* sh = dynamic_cast<Shot*>(current);
+        if (sh){
+            if (e < sh->scenePos().x()+sh->rect().width() && e >=  sh->scenePos().x()){
+                pos=sh->scenePos().x();
 
-                    }
-                }
             }
+        }
+    }
     if (pos==200000000){
-       pos = findClosestShot(e);
+        pos = findClosestShot(e);
     }
     selection->setXToFrame(pos);
 }
@@ -218,8 +219,12 @@ void TimelineScene::behaveOnSelectedShotDisplace()
 {
     Shot* selection= dynamic_cast<Shot*>(selectedItems().at(0));
     int limit = ShotXAndWBefore(selection);
-    selection->setXToFrame(selection->scenePos().x()<limit? limit : selection->scenePos().x());
+
+    selection->setXToFrame(selection->scenePos().x()<limit? limit :
+                                                            selection->scenePos().x()>1000000?
+                                                                1000000 : selection->scenePos().x());
     selection->setY(160);
+    emit(selectionXChanged());
 
 
     foreach (QGraphicsItem* current, items()){
@@ -228,7 +233,8 @@ void TimelineScene::behaveOnSelectedShotDisplace()
             rect->setXToFrame(rect->previousxpos+(selection->scenePos().x()-selection->previousxpos));
         }
     }
-    this->setSceneRect(0,0,previousSceneWidth+(selection->scenePos().x()-selection->previousxpos),100);
+    this->setSceneRect(0,0,previousSceneWidth+(selection->scenePos().x()-selection->previousxpos),400);
+    scaleViewToScene();
 }
 void TimelineScene::behaveOnSelectedSoundDisplace()
 {
@@ -329,94 +335,94 @@ void TimelineScene::placeInsertedShotInTimeline(float e)
 void TimelineScene::placeInsertedSoundTrackInTimeline(float e)
 {
     foreach (QGraphicsItem* current, items()){
-                SoundTrack * st = dynamic_cast<SoundTrack*>(current);
-                Shot* sh = dynamic_cast<Shot*>(current);
-                if (st && st!= soundDropRepresentation)
-                {
-                    soundRemovedByInsertion=st;
-                    removeItem(st);
-                }
-                else if (sh){
-                    if (e < sh->scenePos().x()+sh->rect().width() && e>=  sh->scenePos().x()+sh->rect().width()){
+        SoundTrack * st = dynamic_cast<SoundTrack*>(current);
+        Shot* sh = dynamic_cast<Shot*>(current);
+        if (st && st!= soundDropRepresentation)
+        {
+            soundRemovedByInsertion=st;
+            removeItem(st);
+        }
+        else if (sh){
+            if (e < sh->scenePos().x()+sh->rect().width() && e>=  sh->scenePos().x()+sh->rect().width()){
 
-                        soundDropRepresentation->setXToFrame(sh->scenePos().x());
-                    }
-                }
+                soundDropRepresentation->setXToFrame(sh->scenePos().x());
             }
+        }
+    }
 
-//    if (soundDropRepresentation->collidingItems().length()!=0){
+    //    if (soundDropRepresentation->collidingItems().length()!=0){
 
-//        // i want to find the information allowing me to place the droprepresentation, and move the appriated sshots in the timeline.
+    //        // i want to find the information allowing me to place the droprepresentation, and move the appriated sshots in the timeline.
 
-//        int maxbeforeInsertMiddle = 0;
-//        int minafterInsertMiddle = 2000000000;
+    //        int maxbeforeInsertMiddle = 0;
+    //        int minafterInsertMiddle = 2000000000;
 
-//        foreach (QGraphicsItem* current, items()){
-//            SoundTrack * sh = dynamic_cast<SoundTrack*>(current);
-//            if (sh && sh!= soundDropRepresentation)
-//            {
-//                if (sh->isMyMiddlePastOrEqual(e))
-//                {
-//                    if (sh->collidesWithItem(soundDropRepresentation) && sh->previousxpos+sh->previousboxwidth>maxbeforeInsertMiddle)
-//                        maxbeforeInsertMiddle=sh->previousxpos+sh->previousboxwidth;
-//                }
-//                else
-//                {
-//                    if (sh->collidesWithItem(soundDropRepresentation) && sh->previousxpos<minafterInsertMiddle)
-//                        minafterInsertMiddle=sh->previousxpos;
-//                }
-//            }
-//        }
+    //        foreach (QGraphicsItem* current, items()){
+    //            SoundTrack * sh = dynamic_cast<SoundTrack*>(current);
+    //            if (sh && sh!= soundDropRepresentation)
+    //            {
+    //                if (sh->isMyMiddlePastOrEqual(e))
+    //                {
+    //                    if (sh->collidesWithItem(soundDropRepresentation) && sh->previousxpos+sh->previousboxwidth>maxbeforeInsertMiddle)
+    //                        maxbeforeInsertMiddle=sh->previousxpos+sh->previousboxwidth;
+    //                }
+    //                else
+    //                {
+    //                    if (sh->collidesWithItem(soundDropRepresentation) && sh->previousxpos<minafterInsertMiddle)
+    //                        minafterInsertMiddle=sh->previousxpos;
+    //                }
+    //            }
+    //        }
 
-//        // if droprepresentation has to be moved to the right because it colliding with a shot that will remain in its current pos
+    //        // if droprepresentation has to be moved to the right because it colliding with a shot that will remain in its current pos
 
-//        if (soundDropRepresentation->scenePos().x()<maxbeforeInsertMiddle){
+    //        if (soundDropRepresentation->scenePos().x()<maxbeforeInsertMiddle){
 
-//            foreach (QGraphicsItem* current, items()){
-//                SoundTrack * sh = dynamic_cast<SoundTrack*>(current);
-//                if (minafterInsertMiddle == 2000000000){
-
-
-//                    //if the half of droprepresentation is before the half of current inspected shot
-
-//                    if (sh && sh!= soundDropRepresentation && !sh->isMyMiddlePastOrEqual(e))
-//                    {
-//                        sh->setXToFrame(sh->previousxpos+shotDropRepresentation->rect().width());
-//                        sh->setPreviousToCurrent();
-//                    }
-//                }
-//                else{
-//                    int decalage = (soundDropRepresentation->previousboxwidth+maxbeforeInsertMiddle)-minafterInsertMiddle;
-//                    soundDropRepresentation->setXToFrame(maxbeforeInsertMiddle);
-//                    if (sh && sh!= soundDropRepresentation && sh->posOfMidd()>=soundDropRepresentation->posOfMidd())
-//                    {
-//                        sh->setXToFrame(sh->previousxpos+decalage);
-//                        sh->setPreviousToCurrent();
-//                    }
-
-//                }
-
-//            }
+    //            foreach (QGraphicsItem* current, items()){
+    //                SoundTrack * sh = dynamic_cast<SoundTrack*>(current);
+    //                if (minafterInsertMiddle == 2000000000){
 
 
-//        }
-//        else if (soundDropRepresentation->previousxpos+soundDropRepresentation->previousboxwidth>minafterInsertMiddle){
-//            int decalage = minafterInsertMiddle-(soundDropRepresentation->previousboxwidth+soundDropRepresentation->previousxpos);
-//            foreach (QGraphicsItem* current, items()){
-//                SoundTrack * sh = dynamic_cast<SoundTrack*>(current);
+    //                    //if the half of droprepresentation is before the half of current inspected shot
 
-//                //if the half of droprepresentation is before the half of current inspected shot
+    //                    if (sh && sh!= soundDropRepresentation && !sh->isMyMiddlePastOrEqual(e))
+    //                    {
+    //                        sh->setXToFrame(sh->previousxpos+shotDropRepresentation->rect().width());
+    //                        sh->setPreviousToCurrent();
+    //                    }
+    //                }
+    //                else{
+    //                    int decalage = (soundDropRepresentation->previousboxwidth+maxbeforeInsertMiddle)-minafterInsertMiddle;
+    //                    soundDropRepresentation->setXToFrame(maxbeforeInsertMiddle);
+    //                    if (sh && sh!= soundDropRepresentation && sh->posOfMidd()>=soundDropRepresentation->posOfMidd())
+    //                    {
+    //                        sh->setXToFrame(sh->previousxpos+decalage);
+    //                        sh->setPreviousToCurrent();
+    //                    }
 
-//                if (sh && sh!= soundDropRepresentation && sh->posOfMidd()>=soundDropRepresentation->posOfMidd())
-//                {
-//                    sh->setXToFrame(sh->previousxpos-decalage);
-//                    sh->setPreviousToCurrent();
-//                }
-//            }
+    //                }
 
-//        }
-//        soundDropRepresentation->setPreviousToCurrent();
-//    }
+    //            }
+
+
+    //        }
+    //        else if (soundDropRepresentation->previousxpos+soundDropRepresentation->previousboxwidth>minafterInsertMiddle){
+    //            int decalage = minafterInsertMiddle-(soundDropRepresentation->previousboxwidth+soundDropRepresentation->previousxpos);
+    //            foreach (QGraphicsItem* current, items()){
+    //                SoundTrack * sh = dynamic_cast<SoundTrack*>(current);
+
+    //                //if the half of droprepresentation is before the half of current inspected shot
+
+    //                if (sh && sh!= soundDropRepresentation && sh->posOfMidd()>=soundDropRepresentation->posOfMidd())
+    //                {
+    //                    sh->setXToFrame(sh->previousxpos-decalage);
+    //                    sh->setPreviousToCurrent();
+    //                }
+    //            }
+
+    //        }
+    //        soundDropRepresentation->setPreviousToCurrent();
+    //    }
 }
 
 
@@ -438,20 +444,20 @@ void TimelineScene::resetShotsDisplacedByInsertion()
 }
 void TimelineScene::resetSoundsDisplacedByInsertion()
 {
-      if (soundRemovedByInsertion!=nullptr)
+    if (soundRemovedByInsertion!=nullptr)
         addItem(soundRemovedByInsertion);
-      soundRemovedByInsertion=nullptr;
-//    QHash<SoundTrack*, int>::const_iterator i = imageOfSoundPositions.constBegin();
-//    while (i != imageOfSoundPositions.constEnd()) {
-//        auto  sh =i.key();
-//        sh->previousxpos = i.value();
-//        sh->timer->stop();
-//        sh->setXToFrame(sh->previousxpos);
-//        sh->setPreviousToCurrent();
-//        sh->setAnimatedFalse();
-//        i++;
-//    }
-//    imageOfSoundPositions.clear();
+    soundRemovedByInsertion=nullptr;
+    //    QHash<SoundTrack*, int>::const_iterator i = imageOfSoundPositions.constBegin();
+    //    while (i != imageOfSoundPositions.constEnd()) {
+    //        auto  sh =i.key();
+    //        sh->previousxpos = i.value();
+    //        sh->timer->stop();
+    //        sh->setXToFrame(sh->previousxpos);
+    //        sh->setPreviousToCurrent();
+    //        sh->setAnimatedFalse();
+    //        i++;
+    //    }
+    //    imageOfSoundPositions.clear();
 }
 
 void TimelineScene::resetShotsDisplacedFinal()
@@ -471,7 +477,7 @@ int TimelineScene::findLastXWShot()
     foreach (QGraphicsItem* current, items()){
         Shot* sh = dynamic_cast<Shot*>(current);
         if (sh && sh->scenePos().x()+sh->rect().width() > min)
-        min =  sh->scenePos().x()+sh->rect().width();
+            min =  sh->scenePos().x()+sh->rect().width();
     }
     return min;
 }
@@ -482,7 +488,7 @@ int TimelineScene::findLastXWSound()
     foreach (QGraphicsItem* current, items()){
         SoundTrack* sh = dynamic_cast<SoundTrack*>(current);
         if (sh && sh->scenePos().x()+sh->rect().width() > min)
-        min =  sh->scenePos().x()+sh->rect().width();
+            min =  sh->scenePos().x()+sh->rect().width();
     }
     return min;
 }
@@ -713,17 +719,24 @@ void TimelineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *e)
         auto list = przreg->currentExpandedFolderSequences->value(path);
         foreach (SequenceData* current, list){
             if(current->name == file){
-                shotDropRepresentation = new Shot ();
-                shotDropRepresentation->setRect(0,0,current->sequencelength()*10,100);
-                shotDropRepresentation->setX(e->scenePos().x());
-                if (!selectedItems().isEmpty()){
-                    clearSelection();
+                if (validateInsertionSizeCap(current->sequencelength()*10)){
+                    shotDropRepresentation = new Shot ();
+                    shotDropRepresentation->setRect(0,0,current->sequencelength()*10,100);
+                    shotDropRepresentation->setX(e->scenePos().x());
+                    if (!selectedItems().isEmpty()){
+                        clearSelection();
+                    }
+                    shotDropRepresentation->setSelected(true);
+                    shotDropRepresentation->setPreviousToCurrent();
+                    shotDropRepresentation->seqs.append( current );
+                    qDebug()<<current->name << "inserted in dragenter shot";
+                    addItem(shotDropRepresentation);
                 }
-                shotDropRepresentation->setSelected(true);
-                shotDropRepresentation->setPreviousToCurrent();
-                shotDropRepresentation->seqs.append( current );
-                qDebug()<<current->name << "inserted in dragenter shot";
-                addItem(shotDropRepresentation);
+
+                else{
+                    e->ignore();
+                    emit(displayError("this insertion exceeds the limit of frames", 3000));
+                }
             }
         }
 
@@ -739,9 +752,11 @@ void TimelineScene::dragMoveEvent(QGraphicsSceneDragDropEvent *e)
         if (e->scenePos().y()<60 || e->scenePos().y()>260){
             if (shotDropRepresentation->inserted){
                 shotDropRepresentation->setXToFrame(e->scenePos().x()-(shotDropRepresentation->rect().width()/2));
-                shotDropRepresentation->scenePos().setY(160);
                 shotDropRepresentation->inserted=false;
                 resetShotsDisplacedByInsertion();
+                ExtendSceneWidth(-shotDropRepresentation->rect().width());
+                scaleViewToScene();
+
             }
             shotDropRepresentation->setXToFrame(e->scenePos().x()-(shotDropRepresentation->rect().width()/2));
             shotDropRepresentation->setY(e->scenePos().y());
@@ -755,6 +770,8 @@ void TimelineScene::dragMoveEvent(QGraphicsSceneDragDropEvent *e)
                 shotDropRepresentation->setPreviousToCurrent();
                 shotDropRepresentation->inserted=true;
                 placeInsertedShotInTimeline(e->scenePos().x());
+                ExtendSceneWidth(shotDropRepresentation->rect().width());
+                scaleViewToScene();
             }
             else{
                 shotDropRepresentation->setXToFrame(e->scenePos().x()-(shotDropRepresentation->rect().width()/2));
@@ -830,15 +847,15 @@ float TimelineScene::findClosestShot(float e)
         if (sh)
         {
             if (qFabs((sh->scenePos().x()+(sh->rect().width()/2))-e)<dist){
-               dist = qFabs((sh->scenePos().x()+(sh->rect().width()/2))-e);
-               xpos = sh->scenePos().x();
+                dist = qFabs((sh->scenePos().x()+(sh->rect().width()/2))-e);
+                xpos = sh->scenePos().x();
             }
         }
     }
     if (dist ==  20000000)
-    return 0;
+        return 0;
     else
-    return xpos;
+        return xpos;
 }
 
 
@@ -847,31 +864,76 @@ bool TimelineScene::validateParameterTargetChange()
     return (selectedItems().length() != 0 && selectedItems().at(0)!= shotDropRepresentation && selectedItems().at(0)!= soundDropRepresentation);
 }
 
+bool TimelineScene::validateInsertionSizeCap(int newRectWidth)
+{
+    int sizecap = newRectWidth;
+    foreach (QGraphicsItem* current, items())
+    {
+        auto sh = dynamic_cast<Shot*>(current);
+        if(sh)
+        {
+            sizecap+= sh->rect().width();
+        }
+    }
+    return sizecap<800000;
+}
+
+QList<Shot *> TimelineScene::getShotsPastSelection()
+{
+    int max = 0;
+    QList<Shot*> ret;
+    foreach (QGraphicsItem* current, selectedItems())
+            {
+        auto sh = dynamic_cast<Shot*>(current);
+            if (sh)
+            {
+                if (sh->scenePos().x()>max)
+                    max = sh->scenePos().x();
+            }
+    }
+    foreach (QGraphicsItem* current, items())
+            {
+        auto sh = dynamic_cast<Shot*>(current);
+            if (sh && !sh->isSelected())
+            {
+                if (sh->scenePos().x()>max)
+                    ret.append(sh);
+            }
+    }
+    return ret;
+}
+
 QRectF TimelineScene::getVisibleRect()
 {
 
-        QPointF A = view->mapToScene( QPoint(0, 0) );
-        QPointF B = view->mapToScene( QPoint(
-            view->viewport()->width(),
-            view->viewport()->height() ));
-        return QRectF( A, B );
+    QPointF A = view->mapToScene( QPoint(0, 0) );
+    QPointF B = view->mapToScene( QPoint(
+                                      view->viewport()->width(),
+                                      view->viewport()->height() ));
+    return QRectF( A, B );
 
 }
 
-void TimelineScene::validateDataIntegrity()
+
+bool TimelineScene::validateDataIntegrity()
 {
+    bool ret = true;
     foreach(QGraphicsItem* current, items()){
         auto sh = dynamic_cast<Shot*>(current);
         auto sound = dynamic_cast<SoundTrack*>(current);
         if (sh){
-            sh->seqs[0]->checkIntegrity();
+            if (!sh->seqs[0]->checkIntegrity())
+                ret = false;
             sh->update();
         }
         else if (sound){
-            sound->soundfile->checkIntegrity();
+            if (!sound->soundfile->checkIntegrity())
+                ret=false;
+
             sound->update();
         }
-   }
+    }
+    return ret;
 }
 
 void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
@@ -886,6 +948,7 @@ void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
             resetShotsDisplacedFinal();
             auto list = getMovedShots();
             //resetBoxStates();
+            ExtendSceneWidth(-shotDropRepresentation->rect().width());
             emit (createShot(shotDropRepresentation->seqs, shotDropRepresentation->scenePos().x(), shotDropRepresentation->rect().width(), this, list));
             shotDropRepresentation =  nullptr;
         }
@@ -989,7 +1052,6 @@ void TimelineScene::ExtendSceneWidth(float f)
 {
     this->setSceneRect(0,0,this->width()+f, 100);
     previousSceneWidth = this->width();
-    ruler.xtand(f);
 }
 
 
@@ -1059,12 +1121,12 @@ void TimelineScene::displaceSelection(int framePos, QString type)
         }
 
         else if (sound){
-               if (sound->validatePosChange(framePos)){
-                   sound->setPreviousToCurrent();
-                   sound->setX(framePos*10);
-                   QVector<SoundTrack*> moved;
-                   moved.append(sound);
-                   emit (moveSoundtracks(this,moved, previousSceneWidth, this->sceneRect().width()));
+            if (sound->validatePosChange(framePos)){
+                sound->setPreviousToCurrent();
+                sound->setX(framePos*10);
+                QVector<SoundTrack*> moved;
+                moved.append(sound);
+                emit (moveSoundtracks(this,moved, previousSceneWidth, this->sceneRect().width()));
             }
             else{
                 emit (displayError("Invalid position, this sounds will collide with other sounds", 10000));
@@ -1080,14 +1142,14 @@ void TimelineScene::changeSelectionSize(int newSize, QString type)
         SoundTrack* sound = dynamic_cast<SoundTrack*>(selectedItems().at(0));
 
         if (shot){
-                shot->setSize(newSize*10);
-                moveAllFrom(shot->previousxpos+1, newSize*10 - shot->previousboxwidth, type);
-                ExtendSceneWidth(newSize*10 - shot->previousboxwidth);
-                emit (resizeShot(this, getMovedShots(),shot, shot->rect().width(), previousSceneWidth, this->sceneRect().width()));
+            shot->setSize(newSize*10);
+            moveAllFrom(shot->previousxpos+1, newSize*10 - shot->previousboxwidth, type);
+            ExtendSceneWidth(newSize*10 - shot->previousboxwidth);
+            emit (resizeShot(this, getMovedShots(),shot, shot->rect().width(), previousSceneWidth, this->sceneRect().width()));
 
         }
         else if (sound){
-               if (sound->validateSizeChange(newSize *10)){
+            if (sound->validateSizeChange(newSize *10)){
                 sound->setSize(newSize *10);
                 moveAllFrom(shot->previousxpos+1, newSize*10 - sound->previousboxwidth, type);
                 ExtendSceneWidth(newSize*10 - sound->previousboxwidth);
@@ -1104,17 +1166,22 @@ void TimelineScene::changeSelectionSize(int newSize, QString type)
 void TimelineScene::insertShotAtEnd(QList<SequenceData*> list)
 {
     qDebug()<<"insertshot at the end";
-    emit (createShot(list, findLastXWShot(), list[0]->sequencelength()*10, this, {}));
+    if (validateInsertionSizeCap(list[0]->sequencelength()*10)){
+       emit (createShot(list, findLastXWShot(), list[0]->sequencelength()*10, this, {}));
+    }
+    else{
+        emit(displayError("this insertion exceeds the limit of frames", 3000));
+    }
 }
 void TimelineScene::insertSoundAtEnd(TbeSoundData* soundfile)
 {
     SoundTrack* suppressedSound = nullptr;
     foreach (QGraphicsItem* current, items()){
-                SoundTrack* sh = dynamic_cast<SoundTrack*>(current);
-                if (sh){
-                        suppressedSound = sh;
-                    }
-                }
+        SoundTrack* sh = dynamic_cast<SoundTrack*>(current);
+        if (sh){
+            suppressedSound = sh;
+        }
+    }
     emit (babar(suppressedSound, soundfile, 0, 1000000, this, {}));
 }
 

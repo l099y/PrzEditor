@@ -43,7 +43,8 @@ bool SequenceData::checkIntegrity()
             auto current =  getReleventInfo(&przlist[i]);
             if (current.name == this->sequencefilename){
                 if (current.idx == this->startIdx){
-                    qDebug()<<"found the begining of the sequence in path"<< current.idx << this -> startIdx;
+                    if (current.idx == startIdx && current.idx == endIdx)
+                        return true;
                     seqIndex++;
                     startPosInList=i;
                 }
@@ -60,9 +61,6 @@ bool SequenceData::checkIntegrity()
                     if (current.idx == (i - startPosInList) + startIdx)
                         seqIndex++;
                     else{
-
-
-                        qDebug()<<startPosInList<<"in finding nesterd missing sequences";
                         QList<int> missingIndexes;
 
                         int missingindexcount = 0;
@@ -80,9 +78,10 @@ bool SequenceData::checkIntegrity()
                 }
             }
         }
-
-        foreach (QList<int> current, missingIndexesList)
+        foreach (QList<int> current, missingIndexesList){
+            if (current.length()>0)
             corruptedSubSequences.insert(current[0], current.length());
+        }
         corrupted = !(seqIndex==sequencelength());
         return seqIndex==sequencelength();
     }

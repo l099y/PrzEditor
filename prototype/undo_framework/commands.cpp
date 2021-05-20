@@ -9,26 +9,50 @@
 #include <QJsonObject>
 #include <QGraphicsItem>
 
-DeleteCommand::DeleteCommand(TimelineScene *scene, QUndoCommand *parent)
+DeleteShotsCommand::DeleteShotsCommand(QList<Shot*> deletedShots, QList<SoundTrack*> deletedSounds, TimelineScene *scene, QUndoCommand *parent)
     : QUndoCommand(parent)
 {
     timeline = scene;
-    QList<QGraphicsItem *> list = timeline->selectedItems();
-    list.first()->setSelected(false);
-    shot = list.first();
+    this->deletedShots = deletedShots;
+    this->deletedSounds = deletedSounds;
+    movedShots=timeline->getShotsPastSelection();
+    foreach (Shot* current, deletedShots){
+        totalwidthremoved+=current->rect().width();
+    }
     setText(QObject::tr("Delete %1")
             .arg(" created "));
 }
 
-void DeleteCommand::undo()
+void DeleteShotsCommand::undo()
 {
-    timeline->addItem(shot);
-    timeline->update();
+    foreach (Shot* current, deletedShots){
+        timeline->addItem(current);
+    }
+    foreach (SoundTrack* current, deletedSounds){
+        timeline->addItem(current);
+    }
+    foreach (Shot* current, movedShots){
+        current->setX(current->scenePos().x()+totalwidthremoved);
+        current->setPreviousToCurrent();
+    }
+    timeline->ExtendSceneWidth(totalwidthremoved);
+    timeline->scaleViewToScene();
 }
 
-void DeleteCommand::redo()
+void DeleteShotsCommand::redo()
 {
-    timeline->removeItem(shot);
+    foreach (Shot* current, deletedShots){
+        timeline->removeItem(current);
+    }
+    foreach (SoundTrack* current, deletedSounds){
+        timeline->removeItem(current);
+    }
+    foreach (Shot* current, movedShots){
+        current->setX(current->scenePos().x()-totalwidthremoved);
+        current->setPreviousToCurrent();
+    }
+    timeline->ExtendSceneWidth(-totalwidthremoved);
+    timeline->scaleViewToScene();
 }
 
 
@@ -76,7 +100,7 @@ void AddCommand::undo()
         i++;
     }
     timeline->setSceneRect(0,0,timeline->sceneRect().width()-shot->rect().width(),400);
-    timeline->previousSceneWidth=timeline->sceneRect().width()-shot->rect().width();
+    timeline->setPreviousToCurrent();
     timeline->scaleViewToScene();
 //    timeline->sceneRect().setWidth(timeline->sceneRect().width()-shot->rect().width());
 //    timeline->previousSceneWidth = timeline->sceneRect().width();
@@ -102,7 +126,7 @@ void AddCommand::redo()
     timeline->clearSelection();
     shot->setSelected(true);
     timeline->setSceneRect(0,0,timeline->sceneRect().width()+shot->rect().width(),400);
-    timeline->previousSceneWidth=timeline->sceneRect().width()+shot->rect().width();
+    timeline->setPreviousToCurrent();
     timeline->update();
     timeline->scaleViewToScene();
 
@@ -134,6 +158,8 @@ void MoveCommand::undo()
         i++;
     }
     timeline->setSceneRect(0,0,prevscenesize,400);
+    timeline->setPreviousToCurrent();
+    timeline->scaleViewToScene();
 }
 
 void MoveCommand::redo()
@@ -147,6 +173,7 @@ void MoveCommand::redo()
         i++;
     }
     timeline->setSceneRect(0,0,currentscenesize,400);
+    timeline->setPreviousToCurrent();
 }
 
 
@@ -189,7 +216,7 @@ void ClearCommand::redo()
     if (removedSound != nullptr){
         timeline->removeItem(removedSound);
     }
-    timeline->setSceneRect(0,0, 200000, 400);
+    timeline->setSceneRect(0,0, 10000, 400);
     timeline->setPreviousToCurrent();
     timeline->scaleViewToScene();
     timeline->newRect();

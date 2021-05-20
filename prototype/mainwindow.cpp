@@ -173,7 +173,7 @@ void MainWindow::setupTreeItem(){
     tree->setHeaderHidden(true);
     tree->setStyleSheet("background: rgb(120,120,120);");
 
-    // generateData(); //well you only need to do it once...
+    generateData(); //well you only need to do it once...
     connect (sequencesStorageView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(insertComponentAtEndOfTimeline(QModelIndex)));
     //connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequencesAndCollapse(QModelIndex)));
     connect (tree, SIGNAL(clicked(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
@@ -206,7 +206,7 @@ void MainWindow::inittimelinescene(){
     auto hsb = timelineView->horizontalScrollBar();
 
     connect(timeline, SIGNAL(scaleToViewRequest()), this, SLOT(scaleViewToScene()));
-    connect(hsb, SIGNAL(sliderMoved(int)), timeline, SLOT(refreshRuler(int)));
+    connect(hsb, SIGNAL(valueChanged(int)), timeline, SLOT(refreshRuler(int)));
     connect(hsb, SIGNAL(sliderReleased()), timeline, SLOT(update()));
 
 }
@@ -242,6 +242,10 @@ void MainWindow::createActions()
 
     saveAsAction = new QAction(tr("Save&As"), this);
     connect(saveAsAction, SIGNAL(triggered(bool)), this, SLOT(saveAsTriggered()));
+
+    exportAction = new QAction(tr("&Export"), this);
+    connect (exportAction, SIGNAL(triggered(bool)), this, SLOT(exportTriggered()));
+
 }
 
 void MainWindow::createMenus()
@@ -250,6 +254,7 @@ void MainWindow::createMenus()
     fileMenu->addAction(saveAction);
     fileMenu->addAction(saveAsAction);
     fileMenu->addAction(loadAction);
+    fileMenu->addAction(exportAction);
     fileMenu->addAction(exitAction);
 
     editMenu = menuBar()->addMenu(tr("&Edit"));
@@ -292,18 +297,27 @@ void MainWindow::changeEvent(QEvent *event)
 
 void MainWindow::generateData()
 {
-    TreeModel->mkdir(TreeModel->index("c://DataTest"), "NestedTest");
-    QString path ("c://DataTest//");
+    QDir dir ("c://DataTest");
+    if (!dir.exists()){
+        TreeModel->mkdir(TreeModel->index("c://"), "DataTest");
+        TreeModel->mkdir(TreeModel->index("c://DataTest"), "NestedDataTest");
+        QString path ("c://DataTest//");
+        QStringList namelist ({"Davinci.", "Eiffel.", "Podracing.", "porgy_and_bess.", "robot-24."});
+        QStringList soundlist ({"sound_1.", "Eiffelsound.", "atmosphere.", "wildfd.", "robod."});
 
-    for (int i = 0; i<3000; i++)
-    {
-        QString name ("Davinci_workshop.");
-        name = name.append(i < 10 ? "00000" : i<100 ? "0000" : i<1000? "000" : i<10000? "00": "0").append("%1").arg(i).append(".prz");
-        QFile file(path+name);
-        file.open(QIODevice::ReadWrite);
+        for (int j = 0; j<5; j++){
+            for (int i = 0; i<((j+1)*1000); i++)
+            {
+                QString name (namelist[j]);
+                name = name.append(i < 10 ? "00000" : i<100 ? "0000" : i<1000? "000" : i<10000? "00": "0").append("%1").arg(i).append(".prz");
+                QFile file(path+name);
+                file.open(QIODevice::ReadWrite);
+            }
+            QFile file(path+soundlist[j].append("tbe"));
+            file.open(QIODevice::ReadWrite);
+        }
     }
 }
-
 void MainWindow::enableParameterInterface(bool mod)
 {
     shotparams->setVisible(mod);
@@ -318,6 +332,12 @@ QJsonObject MainWindow::toJSON()
     ret.insert("savepath", savepath);
     ret.insert("framerate", framerate);
     return ret;
+}
+
+QJsonObject MainWindow::toPRZTOC()
+{
+    QJsonObject q;
+    return q;///le format final ENFIN!!!
 }
 
 void MainWindow::scaleUpView()
@@ -527,9 +547,17 @@ void MainWindow::deleteSelection()
 {
     if (timeline->selectedItems().isEmpty())
         return;
-    reg->validateUsedContent();
-    reg->printStoredSequences();
-    QUndoCommand *deleteCommand = new DeleteCommand(timeline);
+    QList<Shot*> deletedShots;
+    QList<SoundTrack*> deletedSounds;
+    foreach (QGraphicsItem* current, timeline->selectedItems()){
+        auto sh = dynamic_cast<Shot*>(current);
+        auto sound = dynamic_cast<SoundTrack*>(current);
+        if (sh)
+            deletedShots.append(sh);
+        else if (sound)
+            deletedSounds.append(sound);
+    }
+    QUndoCommand *deleteCommand = new DeleteShotsCommand(deletedShots, deletedSounds, timeline);
     isSaved = false;
     undoStack->push(deleteCommand);
 }
@@ -632,8 +660,25 @@ void MainWindow::loadActionTriggered()
     saveDialog->setModal(true);
     saveDialog->exec();
     qDebug()<<saveDialog->selectedFiles();
-    if (saveDialog->selectedFiles().length() == 1){
+    if (saveDialog->result()){
         loadRequestExecuted(saveDialog->selectedFiles().at(0));
+    }
+}
+
+void MainWindow::exportTriggered()
+{
+    qDebug()<<"xport triggered";
+    if (!timeline->validateDataIntegrity()){
+        if (!ProjectLoader::confirm("Do you want to save a corrupted movie", "export corrupted movie validation"))
+            return;
+    }
+    saveDialog = new ProjectLoader(true, "", this);
+    saveDialog->setDefaultSuffix("prztoc");
+    saveDialog->setNameFilters({".prztoc"});
+    saveDialog->setWindowTitle("Export");
+    saveDialog->exec();
+    if (saveDialog->result()){
+        exportRequestExecuted(saveDialog->selectedFiles().at(0));
     }
 }
 
@@ -768,6 +813,23 @@ void MainWindow::loadRequestExecuted(QString filepath)
     }
 }
 
+void MainWindow::exportRequestExecuted(QString filepath)
+{
+    qDebug()<<filepath <<"should created prztoc";
+    QFile file(filepath);
+
+    if (filepath.size()!=0){
+        if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
+        {
+            qDebug()<<"file now exists";
+            QJsonDocument content(toJSON());
+            file.write(content.toJson());
+            file.close();
+            qDebug() << " Export Writing finished";
+        }
+    }
+}
+
 void MainWindow::changeSelectedShotInParametersInterface()
 {
 
@@ -781,7 +843,7 @@ void MainWindow::changeSelectedShotInParametersInterface()
             else{
                 auto* sh = dynamic_cast<Shot*>(timeline->selectedItems()[0]);
                 shotparams->setShot({sh});
-                 enableParameterInterface(true);
+                enableParameterInterface(true);
             }
         }
         else{
@@ -793,12 +855,12 @@ void MainWindow::changeSelectedShotInParametersInterface()
                     sound->setSelected(false);
                 }
                 else if (shot){
-                selectedShots.append(shot);
-            }
+                    selectedShots.append(shot);
+                }
 
-        }
-        shotparams->setShot(selectedShots);
-        enableParameterInterface(true);
+            }
+            shotparams->setShot(selectedShots);
+            enableParameterInterface(true);
         }
     }
     else{

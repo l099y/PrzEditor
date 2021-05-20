@@ -97,6 +97,8 @@ void ShotParametersInterface::setShot(QList<Shot *>shot)
     widthInput->setMaximum(shot[0]->smallestSequence());
     widthInput->setValue(shot[0]->previousboxwidth/10);
     widthInput->setMinimum(0);
+    positionInput->setEnabled(true);
+    widthInput->setEnabled(true);
     }
     else{
         positionInput->setEnabled(false);

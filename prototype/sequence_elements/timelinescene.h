@@ -77,12 +77,13 @@ class TimelineScene : public QGraphicsScene
     // check if the condition to assign selection to the the interface Panel
 
     bool validateParameterTargetChange();
-
+    bool validateInsertionSizeCap(int newRectWidth);
+    QList<Shot*>getShotsPastSelection();
     QRectF getVisibleRect();
 
 public slots:
 
-    void validateDataIntegrity();
+    bool validateDataIntegrity();
     void activatelxt();
     void activaterxt();
     void deactivatext();

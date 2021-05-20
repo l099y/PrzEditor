@@ -124,6 +124,7 @@ public:
     QAction *saveAction = nullptr;
     QAction *saveAsAction = nullptr;
     QAction *loadAction = nullptr;
+    QAction *exportAction = nullptr;
 
 
     // Undo framework elements
@@ -153,6 +154,7 @@ public:
 
 
     QJsonObject toJSON();
+    QJsonObject toPRZTOC();
 
 public slots:
     void scaleUpView();
@@ -190,11 +192,13 @@ public slots:
     void saveActionTriggered();
     void saveAsTriggered();
     void loadActionTriggered();
+    void exportTriggered();
 
     // those function are triggered by the modalDialog if an action is required
 
     void saveRequestExecuted(QString);
     void loadRequestExecuted(QString);
+    void exportRequestExecuted(QString);
 
 
     // attempt to change the target of the parameter interface

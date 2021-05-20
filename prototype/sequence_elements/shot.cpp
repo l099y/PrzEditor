@@ -27,10 +27,10 @@ Shot::Shot(): QGraphicsRectItem()
     pixmap->convertFromImage(aaa.scaled(80,80, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     QTime time = time.currentTime();
     generateParamsFromTemplate();
-    QRandomGenerator rdm((uint)time.msec());
+    QRandomGenerator rdm((uint)(time.msec()%10));
     QPen pen (Qt::white);
     QColor a;
-    a.setRgb(rdm.bounded(0,74)+180,rdm.bounded(0,74)+180,100);
+    a.setRgb(rdm.bounded(0,74)+100,rdm.bounded(0,74)+180,240);
     setPen(pen);
     setBrush(a);
     setAcceptHoverEvents(true);
@@ -73,9 +73,8 @@ void Shot::generateParamsFromJsonShot(QJsonObject jsonShot)
 
 Shot::Shot(QJsonObject jsonShot)
 {
-    QImage aaa(":/images/dv.jpg");
-
-    pixmap->convertFromImage(aaa.scaled(80,80, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    //QImage aaa(":/images/dv.jpg");
+    //pixmap->convertFromImage(aaa.scaled(80,80, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     setXToFrame(jsonShot.value("x").toInt());
     setRect(0,0, jsonShot.value("width").toInt(), 100);
     setPreviousToCurrent();
@@ -128,7 +127,7 @@ void Shot::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
     QGraphicsItem :: mouseReleaseEvent(e);
     mod = BoxState::REGULAR;
     if (scenePos().y()!=160){
-       scenePos().setY(160);
+        scenePos().setY(160);
     }
     setPreviousToCurrent();
 }
@@ -161,41 +160,41 @@ QRectF Shot::boundingRect() const
     auto sceneEnd = sceneStart+ sceneWidth;
 
 
- // if current shot is in the visible scene
+    // if current shot is in the visible scene
 
     if (((scenePos().x() + this->rect().width() >= sceneStart && scenePos().x()+this->rect().width() < sceneEnd)
-            ||(scenePos().x() <= sceneEnd && scenePos().x() >= sceneStart)) ||(scenePos().x()<= sceneStart && scenePos().x()+this->rect().width()>=sceneEnd)){
+         ||(scenePos().x() <= sceneEnd && scenePos().x() >= sceneStart)) ||(scenePos().x()<= sceneStart && scenePos().x()+this->rect().width()>=sceneEnd)){
 
         // if current shot is smaller than the visible scene.. yes this could be better but to avoid small calculs and save few ressources is a balance
 
         if (this->rect().width()<visible_scene_rect.width())
             return this->rect();
-         else{
-             if (scenePos().x()<sceneEnd && scenePos().x()>=sceneStart){
-                 return QRectF(0,0,sceneEnd-scenePos().x(),100);
-             }
-             else if (scenePos().x()+rect().width()>=sceneStart && scenePos().x()+rect().width() <= sceneEnd){
-                 return QRectF(rect().width()-(scenePos().x()+rect().width()-sceneStart),0, scenePos().x()+rect().width()-sceneStart, 100);
+        else{
+            if (scenePos().x()<sceneEnd && scenePos().x()>=sceneStart){
+                return QRectF(0,0,sceneEnd-scenePos().x(),100);
+            }
+            else if (scenePos().x()+rect().width()>=sceneStart && scenePos().x()+rect().width() <= sceneEnd){
+                return QRectF(rect().width()-(scenePos().x()+rect().width()-sceneStart),0, scenePos().x()+rect().width()-sceneStart, 100);
 
-             }
-             else {
-                 return QRectF(sceneStart-scenePos().x(), 0, sceneWidth, 100);
-             }
-         }
+            }
+            else {
+                return QRectF(sceneStart-scenePos().x(), 0, sceneWidth, 100);
+            }
+        }
     }
     else
     {
-       return QRectF(0,0,0,0);
+        return QRectF(0,0,0,0);
     }
 
-//    qDebug()<<( std::max(scenePos().x(), scenePos().x()+rect().width()) >= std::min(sceneStart, sceneStart+sceneWidth) && std::min(scenePos().x(),  scenePos().x()+rect().width()) <= std::max(sceneStart, sceneWidth));
+    //    qDebug()<<( std::max(scenePos().x(), scenePos().x()+rect().width()) >= std::min(sceneStart, sceneStart+sceneWidth) && std::min(scenePos().x(),  scenePos().x()+rect().width()) <= std::max(sceneStart, sceneWidth));
 
-//    if ( std::max(sceneStart, sceneEnd) >= std::min(scenePos().x(), scenePos().x()+rect().width()) && std::min(sceneStart, sceneEnd) <= std::max(scenePos().x(),  scenePos().x()+rect().width())){
-//        qDebug()<<"sound in visible part of the scene with std";
+    //    if ( std::max(sceneStart, sceneEnd) >= std::min(scenePos().x(), scenePos().x()+rect().width()) && std::min(sceneStart, sceneEnd) <= std::max(scenePos().x(),  scenePos().x()+rect().width())){
+    //        qDebug()<<"sound in visible part of the scene with std";
 
-//    }
-//      qDebug()<<scenePos().x()<<"rect scenepos" << this->rect().width() ;
-//      qDebug()<< sceneStart << "starting point of the view"<< sceneEnd << "in bounding rect";
+    //    }
+    //      qDebug()<<scenePos().x()<<"rect scenepos" << this->rect().width() ;
+    //      qDebug()<< sceneStart << "starting point of the view"<< sceneEnd << "in bounding rect";
 
 
 }
@@ -278,22 +277,22 @@ bool Shot::validateSizeChange(int newSize)
 
 bool Shot::validatePosChange(int pos)
 {
-        bool validated = true;
-        foreach (QGraphicsItem* current, this->scene()->items()){
-            auto* shot = dynamic_cast<Shot*>(current);
-            if (shot && shot != this && inXRange(pos, shot)){
-                shot->displayError();
-                validated = false;
-            }
+    bool validated = true;
+    foreach (QGraphicsItem* current, this->scene()->items()){
+        auto* shot = dynamic_cast<Shot*>(current);
+        if (shot && shot != this && inXRange(pos, shot)){
+            shot->displayError();
+            validated = false;
         }
-        return validated;
+    }
+    return validated;
 }
 
 int Shot::smallestSequence()
 {
 
     if (seqs.isEmpty())
-            return 0;
+        return 0;
     else{
         int min = seqs[0]->sequencelength();
         qDebug()<< seqs[0]->sequencelength() << "in min size eval";
@@ -315,7 +314,7 @@ int Shot::smallestSequence()
 bool Shot::inXRange(int pos, Shot* other)
 {
     return ((pos + this->rect().width() > other->scenePos().x() && pos+this->rect().width() < other->scenePos().x()+other->rect().width())
-                ||(pos <= other->scenePos().x()+other->rect().width() && pos > other->scenePos().x()))
+            ||(pos <= other->scenePos().x()+other->rect().width() && pos > other->scenePos().x()))
             ||(pos<= other->scenePos().x() && pos+this->rect().width()>=other->scenePos().x()+other->rect().width());
 }
 
@@ -334,7 +333,7 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     if (isSelected()){
         setZValue(1);
         painter->setPen(QColor(Qt::yellow));
-        painter->setBrush(QColor(100,220,255));
+        painter->setBrush(QColor(255,220,140));
 
     }
     else{
@@ -342,86 +341,87 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
         painter->setBrush(this->brush());
         painter->setPen(this->pen());
     }
-//    if (animated)
-//        {
-//        painter->setPen(QColor(Qt::yellow));
-//        painter->setBrush(QColor(255,0,0));
-//    }
+
     auto timelineView =this->scene()->views()[0];
     QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
 
     auto visiblerectsize = static_cast<int>((rect().width()*painter->transform().m11()));
 
-        painter->drawRoundedRect(rect(),5,5);
+    painter->drawRoundedRect(rect(),5,5);
 
     // Drawing corrupted sequences
 
-        if (seqs[0]->corrupted)
-        {
-            painter->setBrush(QColor(Qt::red));
+    if (seqs[0]->corrupted)
+    {
+        painter->setBrush(QColor(Qt::red));
+        if (seqs[0]->corruptedSubSequences.size()!=0){
             QHash<int, int>::const_iterator i = seqs[0]->corruptedSubSequences.constBegin();
             while (i != seqs[0]->corruptedSubSequences.constEnd()) {
                 painter->drawRect(i.key()*10,0,i.value()*10, 100);
                 i++;
             }
         }
+        else{
+            painter->drawRect(rect());
+        }
+    }
 
     // Drawing the fadin / fadeout triangles;
 
     int val =  templateParams.value("Fade From Black Frame Out").value("value").toString().toInt();
 
     if (val != 0){
-    qreal startPointX1 = 0.0;
-    qreal startPointY1 = 0.0;
+        qreal startPointX1 = 0.0;
+        qreal startPointY1 = 0.0;
 
-    qreal endPointX1   = 0.0;
-    qreal endPointY1   = 100.0;
+        qreal endPointX1   = 0.0;
+        qreal endPointY1   = 100.0;
 
-    qreal endPointX2 = val*10;
-    qreal endPointY2 = 0;//fadin size;
+        qreal endPointX2 = val*10;
+        qreal endPointY2 = 0;//fadin size;
 
-    QPainterPath path;
+        QPainterPath path;
 
-    path.moveTo (startPointX1, startPointY1);
+        path.moveTo (startPointX1, startPointY1);
 
-    path.moveTo (startPointX1, startPointY1);
-    // Draw line from pen point to this point.
-    path.lineTo (endPointX1, endPointY1);
-    path.lineTo (endPointX2,   endPointY2);
-    path.lineTo (startPointX1, startPointY1);
+        path.moveTo (startPointX1, startPointY1);
+        // Draw line from pen point to this point.
+        path.lineTo (endPointX1, endPointY1);
+        path.lineTo (endPointX2,   endPointY2);
+        path.lineTo (startPointX1, startPointY1);
 
-    painter->setPen (Qt :: NoPen);
-    QColor color(0,0,0);
-    color.setAlpha(40);
-    painter->fillPath (path, QBrush (color));
+        painter->setPen (Qt :: NoPen);
+        QColor color(0,0,0);
+        color.setAlpha(40);
+        painter->fillPath (path, QBrush (color));
     }
 
     val =  templateParams.value("Fade To Black Frame Out").value("value").toString().toInt();
 
     if (val!=0){
 
-    qreal startPointX1 = rect().width();
-    qreal startPointY1 = 0.0;
+        qreal startPointX1 = rect().width();
+        qreal startPointY1 = 0.0;
 
-    qreal endPointX1   = rect().width();
-    qreal endPointY1   = 100.0;
+        qreal endPointX1   = rect().width();
+        qreal endPointY1   = 100.0;
 
-    qreal endPointX2 = rect().width()-(val)*10;
-    qreal endPointY2 = 0;//fadin size;
+        qreal endPointX2 = rect().width()-(val)*10;
+        qreal endPointY2 = 0;//fadin size;
 
-    QPainterPath path;
+        QPainterPath path;
 
-    path.moveTo (startPointX1, startPointY1);
+        path.moveTo (startPointX1, startPointY1);
 
-    path.moveTo (startPointX1, startPointY1);
-    path.lineTo (endPointX1, endPointY1);
-    path.lineTo (endPointX2,   endPointY2);
-    path.lineTo (startPointX1, startPointY1);
+        path.moveTo (startPointX1, startPointY1);
+        path.lineTo (endPointX1, endPointY1);
+        path.lineTo (endPointX2,   endPointY2);
+        path.lineTo (startPointX1, startPointY1);
 
-    painter->setPen (Qt :: NoPen);
-    QColor color(0,0,0);
-    color.setAlpha(40);
-    painter->fillPath (path, QBrush (color));
+        painter->setPen (Qt :: NoPen);
+        QColor color(0,0,0);
+        color.setAlpha(40);
+        painter->fillPath (path, QBrush (color));
     }
 
     // retrieving the size of the visible shot
@@ -432,28 +432,28 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     //disable scaling on painter, to have fix representation of graphics
 
     painter->scale(scaleValue, 1);
-        painter->setPen(QColor(0,0,0,50));
-        QLineF* ll = new QLineF (0, 0, 0, 100);
-        painter->drawLine(*ll);
-        QLineF* lll = new QLineF (rect().width(), 0, rect().width(), 100);
-        painter->drawLine(*lll);
+    painter->setPen(QColor(0,0,0,50));
+    QLineF* ll = new QLineF (0, 0, 0, 100);
+    painter->drawLine(*ll);
+    QLineF* lll = new QLineF (rect().width(), 0, rect().width(), 100);
+    painter->drawLine(*lll);
 
-        if (visiblerectsize>pixmap->width())
-        painter->drawPixmap(0,0, *pixmap,0,0,100,100);
-        else{
-        painter->drawPixmap(0,0, *pixmap,0,0,visiblerectsize, 100);
-        }
+    //        if (visiblerectsize>pixmap->width())
+    //        painter->drawPixmap(0,0, *pixmap,0,0,100,100);
+    //        else{
+    //        painter->drawPixmap(0,0, *pixmap,0,0,visiblerectsize, 100);
+    //        }
 
-        painter->setPen(QColor(0,0,100));
-        painter->setBrush(QColor(0,0,0));
-        QString qs = templateParams.value("Shot designation").value("value").toString();
-        if (qs.length()*6.5<visiblerectsize){
+    painter->setPen(QColor(0,0,100));
+    painter->setBrush(QColor(0,0,0));
+    QString qs = templateParams.value("Shot designation").value("value").toString();
+    if (qs.length()*6.5<visiblerectsize){
         painter->drawText(5, 92, qs);
         this->setToolTip("");
-        }
-        else{
+    }
+    else{
         this->setToolTip(qs);
-        }
+    }
     delete(ll);
     delete(lll);
     painter->restore();

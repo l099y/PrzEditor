@@ -23,7 +23,7 @@ SoundTrack::SoundTrack(): QGraphicsRectItem()
     QRandomGenerator rdm(std::time(0));
     QPen pen (Qt::white);
     QColor a;
-    a.setRgb(rdm.bounded(0,74)+50,rdm.bounded(0,74)+100, 255);
+    a.setRgb(130,200,220);
     setPen(pen);
     setBrush(a);
     setAcceptHoverEvents(true);
@@ -264,7 +264,7 @@ void SoundTrack::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     else if (isSelected()){
         setZValue(1);
         painter->setPen(QColor(Qt::yellow));
-        painter->setBrush(QColor(100,220,255));
+        painter->setBrush(QColor(255,220,140));
 
     }
     else{

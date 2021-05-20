@@ -5,10 +5,10 @@
 ProjectLoader::ProjectLoader(bool creationmod, QString path = "", QWidget * parent): QFileDialog(parent)
 {
     this->savingMod = creationmod;
-    this->setDefaultSuffix("przsqs");
+
     QStringList filter;
     filter<< "*.przsqs";
-
+    this->setDefaultSuffix("przsqs");
     this->setNameFilters(filter);
 
 //    connect (cancelButton, SIGNAL(clicked(bool)), this, SLOT(close()));
