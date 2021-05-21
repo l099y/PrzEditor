@@ -38,13 +38,8 @@ QRectF Ruler::boundingRect() const
 
 
 
-    auto sceneStart = timeline->getVisibleRect().x()-1000;
-    auto sceneWidth = visible_scene_rect.width();
-    auto sceneEnd = sceneStart+ sceneWidth + 2000;
-
-
-
-    return QRectF(background->width()-(scenePos().x()+background->width()-sceneStart),0, scenePos().x()+background->width()-sceneStart, 150);
+    auto sceneStart = timeline->getVisibleRect().x();
+    return QRectF(background->width()-(background->width()-sceneStart),0, background->width()-sceneStart, 150);
 }
 
 void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -56,9 +51,9 @@ void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     QRectF visible_scene_rect = view->mapToScene(viewport_rect).boundingRect();
     painter->save();
     painter->scale(scaleValue, 1);
-    for (int i = static_cast<int>(visible_scene_rect.x()); i < static_cast<int>(visible_scene_rect.x()+visible_scene_rect.width()) ; i++)
+    for (int i = static_cast<int>(visible_scene_rect.x())-100000; i < static_cast<int>(visible_scene_rect.x()+visible_scene_rect.width())+100000 ; i++)
     {
-        if(i>= visible_scene_rect.x() && i <= visible_scene_rect.x()+visible_scene_rect.width()){
+        if(i>= visible_scene_rect.x()-100000 && i <= visible_scene_rect.x()+visible_scene_rect.width()+100000){
             if (i % framesize == 0){
                 if (scale >0.5 || (i%(framesize*10) == 0 && scale > 0.05)|| (i%(framesize*100)==0 && scale > 0.007) || i%(framesize*1000) == 0){
                     QLineF* l = new QLineF (i*scale, 55, i*scale, 60);
@@ -68,7 +63,7 @@ void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
             }
 
             if (i%(framesize*10)==0){
-                if (scale > 0.3 || (i%(framesize*50)==0 && scale >  0.05) || (i%(framesize*500)==0 && scale > 0.007) || i%(framesize*5000)==0){
+                if (scale > 0.3 || (i%(framesize*50)==0 && scale >  0.07) || (i%(framesize*500)==0 && scale > 0.01) || i%(framesize*5000)==0){
                     QString t = QVariant(i/framesize).toString();
                     painter->drawText((i-((5.5*t.length())/2/scale))*scale, 35, t);
                     painter->setPen(QColor(Qt::white));

@@ -264,7 +264,7 @@ void SoundTrack::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     else if (isSelected()){
         setZValue(1);
         painter->setPen(QColor(Qt::yellow));
-        painter->setBrush(QColor(255,220,140));
+        painter->setBrush(QColor(228,212,114));
 
     }
     else{

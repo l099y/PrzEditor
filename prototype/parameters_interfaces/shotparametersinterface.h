@@ -23,16 +23,20 @@ public:
 
     QSpinBox* widthInput = new QSpinBox(this);
     QSpinBox* positionInput = new QSpinBox(this);
+    QSpinBox* frameInInput = new QSpinBox(this);
 
 signals:
     void valueChangedRequest(QList<Shot*>, QJsonObject);
     void changeShotSize(int, QString);
     void changeShotPosition(int, QString);
+    void changeFrameIn(Shot*, int);
+
     void displayError(QString, int);
 public slots:
     void updateShotPos();
     void changedShotSize();
     void changedShotPosition();
+    void changedFrameInValue();
     void RequestValueChanged(QJsonObject);
 };
 

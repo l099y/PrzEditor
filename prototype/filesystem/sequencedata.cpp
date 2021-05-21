@@ -116,12 +116,10 @@ fileInf SequenceData::getReleventInfo(QString* path)
 QJsonObject SequenceData::generateJson()
 {
     QJsonObject ret;
-
     ret.insert("sequencefilename", sequencefilename);
     ret.insert("path", path);
     ret.insert("name", name);
     ret.insert("startIdx", startIdx);
     ret.insert("endIdx", endIdx);
-
     return ret;
 }

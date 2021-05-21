@@ -34,6 +34,8 @@ public:
 
     QHash<QString, QJsonObject> templateParams;
 
+    QList <SequenceData*> seqs;
+
     static QList<QColor> usedColor;
 
     QTimeLine *timer = new QTimeLine(110);
@@ -42,11 +44,14 @@ public:
 
     BoxState mod = BoxState::REGULAR;
 
-    bool inserted = false;
 
+    int frameIn = 0;
+
+
+    bool inserted = false;
     bool animated = false;
     bool prevposresetrequested = false;
-    QList <SequenceData*> seqs;
+
     float previousxpos;
     float previousboxwidth;
     float mousePosXonClick;

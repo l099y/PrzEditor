@@ -21,13 +21,16 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
 
     QWidget* widthWidget = new QWidget(this);
     QWidget* posWidget = new QWidget(this);
+    QWidget* frameInWidget = new QWidget(this);
 
 
     widthWidget->setLayout(new QHBoxLayout(this));
     posWidget->setLayout(new QHBoxLayout(this));
+    frameInWidget->setLayout(new QHBoxLayout(this));
 
     widthWidget->layout()->setAlignment(Qt::AlignLeft);
     posWidget->layout()->setAlignment(Qt::AlignLeft);
+    frameInWidget->layout()->setAlignment(Qt::AlignLeft);
 
     QLabel* wlab = new QLabel("frame length");
     wlab->setMinimumWidth(300);
@@ -41,8 +44,15 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
     posWidget->layout()->addWidget(flab);
     posWidget->layout()->addWidget(positionInput);
 
+    QLabel* fflab = new QLabel("Starting frame of the sequence in the shot");
+    fflab->setMinimumWidth(300);
+    frameInInput->setMinimumWidth(150);
+    frameInWidget->layout()->addWidget(fflab);
+    frameInWidget->layout()->addWidget(frameInInput);
+
     layout()->addWidget(widthWidget);
     layout()->addWidget(posWidget);
+    layout()->addWidget(frameInWidget);
 
     foreach (QJsonValue val, config.value("shot").toArray()){
         CustomShotParameterInterface* param = new CustomShotParameterInterface(val.toObject());
@@ -53,7 +63,9 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
     }
     connect (positionInput, SIGNAL(editingFinished()), this, SLOT(changedShotPosition()));
     connect (widthInput, SIGNAL(editingFinished()), this, SLOT(changedShotSize()));
+    connect (frameInInput, SIGNAL(editingFinished()), this, SLOT(changedFrameInValue()));
 }
+
 
 void ShotParametersInterface::setShot(QList<Shot *>shot)
 {
@@ -90,19 +102,27 @@ void ShotParametersInterface::setShot(QList<Shot *>shot)
     }
 
     if (shots.length()==1){
-    positionInput->setMaximum((shot[0]->scene()->sceneRect().width()/10)-(shot[0]->rect().width()/10));
-    positionInput->setValue(shot[0]->previousxpos/10);
-    positionInput->setMinimum(0);
 
-    widthInput->setMaximum(shot[0]->smallestSequence());
-    widthInput->setValue(shot[0]->previousboxwidth/10);
-    widthInput->setMinimum(0);
-    positionInput->setEnabled(true);
-    widthInput->setEnabled(true);
+        int smallestSequenceSize=  shot[0]->smallestSequence();
+        positionInput->setMaximum((shot[0]->scene()->sceneRect().width()/10)-(shot[0]->rect().width()/10));
+        positionInput->setValue(shot[0]->previousxpos/10);
+        positionInput->setMinimum(0);
+
+        widthInput->setMaximum(smallestSequenceSize);
+        widthInput->setValue(shot[0]->previousboxwidth/10);
+        widthInput->setMinimum(0);
+
+        frameInInput->setMaximum(smallestSequenceSize-(shots[0]->rect().width()/10));
+        frameInInput->setValue(shots[0]->frameIn > (smallestSequenceSize -shots[0]->rect().width()/10)? 0 : shots[0]->frameIn);
+
+        positionInput->setEnabled(true);
+        widthInput->setEnabled(true);
+        frameInInput->setEnabled(true);
     }
     else{
         positionInput->setEnabled(false);
         widthInput->setEnabled(false);
+        frameInInput->setEnabled(false);
     }
 
 
@@ -111,28 +131,34 @@ void ShotParametersInterface::setShot(QList<Shot *>shot)
 void ShotParametersInterface::updateShotPos()
 {
     if (shots.length()==1)
-    positionInput->setValue(shots[0]->scenePos().x()/10);
+        positionInput->setValue(shots[0]->scenePos().x()/10);
 }
 
 void ShotParametersInterface::changedShotSize()
 {
     if (shots.length()==1){
-    if (shots[0]->rect().width()!=widthInput->value()*10 && shots[0]->validateSizeChange(widthInput->value())){
-        emit (changeShotSize(widthInput->value(), "shot"));
-    }
-    else{
-        emit (displayError("Invalid size, this shot contains shorter sequences", 3000));
-    }
+        if (shots[0]->rect().width()!=widthInput->value()*10 && shots[0]->validateSizeChange(widthInput->value())){
+            emit (changeShotSize(widthInput->value(), "shot"));
+        }
+        else{
+            emit (displayError("Invalid size, this shot contains shorter sequences", 3000));
+        }
     }
 }
 
 void ShotParametersInterface::changedShotPosition()
 {
     if (shots.length()==1){
-    qDebug()<<shots[0]->scenePos().x() <<"- shotpos" << positionInput->value()*10 << "input pos in interface updateshotpos";
-    if (shots[0]->scenePos().x()!=positionInput->value()*10)
-        emit (changeShotPosition(positionInput->value()*10, "shot"));
+        qDebug()<<shots[0]->scenePos().x() <<"- shotpos" << positionInput->value()*10 << "input pos in interface updateshotpos";
+        if (shots[0]->scenePos().x()!=positionInput->value()*10)
+            emit (changeShotPosition(positionInput->value()*10, "shot"));
     }
+}
+
+void ShotParametersInterface::changedFrameInValue()
+{
+     if (shots.length()==1)
+     emit (changeFrameIn(shots[0], frameInInput->value()));
 }
 
 void ShotParametersInterface::RequestValueChanged(QJsonObject newparam)

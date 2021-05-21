@@ -140,7 +140,7 @@ private:
 class ResizeShotCommand: public QUndoCommand
 {
 public:
-    ResizeShotCommand(TimelineScene* timeline, QVector<Shot*> movedShots,Shot* resizedShot, int newShotSize, int previoustimelineWidth, int timelineWidth, QUndoCommand *parent = nullptr);
+    ResizeShotCommand(TimelineScene* timeline, QVector<Shot*> movedShots,Shot* resizedShot, int newShotSize, QUndoCommand *parent = nullptr);
 
     void undo() override;
     void redo() override;
@@ -151,6 +151,7 @@ private:
     QHash<Shot*, int> movedShotNewPos;
 
     Shot* resizedShot;
+
     int previousShotWidth;
     int newShotWidth;
 
@@ -163,6 +164,18 @@ private:
     int previousGlowFromFade = 0;
     int newGlowFromFade = 0;
 };
+class changeFrameInCommand: public QUndoCommand
+{
+public:
+    changeFrameInCommand(Shot*, int, QUndoCommand *parent = nullptr);
 
+    void undo() override;
+    void redo() override;
+
+private:
+    Shot* shot;
+    int newValue;
+    int oldValue;
+};
 
 #endif // COMMANDS_H

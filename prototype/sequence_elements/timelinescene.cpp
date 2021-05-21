@@ -45,7 +45,7 @@ TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObjec
     QRect b (0, 260,20000000, 20);
     QGraphicsRectItem*  soundbackgrounds = addRect(b, QColor(150,255,180,50), QColor(150,255,180,50));
 
-
+    connect(this, (SIGNAL(selectionChanged())), this, SLOT(realignSelectionOn260()));
 }
 
 TimelineScene::~TimelineScene(){
@@ -83,7 +83,7 @@ QJsonObject TimelineScene::generateJson()
 //this functions roots to real resizing functions on the selection mod on mouse move
 
 void TimelineScene::handleSelectionMove(float e, bool final){
-    if (selectedItems().length()==1){
+    if (selectedItems().length()==1 && !MultiSelectingByCtrl){
 
         Shot* shot= dynamic_cast<Shot*>(selectedItems().at(0));
         SoundTrack* sound = dynamic_cast<SoundTrack*>(selectedItems().at(0));
@@ -155,7 +155,7 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                             final? rect->setXToFrame(rect->previousxpos-sW):rect->animatedMove(rect->previousxpos-sW);
                         }
 
-                        if (rect->isInMySecondHalf(Shot::roundedTo10(e)))
+                        if (rect->collidesWithItem(selection))
                             selection->setXToFrame(rect->previousboxwidth+rect->previousxpos-sW);
                     }
                 }
@@ -176,7 +176,7 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                             final? rect->setXToFrame(rect->previousxpos+sW):rect->animatedMove(rect->previousxpos+sW);
 
                         }
-                        if (rect->isInMyFirstHalf(Shot::roundedTo10(e)))
+                        if (rect->collidesWithItem(selection))
                             selection->setXToFrame(rect->previousxpos);
                     }
                 }
@@ -532,7 +532,7 @@ void TimelineScene::realignSelectionOn260()
     foreach (QGraphicsItem *current, selectedItems()){
         Shot *shot = dynamic_cast<Shot*>(current);
         if (shot)
-            shot->setY(140);
+            shot->setY(160);
     }
 }
 
@@ -846,9 +846,17 @@ float TimelineScene::findClosestShot(float e)
         Shot* sh= dynamic_cast<Shot*>(current);
         if (sh)
         {
-            if (qFabs((sh->scenePos().x()+(sh->rect().width()/2))-e)<dist){
-                dist = qFabs((sh->scenePos().x()+(sh->rect().width()/2))-e);
-                xpos = sh->scenePos().x();
+            if (sh->scenePos().x()>e){
+                if (qFabs(sh->scenePos().x()-e)<dist){
+                    dist = sh->scenePos().x()-e;
+                    xpos = sh->scenePos().x();
+                }
+            }
+            else{
+                if (qFabs(e-(sh->scenePos().x()+sh->rect().width()))<dist){
+                    dist = e-(sh->scenePos().x()+sh->rect().width());
+                    xpos = sh->scenePos().x()+sh->rect().width();
+                }
             }
         }
     }
@@ -883,22 +891,22 @@ QList<Shot *> TimelineScene::getShotsPastSelection()
     int max = 0;
     QList<Shot*> ret;
     foreach (QGraphicsItem* current, selectedItems())
-            {
+    {
         auto sh = dynamic_cast<Shot*>(current);
-            if (sh)
-            {
-                if (sh->scenePos().x()>max)
-                    max = sh->scenePos().x();
-            }
+        if (sh)
+        {
+            if (sh->scenePos().x()>max)
+                max = sh->scenePos().x();
+        }
     }
     foreach (QGraphicsItem* current, items())
-            {
+    {
         auto sh = dynamic_cast<Shot*>(current);
-            if (sh && !sh->isSelected())
-            {
-                if (sh->scenePos().x()>max)
-                    ret.append(sh);
-            }
+        if (sh && !sh->isSelected())
+        {
+            if (sh->scenePos().x()>max)
+                ret.append(sh);
+        }
     }
     return ret;
 }
@@ -1024,6 +1032,13 @@ void TimelineScene::keyPressEvent(QKeyEvent *e)
     else if(e->key()==16777249){
         MultiSelectingByCtrl=true;
     }
+    else if(e->key()==16777221){
+        foreach (SequenceData* seq, przreg->usedSequences)
+            qDebug()<<seq->name<< "name "<<seq->padding;
+        foreach (TbeSoundData* seq, przreg->usedSoundFiles)
+            qDebug()<<seq->filename<< "name "<<seq->path;
+    }
+
 }
 
 void TimelineScene::keyReleaseEvent(QKeyEvent *e)
@@ -1144,16 +1159,14 @@ void TimelineScene::changeSelectionSize(int newSize, QString type)
         if (shot){
             shot->setSize(newSize*10);
             moveAllFrom(shot->previousxpos+1, newSize*10 - shot->previousboxwidth, type);
-            ExtendSceneWidth(newSize*10 - shot->previousboxwidth);
-            emit (resizeShot(this, getMovedShots(),shot, shot->rect().width(), previousSceneWidth, this->sceneRect().width()));
+            emit (resizeShot(this, getMovedShots(),shot, shot->rect().width(), this->sceneRect().width()));
 
         }
         else if (sound){
             if (sound->validateSizeChange(newSize *10)){
                 sound->setSize(newSize *10);
                 moveAllFrom(shot->previousxpos+1, newSize*10 - sound->previousboxwidth, type);
-                ExtendSceneWidth(newSize*10 - sound->previousboxwidth);
-                emit (resizeSound(this, getMovedSounds(),sound, sound->rect().width(), previousSceneWidth, this->sceneRect().width()));
+                emit (resizeSound(this, getMovedSounds(),sound, sound->rect().width(), this->sceneRect().width()));
 
             }
             else{
@@ -1167,7 +1180,7 @@ void TimelineScene::insertShotAtEnd(QList<SequenceData*> list)
 {
     qDebug()<<"insertshot at the end";
     if (validateInsertionSizeCap(list[0]->sequencelength()*10)){
-       emit (createShot(list, findLastXWShot(), list[0]->sequencelength()*10, this, {}));
+        emit (createShot(list, findLastXWShot(), list[0]->sequencelength()*10, this, {}));
     }
     else{
         emit(displayError("this insertion exceeds the limit of frames", 3000));

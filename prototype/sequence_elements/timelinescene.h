@@ -73,7 +73,7 @@ class TimelineScene : public QGraphicsScene
     SoundTrack* soundDropRepresentation = nullptr;
     SequenceRegister* przreg;
     void setPreviousToCurrent();
-    void realignSelectionOn260();
+
     // check if the condition to assign selection to the the interface Panel
 
     bool validateParameterTargetChange();
@@ -107,6 +107,8 @@ public slots:
    void refreshRuler(int);
    void scaleViewToScene();
 
+   void realignSelectionOn260();
+
 signals:
    void scaleToViewRequest();
    void scaleUp();
@@ -115,10 +117,10 @@ signals:
 
    void createShot(QList<SequenceData*> seq, int xpos, int length, TimelineScene* timeline, QVector<Shot*> movedShot);
    void moveShots(TimelineScene*, QVector<Shot*>, int, int);
-   void resizeShot(TimelineScene*, QVector<Shot*>,Shot*, int, int, int);
+   void resizeShot(TimelineScene*, QVector<Shot*>,Shot*, int, int);
 
    void moveSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int);
-   void resizeSound(TimelineScene*, QVector<SoundTrack*>,SoundTrack*, int, int, int);
+   void resizeSound(TimelineScene*, QVector<SoundTrack*>,SoundTrack*, int, int);
    void babar(SoundTrack*, TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>); // int xpos, int length, TimelineScene* timeline,
 
    void displayError(QString, int);

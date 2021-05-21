@@ -9,6 +9,6 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
     w.setStyleSheet("QMainWindow {background: rgb(40,40,40) ;}");
-
-    return a.exec();
+    a.exec();
+    return 0;
 }

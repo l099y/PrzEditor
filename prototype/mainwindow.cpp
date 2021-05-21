@@ -199,6 +199,7 @@ void MainWindow::inittimelinescene(){
     timelineView->horizontalScrollBar()->setBackgroundRole(QPalette::Highlight);
     timelineView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
+    //connect(this, (SIGNAL(selectionChanged())), this, SLOT(realignSelectionOn260()));
     connect(timeline, SIGNAL(scaleUp()), this, SLOT(scaleUpView()));
     connect(timeline, SIGNAL(scaleDown()),this, SLOT(scaleDownView()));
     connect(timeline, SIGNAL(displayError(QString, int)), this, SLOT(displayStatusBarMessage(QString, int)));
@@ -282,7 +283,7 @@ void MainWindow::bindUndoElements()
     connect (timeline, SIGNAL(clearTimeline(TimelineScene*, QVector<Shot*>, int)), this, SLOT(clearedTimeline(TimelineScene*, QVector<Shot*>, int)));
     connect (timeline, SIGNAL(babar(SoundTrack*, TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>)), this, SLOT(createdSound(SoundTrack*, TbeSoundData*,int, int, TimelineScene*,QVector<SoundTrack*>)));
     connect (timeline, SIGNAL(moveSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int)), this, SLOT(movedSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int)));//TbeSoundData*, int xpos, int length, TimelineScene* timeline,
-    connect (timeline, SIGNAL(resizeShot(TimelineScene*, QVector<Shot*>, Shot* ,int, int, int)), this, SLOT(resizedShot(TimelineScene*, QVector<Shot*>, Shot* ,int, int, int)));
+    connect (timeline, SIGNAL(resizeShot(TimelineScene*, QVector<Shot*>, Shot* ,int, int)), this, SLOT(resizedShot(TimelineScene*, QVector<Shot*>, Shot* ,int, int)));
 }
 
 void MainWindow::changeEvent(QEvent *event)
@@ -606,9 +607,9 @@ void MainWindow::clearedTimeline(TimelineScene *timeline, QVector<Shot *> remove
     undoStack->push(clear);
 }
 
-void MainWindow::resizedShot(TimelineScene *timeline ,  QVector<Shot *>movedshot, Shot* resizedshot, int  newsize, int oldscenesize, int newscenesize)
+void MainWindow::resizedShot(TimelineScene *timeline ,  QVector<Shot *>movedshot, Shot* resizedshot, int  newsize, int newscenesize)
 {
-    QUndoCommand* resizeShot=  new ResizeShotCommand(timeline, movedshot, resizedshot, newsize, oldscenesize, newscenesize);
+    QUndoCommand* resizeShot=  new ResizeShotCommand(timeline, movedshot, resizedshot, newsize);
     undoStack->push(resizeShot);
 }
 
@@ -622,6 +623,13 @@ void MainWindow::changeParameterInAShot(QList<Shot *> sh, QJsonObject obj)
 {
     qDebug()<<"arrived in main"<< obj.value("value").toString();
     QUndoCommand *changeparam = new ChangeParameterInShotCommand(this, sh, obj);
+    isSaved = false;
+    undoStack->push(changeparam);
+}
+
+void MainWindow::changeFrameIn(Shot * sh , int val)
+{
+    QUndoCommand *changeparam = new changeFrameInCommand(sh, val);
     isSaved = false;
     undoStack->push(changeparam);
 }
@@ -668,10 +676,9 @@ void MainWindow::loadActionTriggered()
 void MainWindow::exportTriggered()
 {
     qDebug()<<"xport triggered";
-    if (!timeline->validateDataIntegrity()){
-        if (!ProjectLoader::confirm("Do you want to save a corrupted movie", "export corrupted movie validation"))
-            return;
-    }
+    if ( timeline->validateDataIntegrity()){
+
+
     saveDialog = new ProjectLoader(true, "", this);
     saveDialog->setDefaultSuffix("prztoc");
     saveDialog->setNameFilters({".prztoc"});
@@ -679,6 +686,10 @@ void MainWindow::exportTriggered()
     saveDialog->exec();
     if (saveDialog->result()){
         exportRequestExecuted(saveDialog->selectedFiles().at(0));
+    }
+    }
+    else{
+        displayStatusBarMessage("movie contains corrupted sequences, it cannot be formated to play", 3000);
     }
 }
 
@@ -720,6 +731,7 @@ void MainWindow::initShotsParameters()
         scrollArea->setLayout(sublayoutparams1);
         enableParameterInterface(false);
         connect(shotparams, SIGNAL(valueChangedRequest(QList<Shot*>, QJsonObject)), this, SLOT(changeParameterInAShot(QList<Shot*>, QJsonObject)));
+        connect(shotparams, SIGNAL(changeFrameIn(Shot*, int)), this, SLOT(changeFrameIn(Shot*, int)));
     }
 
 }

@@ -101,6 +101,7 @@ void AddCommand::undo()
     }
     timeline->setSceneRect(0,0,timeline->sceneRect().width()-shot->rect().width(),400);
     timeline->setPreviousToCurrent();
+    if (timeline->sceneRect().width()>10000)
     timeline->scaleViewToScene();
 //    timeline->sceneRect().setWidth(timeline->sceneRect().width()-shot->rect().width());
 //    timeline->previousSceneWidth = timeline->sceneRect().width();
@@ -415,7 +416,7 @@ void MoveSoundsCommand::redo()
     timeline->setSceneRect(0,0,currentscenesize,100);
 }
 
-ResizeShotCommand::ResizeShotCommand(TimelineScene *timeline, QVector<Shot *> movedShots, Shot* shot,int newShotSize, int previoustimelineWidth, int timelineWidth, QUndoCommand *parent)
+ResizeShotCommand::ResizeShotCommand(TimelineScene *timeline, QVector<Shot *> movedShots, Shot* shot,int newShotSize, QUndoCommand *parent)
 {
     foreach(Shot* current, movedShots){
         movedShotOldPos.insert(current, current->scenePos().x());
@@ -423,10 +424,13 @@ ResizeShotCommand::ResizeShotCommand(TimelineScene *timeline, QVector<Shot *> mo
     }
     this->resizedShot = shot;
     this->timeline = timeline;
-    this->prevscenesize = previoustimelineWidth;
-    this->currentscenesize = timelineWidth;
+
     this->previousShotWidth = shot->previousboxwidth;
     this->newShotWidth = newShotSize;
+
+    this->prevscenesize = timeline->sceneRect().width();
+    this->currentscenesize =  timeline->sceneRect().width()+ (newShotWidth-previousShotWidth);
+
     setText(QObject::tr("shot resize"));
 
         previousGlowFromFade = resizedShot->templateParams.value("Fade From Black Frame Out").value("value").toString().toInt();
@@ -500,4 +504,24 @@ void ResizeShotCommand::redo()
     resizedShot->setSelected(true);
     timeline->scaleViewToScene();
 
+}
+
+changeFrameInCommand::changeFrameInCommand(Shot * shot, int newvalue, QUndoCommand *parent)
+{
+    this->shot = shot;
+    this->oldValue = shot->frameIn;
+    this->newValue = newvalue;
+    setText(QObject::tr("shot frame in changed"));
+}
+
+void changeFrameInCommand::undo()
+{
+    shot->frameIn = oldValue;
+    shot->scene()->clearSelection();
+    shot->setSelected(true);
+}
+
+void changeFrameInCommand::redo()
+{
+    shot->frameIn = newValue;
 }
