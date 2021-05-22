@@ -3,6 +3,11 @@
 #include <QtDebug>
 #include <QDir>
 #include <filesystem/sequenceregister.h>
+#include <QFuture>
+#include <QThreadPool>
+#include <QtConcurrent/QtConcurrent>
+#include <QProgressDialog>
+#include <QFutureWatcher>
 
 SequenceData::SequenceData(QObject* parent): QObject(parent)
 {
@@ -29,6 +34,32 @@ int SequenceData::sequencelength()
 }
 
 bool SequenceData::checkIntegrity()
+{
+//    QProgressDialog progress("parsing sequence", "", 0, 0, nullptr);
+
+
+//    QFuture<bool> asyncCheck = QtConcurrent::run(this, &SequenceData::checkIntegrityAsync);
+//    QFutureWatcher<bool> watcher;
+
+
+
+//    connect(&watcher, SIGNAL(finished()), &progress, SLOT(reset()));
+//    connect(&watcher, SIGNAL(progressRangeChanged(int,int)), &progress, SLOT(setRange(int,int)));
+//    connect(&watcher, SIGNAL(progressValueChanged(int)), &progress, SLOT(setValue(int)));
+
+
+//    progress.setWindowModality(Qt::WindowModal);
+//    progress.setRange(0,10);
+//    qDebug()<<asyncCheck.progressMaximum();
+//    connect (&watcher, SIGNAL(progressValueChanged(int)), &progress, SLOT(setValue(int)));
+//    progress.setAutoClose(true);
+
+//    progress.exec();
+//    bool ret = watcher.result();
+    return checkIntegrityAsync();
+}
+
+bool SequenceData::checkIntegrityAsync()
 {
     corruptedSubSequences.clear();
     int startPosInList= 0;
@@ -121,5 +152,36 @@ QJsonObject SequenceData::generateJson()
     ret.insert("name", name);
     ret.insert("startIdx", startIdx);
     ret.insert("endIdx", endIdx);
+    return ret;
+}
+
+QJsonObject SequenceData::generateJsonForExport()
+{
+    QJsonObject ret;
+    QString a ("");
+    a.append(path).append("/").append(sequencefilename);
+    ret.insert("file", a);
+    ret.insert("padding", padding);
+    ret.insert("frames", generateFrames());
+    return ret;
+}
+
+QJsonArray SequenceData::generateFrames()
+{
+    QJsonArray ret;
+    QDir dir (path);
+    if (dir.exists()){
+        QStringList przlist = dir.entryList(QStringList()<<"*.prz", QDir::Files);
+        for (int i = 0; i <przlist.size(); i ++){
+            auto current =  getReleventInfo(&przlist[i]);
+            if (current.name == this->sequencefilename && current.idx >= startIdx && current.idx <= endIdx){
+                QFile file (path+"/"+dir.entryList()[i]);
+                QJsonObject frame;
+                frame.insert("frame", current.idx);
+                frame.insert("filesize", file.size());
+                ret.append(frame);
+            }
+        }
+    }
     return ret;
 }

@@ -298,16 +298,16 @@ void MainWindow::changeEvent(QEvent *event)
 
 void MainWindow::generateData()
 {
-    QDir dir ("c://DataTest");
+    QDir dir ("c://DataTests");
     if (!dir.exists()){
-        TreeModel->mkdir(TreeModel->index("c://"), "DataTest");
-        TreeModel->mkdir(TreeModel->index("c://DataTest"), "NestedDataTest");
-        QString path ("c://DataTest//");
+        TreeModel->mkdir(TreeModel->index("c://"), "DataTests");
+        TreeModel->mkdir(TreeModel->index("c://DataTests"), "NestedDataTests");
+        QString path ("c://DataTests//");
         QStringList namelist ({"Davinci.", "Eiffel.", "Podracing.", "porgy_and_bess.", "robot-24."});
         QStringList soundlist ({"sound_1.", "Eiffelsound.", "atmosphere.", "wildfd.", "robod."});
 
         for (int j = 0; j<5; j++){
-            for (int i = 0; i<((j+1)*1000); i++)
+            for (int i = 0; i<((j+1)*100); i++)
             {
                 QString name (namelist[j]);
                 name = name.append(i < 10 ? "00000" : i<100 ? "0000" : i<1000? "000" : i<10000? "00": "0").append("%1").arg(i).append(".prz");
@@ -679,14 +679,14 @@ void MainWindow::exportTriggered()
     if ( timeline->validateDataIntegrity()){
 
 
-    saveDialog = new ProjectLoader(true, "", this);
-    saveDialog->setDefaultSuffix("prztoc");
-    saveDialog->setNameFilters({".prztoc"});
-    saveDialog->setWindowTitle("Export");
-    saveDialog->exec();
-    if (saveDialog->result()){
-        exportRequestExecuted(saveDialog->selectedFiles().at(0));
-    }
+        saveDialog = new ProjectLoader(true, "", this);
+        saveDialog->setDefaultSuffix("prztoc");
+        saveDialog->setNameFilters({"*.prztoc"});
+        saveDialog->setWindowTitle("Export");
+        saveDialog->exec();
+        if (saveDialog->result()){
+            exportRequestExecuted(saveDialog->selectedFiles().at(0));
+        }
     }
     else{
         displayStatusBarMessage("movie contains corrupted sequences, it cannot be formated to play", 3000);
@@ -830,16 +830,144 @@ void MainWindow::exportRequestExecuted(QString filepath)
     qDebug()<<filepath <<"should created prztoc";
     QFile file(filepath);
 
+
     if (filepath.size()!=0){
         if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
         {
-            qDebug()<<"file now exists";
-            QJsonDocument content(toJSON());
-            file.write(content.toJson());
-            file.close();
-            qDebug() << " Export Writing finished";
+            int index = 1;
+
+            //to not use same sequence mutliple time
+            QHash<SequenceData*, int> writtenSequences;
+            QJsonObject exportJson;
+            QJsonArray files;
+            QJsonArray sound;
+            QJsonArray sequences;
+            SoundTrack* soundd = nullptr;
+
+            //we need a blank sequence if there is unsigned frames in the timeline
+            files.append(generateBlankPrz());
+
+            QVector<Shot*> sortedlist;
+            foreach (QGraphicsItem *current, timeline->items()){
+                Shot *rec = dynamic_cast<Shot*>(current);
+                auto sd = dynamic_cast<SoundTrack*>(current);
+                if (rec)
+                    sortedlist.append(rec);
+                if (sd)
+                    soundd = sd;
+            }
+            std::sort(sortedlist.begin(), sortedlist.end(), [](Shot *a, Shot *b){
+                return a->previousxpos<b->previousxpos;
+            });
+
+            if (soundd != nullptr){
+                QJsonObject soun;
+                QString soundpath ("");
+                soundpath.append(soundd->soundfile->path).append("/").append(soundd->soundfile->filename);
+                soun.insert("file", soundpath);
+                sound.append(soun);
+            }
+
+            int currentframewritten = 0;
+            foreach (Shot* current, sortedlist){
+                if (current->scenePos().x()!=currentframewritten){
+                    auto blankSeq = generateEmptyScene((current->scenePos().x()-currentframewritten)/10);
+                    if (soundd != nullptr && soundd->scenePos().x() == currentframewritten)
+                        blankSeq.insert("audio", 0);
+                    sequences.append(blankSeq);
+
+                }
+
+                int fileIndex;
+                if (current->seqs.size()>0){
+                    if (!writtenSequences.contains(current->seqs[0])){
+                        auto fileToBeInserted = current->seqs[0]->generateJsonForExport();
+                        fileIndex =  index;
+                        writtenSequences.insert(current->seqs[0], index);
+                        fileToBeInserted.insert("index", index++);
+                        files.append(fileToBeInserted);
+
+                    }
+                    else{
+                        fileIndex = writtenSequences.value(current->seqs[0]);
+                    }
+                }
+                currentframewritten = current->scenePos().x()+current->rect().width();
+                auto finalseq = current->generateExportJson(fileIndex);
+                if (soundd != nullptr && soundd->scenePos().x() == current->scenePos().x())
+                    finalseq.insert("audio", 0);
+                sequences.append(finalseq);
+                }
+                exportJson.insert("files", files);
+                exportJson.insert("scenes", sequences);
+                exportJson.insert("audio", sound);
+                QJsonDocument print(exportJson);
+
+                file.write(print.toJson());
+                file.close();
+            }
         }
     }
+
+
+QJsonObject MainWindow::generateBlankPrz()
+{
+    QFile blankframe("./blank.0000.prz");
+    if (blankframe.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text)){
+        qDebug()<<blankframe.exists()<<"blank frame created"<<blankframe.fileName();
+        blankframe.write("");
+        blankframe.close();
+    }
+    QJsonObject blankSequence;
+    blankSequence.insert("index", 0);
+    blankSequence.insert("file", "./blank");
+    blankSequence.insert("padding", 4);
+    QJsonArray blankframear;
+    QJsonObject blankfram;
+
+    blankfram.insert("frame", 0);
+    blankfram.insert("filesize", 0);
+
+    blankframear.append(blankfram);
+    blankSequence.insert("frames", blankframear);
+    return blankSequence;
+}
+
+QJsonObject MainWindow::generateEmptyScene(int size)
+{
+    QJsonObject seq;
+    seq.insert("framerate", 0);
+    seq.insert("playmode", 0);
+    seq.insert("autoplay", 0);
+    seq.insert("resetView", 0);
+    seq.insert("sceneRotation", 0);
+    seq.insert("scale", 0);
+    seq.insert("cameraHeight", 0);
+    seq.insert("fadeFromBLackFrameIn", 0);
+    seq.insert("fadeFromBlackFrameOut", 0);
+    seq.insert("fadeToBlackFrameIn", 0);
+    seq.insert("fadeToBlackFrameOut", 0);
+    seq.insert("glowIntensity", 0);
+    seq.insert("glowPower", 0);
+    seq.insert("continueAudio",0);
+    seq.insert("audioRotation", 0);
+    seq.insert("backgroundRotation", 0);
+    QJsonObject positions;
+    positions.insert("x",0);
+    positions.insert("y",0);
+    positions.insert("z", 0);
+
+    QJsonArray frames;
+    for (int i = 0; i < size; i++)
+    {
+        QJsonObject frame;
+        frame.insert("file", 0);
+        frame.insert("frame", 0);
+        frames.append(frame);
+    }
+    positions.insert("frames", frames);
+    seq.insert("positions", positions);
+    return seq;
 }
 
 void MainWindow::changeSelectedShotInParametersInterface()

@@ -200,6 +200,8 @@ public slots:
     void saveRequestExecuted(QString);
     void loadRequestExecuted(QString);
     void exportRequestExecuted(QString);
+    QJsonObject generateBlankPrz();
+    QJsonObject generateEmptyScene(int size);
 
 
     // attempt to change the target of the parameter interface

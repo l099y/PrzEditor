@@ -262,6 +262,67 @@ QJsonObject Shot::generateJson()
     return ret;
 }
 
+QJsonObject Shot::generateExportJson(int fileIndex)
+{
+    QJsonObject seq;
+    foreach (QJsonObject param, templateParams)
+    {
+        if (param.value("name").toString()=="Framerate")
+            seq.insert("framerate", param.value("value").toInt());
+        else if (param.value("name").toString()=="Playmode")
+            seq.insert("playmode", param.value("value").toInt());
+        else if (param.value("name").toString()=="Autoplay")
+            seq.insert("autoplay", param.value("value").toInt());
+        else if (param.value("name").toString()=="Reset View")
+            seq.insert("resetView", param.value("value").toInt());
+        else if (param.value("name").toString()=="Scene Rotation")
+            seq.insert("sceneRotation", param.value("value").toDouble());
+        else if (param.value("name").toString()=="Scale")
+            seq.insert("scale", param.value("value").toDouble());
+        else if (param.value("name").toString()=="CameraHeight")
+            seq.insert("cameraHeight", param.value("value").toDouble());
+        else if (param.value("name").toString()=="Fade From Black Frame Out"){
+            seq.insert("fadeFromBLackFrameIn", 0);
+            seq.insert("fadeFromBlackFrameOut", param.value("value").toInt());
+        }
+        else if (param.value("name").toString()=="Fade To Black Frame Out"){
+
+            seq.insert("fadeToBlackFrameIn", rect().width()/10-param.value("value").toString().toInt());
+            seq.insert("fadeToBlackFrameOut", rect().width()/10);
+        }
+        else if (param.value("name").toString()=="Glow Intensity")
+            seq.insert("glowIntensity", param.value("value").toDouble());
+        else if (param.value("name").toString()=="Glow Power")
+            seq.insert("glowPower", param.value("value").toDouble());
+        else if (param.value("name").toString()=="Continue Audio")
+            seq.insert("continueAudio", param.value("value").toInt());
+        else if (param.value("name").toString()=="Audio Rotation")
+            seq.insert("audioRotation", param.value("value").toDouble());
+        else if (param.value("name").toString()=="Background")
+            seq.insert("backgroundFile", param.value("value"));
+        else if (param.value("name").toString()=="Background Rotation")
+            seq.insert("backgroundRotation", param.value("value").toDouble());
+
+    }
+    QJsonObject positions;
+    positions.insert("x",0);
+    positions.insert("y",0);
+    positions.insert("z", 0);
+
+    QJsonArray frames;
+    for (int i = 0; i <rect().width()/10; i++)
+        {
+        QJsonObject frame;
+        frame.insert("file", fileIndex);
+        frame.insert("frame", seqs[0]->startIdx+i+frameIn);
+        frames.append(frame);
+    }
+    positions.insert("frames", frames);
+
+    seq.insert("positions", positions);
+    return seq;
+}
+
 int Shot::roundedTo10(float xf)
 {
     int x = (int)xf;

@@ -26,14 +26,16 @@ public:
     int padding;
     int endIdx;
     bool corrupted = false;
-
     int sequencelength();
     bool checkIntegrity();
+    bool checkIntegrityAsync();
 
     fileInf getReleventInfo(QString* path);
 
     QHash<int,int> corruptedSubSequences;
     QJsonObject generateJson();
+    QJsonObject generateJsonForExport();
+    QJsonArray generateFrames();
 };
 #endif // SEQUENCEDATA_H
 

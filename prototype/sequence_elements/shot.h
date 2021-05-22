@@ -71,6 +71,7 @@ public:
     void setSize(int realsize);
 
     QJsonObject generateJson();
+    QJsonObject generateExportJson(int);
 
     static int roundedTo10(float x);
 
