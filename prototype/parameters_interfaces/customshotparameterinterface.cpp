@@ -124,8 +124,8 @@ void CustomShotParameterInterface::setShot(QList<Shot*>  shot)
             cb->setChecked(yes>no);
         }
         else if (param.value("type").toString()=="3"){ //FILE type
-            le->setDisabled(true);
-            dialog->setDisabled(true);
+            le->setText("unsure");
+
         }
         else if (param.value("type").toString()=="4"){ //PLAYMOD type
             int total = 0;

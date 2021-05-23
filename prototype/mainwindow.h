@@ -57,12 +57,14 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-
-//
     float currentTimelineScaling = 1;
     int framerate = 24;
     QString savepath = "";
     bool isSaved = true;
+
+    //flag to disable the refresh on losing focus used on certain actions
+
+    bool refreshEnabled = true;
 
     // containers and layout
 

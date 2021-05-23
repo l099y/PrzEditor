@@ -43,6 +43,10 @@ MainWindow::MainWindow(QWidget *parent)
     showMaximized();
 
     scaleViewToScene();
+
+    // sadly
+//    QKeyEvent *event = new QKeyEvent ( QEvent::KeyPress, Qt::CTRL, Qt::NoModifier);
+//    QCoreApplication::postEvent (this, event);
 }
 void MainWindow :: initButtons(){
 
@@ -297,11 +301,13 @@ void MainWindow::changeEvent(QEvent *event)
 {
     if(event->type() == QEvent::ActivationChange && this->isActiveWindow()) {
         qDebug()<<"retrieve the focus";
-        validateSequenceIntegrity();
-        timeline->update();
-        TreeModel->parseExpandedDir(tree->currentIndex());
-        if (shotparams!=nullptr && shotparams->shots.length()!=0){
-            shotparams->setShot(shotparams->shots);
+        if (refreshEnabled){
+            validateSequenceIntegrity();
+            timeline->update();
+            TreeModel->parseExpandedDir(tree->currentIndex());
+            if (shotparams!=nullptr && shotparams->shots.length()!=0){
+                shotparams->setShot(shotparams->shots);
+            }
         }
     }
     QWidget :: changeEvent(event);
@@ -653,6 +659,8 @@ void MainWindow::saveActionTriggered()
 
 void MainWindow::saveAsTriggered()
 {
+    refreshEnabled =false;
+
     saveDialog = new ProjectLoader(true, "", this);
     saveDialog->setModal(true);
     saveDialog->exec();
@@ -661,10 +669,12 @@ void MainWindow::saveAsTriggered()
         saveRequestExecuted(saveDialog->selectedFiles().at(0));
 
     }
+    refreshEnabled =true;
 }
 
 void MainWindow::loadActionTriggered()
 {
+    refreshEnabled =false;
     if (!isSaved)
     {
         if (ProjectLoader::confirm("do you want to save modified document","unsaved modifications"))
@@ -677,10 +687,12 @@ void MainWindow::loadActionTriggered()
     if (saveDialog->result()){
         loadRequestExecuted(saveDialog->selectedFiles().at(0));
     }
+    refreshEnabled =true;
 }
 
 void MainWindow::exportTriggered()
 {
+    refreshEnabled =false;
     qDebug()<<"xport triggered";
     if ( timeline->validateDataIntegrity()){
 
@@ -697,6 +709,7 @@ void MainWindow::exportTriggered()
     else{
         displayStatusBarMessage("movie contains corrupted sequences, it cannot be formated to play", 3000);
     }
+    refreshEnabled =true;
 }
 
 void MainWindow::newTriggered()
@@ -948,10 +961,10 @@ QJsonArray MainWindow::formatUtilRange(QJsonArray files, QJsonArray sequences)
         foreach (QJsonValue currents, sequences){
             auto currentSeq = currents.toObject();
             if (fileIndex == currentSeq.value("positions").toObject().value("frames").toArray().first().toObject().value("file").toInt()){
-            int startframe = currentSeq.value("positions").toObject().value("frames").toArray().first().toObject().value("frame").toInt();
-            int endframe = currentSeq.value("positions").toObject().value("frames").toArray().last().toObject().value("frame").toInt();
-            for (int i = startframe; i<=endframe; i++){
-                set.insert(i);
+                int startframe = currentSeq.value("positions").toObject().value("frames").toArray().first().toObject().value("frame").toInt();
+                int endframe = currentSeq.value("positions").toObject().value("frames").toArray().last().toObject().value("frame").toInt();
+                for (int i = startframe; i<=endframe; i++){
+                    set.insert(i);
                 }
             }
         }

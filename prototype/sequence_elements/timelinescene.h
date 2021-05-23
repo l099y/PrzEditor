@@ -31,7 +31,7 @@ class TimelineScene : public QGraphicsScene
     QHash<SoundTrack*, int> imageOfSoundPositions;
     SoundTrack* soundRemovedByInsertion = nullptr;
 
-    bool MultiSelectingByCtrl;
+    bool MultiSelectingByCtrl = false;
 
     inline bool isMultiSelectingByCtr();
 

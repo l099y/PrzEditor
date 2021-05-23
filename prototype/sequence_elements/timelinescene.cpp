@@ -925,6 +925,7 @@ QRectF TimelineScene::getVisibleRect()
 
 bool TimelineScene::validateDataIntegrity()
 {
+    qDebug()<<"PARSSINNNG";
     bool ret = true;
     foreach(QGraphicsItem* current, items()){
         auto sh = dynamic_cast<Shot*>(current);
@@ -1029,7 +1030,7 @@ void TimelineScene::keyPressEvent(QKeyEvent *e)
     {
         deleteSelection();
     }
-    else if(e->key()==16777249){
+    else if(e->key()==Qt::CTRL){
         MultiSelectingByCtrl=true;
     }
     else if(e->key()==16777221){
@@ -1043,7 +1044,7 @@ void TimelineScene::keyPressEvent(QKeyEvent *e)
 
 void TimelineScene::keyReleaseEvent(QKeyEvent *e)
 {
-    if(e->key()==16777249){
+    if(e->key()==Qt::CTRL){
         MultiSelectingByCtrl=false;
     }
 }
