@@ -152,9 +152,8 @@ public:
 
     inline void enableParameterInterface(bool);
 
-
+    QJsonArray formatUtilRange(QJsonArray files, QJsonArray sequences);
     QJsonObject toJSON();
-    QJsonObject toPRZTOC();
 
 public slots:
     void scaleUpView();

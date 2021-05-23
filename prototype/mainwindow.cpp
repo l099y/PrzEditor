@@ -326,6 +326,7 @@ void MainWindow::enableParameterInterface(bool mod)
     scrollArea->setVisible(mod);
 }
 
+
 QJsonObject MainWindow::toJSON()
 {
     QJsonObject ret;
@@ -333,12 +334,6 @@ QJsonObject MainWindow::toJSON()
     ret.insert("savepath", savepath);
     ret.insert("framerate", framerate);
     return ret;
-}
-
-QJsonObject MainWindow::toPRZTOC()
-{
-    QJsonObject q;
-    return q;///le format final ENFIN!!!
 }
 
 void MainWindow::scaleUpView()
@@ -844,9 +839,6 @@ void MainWindow::exportRequestExecuted(QString filepath)
             QJsonArray sequences;
             SoundTrack* soundd = nullptr;
 
-            //we need a blank sequence if there is unsigned frames in the timeline
-            files.append(generateBlankPrz());
-
             QVector<Shot*> sortedlist;
             foreach (QGraphicsItem *current, timeline->items()){
                 Shot *rec = dynamic_cast<Shot*>(current);
@@ -897,17 +889,51 @@ void MainWindow::exportRequestExecuted(QString filepath)
                 if (soundd != nullptr && soundd->scenePos().x() == current->scenePos().x())
                     finalseq.insert("audio", 0);
                 sequences.append(finalseq);
-                }
-                exportJson.insert("files", files);
-                exportJson.insert("scenes", sequences);
-                exportJson.insert("audio", sound);
-                QJsonDocument print(exportJson);
-
-                file.write(print.toJson());
-                file.close();
             }
+            //we need a blank sequence if there is unsigned frames in the timeline
+            files = formatUtilRange(files, sequences);
+            files.append(generateBlankPrz());
+            exportJson.insert("files",  files);
+            exportJson.insert("scenes", sequences);
+            exportJson.insert("audio", sound);
+            QJsonDocument print(exportJson);
+
+            file.write(print.toJson());
+            file.close();
         }
     }
+}
+QJsonArray MainWindow::formatUtilRange(QJsonArray files, QJsonArray sequences)
+{
+    QJsonArray rettt;
+    foreach (QJsonValue current, files){
+        QJsonArray ret;
+        auto currentFile = current.toObject();
+        int fileIndex = currentFile.value("index").toInt();
+        auto frames = currentFile.value("frames").toArray();
+        QSet<int> set;
+        foreach (QJsonValue currents, sequences){
+            auto currentSeq = currents.toObject();
+            if (fileIndex == currentSeq.value("positions").toObject().value("frames").toArray().first().toObject().value("file").toInt()){
+            int startframe = currentSeq.value("positions").toObject().value("frames").toArray().first().toObject().value("frame").toInt();
+            int endframe = currentSeq.value("positions").toObject().value("frames").toArray().last().toObject().value("frame").toInt();
+            for (int i = startframe; i<=endframe; i++){
+                set.insert(i);
+                }
+            }
+        }
+        qDebug()<<set;
+        foreach (QJsonValue currentf, frames){
+            auto currentframe = currentf.toObject();
+            if (set.contains(currentframe.value("frame").toInt()))
+                ret.append(currentframe);
+        }
+        currentFile.insert("frames", ret);
+        rettt.append(currentFile);
+        qDebug()<<rettt;
+    }
+    return rettt;
+}
 
 
 QJsonObject MainWindow::generateBlankPrz()
