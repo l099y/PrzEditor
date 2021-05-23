@@ -125,6 +125,7 @@ public:
     QAction *saveAsAction = nullptr;
     QAction *loadAction = nullptr;
     QAction *exportAction = nullptr;
+    QAction *newAction = nullptr;
 
 
     // Undo framework elements
@@ -147,7 +148,9 @@ public:
 
     void createUndoView();
     void bindUndoElements();
+
     void changeEvent(QEvent *event) override;
+
     void generateData();
 
     inline void enableParameterInterface(bool);
@@ -193,12 +196,17 @@ public slots:
     void saveAsTriggered();
     void loadActionTriggered();
     void exportTriggered();
+    void newTriggered();
 
     // those function are triggered by the modalDialog if an action is required
 
     void saveRequestExecuted(QString);
     void loadRequestExecuted(QString);
     void exportRequestExecuted(QString);
+    void newRequestExecuted();
+
+
+
     QJsonObject generateBlankPrz();
     QJsonObject generateEmptyScene(int size);
 

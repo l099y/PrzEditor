@@ -77,6 +77,7 @@ Shot::Shot(QJsonObject jsonShot)
     //pixmap->convertFromImage(aaa.scaled(80,80, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     setXToFrame(jsonShot.value("x").toInt());
     setRect(0,0, jsonShot.value("width").toInt(), 100);
+    frameIn =  jsonShot.value("frameIn").toInt();
     setPreviousToCurrent();
     setBrush(QColor(jsonShot.value("bred").toInt(), jsonShot.value("bgreen").toInt(), jsonShot.value("bblue").toInt()));
     scenePos().setY(160);
@@ -254,6 +255,7 @@ QJsonObject Shot::generateJson()
 
     ret.insert("x", roundedTo10(previousxpos));
     ret.insert("width", roundedTo10(previousboxwidth));
+    ret.insert("frameIn", frameIn);
     ret.insert("sequences", array);
     ret.insert("bred", this->brush().color().red());
     ret.insert("bgreen", this->brush().color().green());

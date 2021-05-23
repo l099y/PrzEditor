@@ -51,7 +51,6 @@ signals:
     void valueChangeRequest(QJsonObject newparam);
 public slots:
     void evaluateDialogSelection();
-    void evaluateFileCheckBox();
     void setValue();
     void updateFloatControllersFromCs();
     void updateFloatControllersFromSd();

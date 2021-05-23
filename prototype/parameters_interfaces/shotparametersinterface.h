@@ -24,6 +24,7 @@ public:
     QSpinBox* widthInput = new QSpinBox(this);
     QSpinBox* positionInput = new QSpinBox(this);
     QSpinBox* frameInInput = new QSpinBox(this);
+    QPushButton* validateSeq = new QPushButton(this);
 
 signals:
     void valueChangedRequest(QList<Shot*>, QJsonObject);
@@ -38,6 +39,7 @@ public slots:
     void changedShotPosition();
     void changedFrameInValue();
     void RequestValueChanged(QJsonObject);
+    void changeSeqPathAndParse();
 };
 
 #endif // SHOTPARAMETERSINTERFACE_H

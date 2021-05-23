@@ -15,22 +15,25 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
     this->setSizePolicy(a);
 
     layout()->addWidget(title);
-    layout()->addWidget(path);
     title->setVisible(false);
     path->setVisible(false);
 
     QWidget* widthWidget = new QWidget(this);
     QWidget* posWidget = new QWidget(this);
     QWidget* frameInWidget = new QWidget(this);
+    QWidget* pathWidget = new QWidget(this);
+
 
 
     widthWidget->setLayout(new QHBoxLayout(this));
     posWidget->setLayout(new QHBoxLayout(this));
     frameInWidget->setLayout(new QHBoxLayout(this));
+    pathWidget->setLayout(new QHBoxLayout(this));
 
     widthWidget->layout()->setAlignment(Qt::AlignLeft);
     posWidget->layout()->setAlignment(Qt::AlignLeft);
     frameInWidget->layout()->setAlignment(Qt::AlignLeft);
+    pathWidget->layout()->setAlignment(Qt::AlignLeft);
 
     QLabel* wlab = new QLabel("frame length");
     wlab->setMinimumWidth(300);
@@ -50,6 +53,13 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
     frameInWidget->layout()->addWidget(fflab);
     frameInWidget->layout()->addWidget(frameInInput);
 
+    pathWidget->layout()->addWidget(path);
+    pathWidget->layout()->addWidget(validateSeq);
+
+    validateSeq->setText("Change source");
+    validateSeq->setMaximumWidth(200);
+
+    layout()->addWidget(pathWidget);
     layout()->addWidget(widthWidget);
     layout()->addWidget(posWidget);
     layout()->addWidget(frameInWidget);
@@ -64,6 +74,7 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
     connect (positionInput, SIGNAL(editingFinished()), this, SLOT(changedShotPosition()));
     connect (widthInput, SIGNAL(editingFinished()), this, SLOT(changedShotSize()));
     connect (frameInInput, SIGNAL(editingFinished()), this, SLOT(changedFrameInValue()));
+    connect (validateSeq, SIGNAL(clicked(bool)), this, SLOT(changeSeqPathAndParse()));
 }
 
 
@@ -87,7 +98,17 @@ void ShotParametersInterface::setShot(QList<Shot *>shot)
         title->setText(shot[0]->seqs[0]->name);
         path->setText(shot[0]->seqs[0]->path);
         if (shots[0]->seqs[0]->corrupted){
+            QPalette *palette = new QPalette();
+            palette->setColor(QPalette::Text,Qt::red);
+            path->setPalette(*palette);
             path->setText("corrupted");
+            validateSeq->setVisible(true);
+        }
+        else{
+            QPalette *palette = new QPalette();
+            palette->setColor(QPalette::Text,Qt::black);
+            path->setPalette(*palette);
+            validateSeq->setVisible(false);
         }
     }
     else{
@@ -164,4 +185,31 @@ void ShotParametersInterface::changedFrameInValue()
 void ShotParametersInterface::RequestValueChanged(QJsonObject newparam)
 {
     emit (valueChangedRequest(shots, newparam));
+}
+
+void ShotParametersInterface::changeSeqPathAndParse()
+{
+    auto dialog  = new QFileDialog(this);
+    QStringList filter;
+    filter<< "*.mp4"<<"*.avi"<<"*.mkv";
+    dialog->setNameFilters(filter);
+    dialog->setFileMode(QFileDialog::Directory);
+    dialog->setAcceptMode(QFileDialog::AcceptOpen);
+    dialog->setWindowTitle("select directory containing proper sequence");
+    dialog->exec();
+    if (dialog->result()){
+            auto savepath = dialog->selectedFiles().at(0);
+            auto temp = shots[0]->seqs[0]->path;
+            shots[0]->seqs[0]->path = savepath;
+            if (!shots[0]->seqs[0]->checkIntegrity()){
+                shots[0]->seqs[0]->path = temp;
+                shots[0]->seqs[0]->checkIntegrity();
+            }
+            else{
+                shots[0]->setSelected(false);
+                shots[0]->setSelected(true);
+                shots[0]->update();
+            }
+
+    }
 }

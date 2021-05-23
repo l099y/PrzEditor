@@ -59,7 +59,7 @@ void CustomShotParameterInterface::setShot(QList<Shot*>  shot)
             }
         }
         else if (param.value("type").toString()=="1"){ //FLOAT type
-            sd->setValue(getParamValueFromShot().toFloat()+0.05);
+            sd->setValue(getParamValueFromShot().toFloat());
             cs->setValue(getParamValueFromShot().toFloat()/param.value("stepvalue").toString().toDouble());
             evaluateGlowDisplay();
         }
@@ -68,10 +68,9 @@ void CustomShotParameterInterface::setShot(QList<Shot*>  shot)
         }
         else if (param.value("type").toString()=="3"){ //FILE type
             le->setText(getParamValueFromShot());
-            cb->setChecked(getParamValueFromShot()==""? false: true);
+            bt->setText(getParamValueFromShot()==""? "select": "clear");
             dialog->selectFile(getParamValueFromShot());
             le->setDisabled(false);
-            cb->setDisabled(false);
             dialog->setDisabled(false);
         }
         else if (param.value("type").toString()=="4"){ //PLAYMOD type
@@ -83,6 +82,9 @@ void CustomShotParameterInterface::setShot(QList<Shot*>  shot)
             le->setDisabled(false);
         }
     }
+
+    // if there is more than one shot selected
+
     else{
         if (param.value("type").toString()=="0"){ //INT type
             int avg = 0;
@@ -97,7 +99,7 @@ void CustomShotParameterInterface::setShot(QList<Shot*>  shot)
                 sb->setDisabled(true);
             }
         }
-         if (param.value("type").toString()=="1"){ //FLOAT type
+        if (param.value("type").toString()=="1"){ //FLOAT type
 
             float avg = 0;
             int count = 0;
@@ -123,7 +125,6 @@ void CustomShotParameterInterface::setShot(QList<Shot*>  shot)
         }
         else if (param.value("type").toString()=="3"){ //FILE type
             le->setDisabled(true);
-            cb->setDisabled(true);
             dialog->setDisabled(true);
         }
         else if (param.value("type").toString()=="4"){ //PLAYMOD type
@@ -194,12 +195,9 @@ void CustomShotParameterInterface::InitFile()
     bt->setText("select");
     le = new QLineEdit(this);
     le->setReadOnly(true);
-    cb = new QCheckBox(this);
     layout()->addWidget(bt);
     layout()->addWidget(le);
-    layout()->addWidget(cb);
     connect(bt, SIGNAL(clicked(bool)), this, SLOT(evaluateDialogSelection()));
-    connect(cb, SIGNAL(clicked()), this, SLOT(evaluateFileCheckBox()));
 }
 
 void CustomShotParameterInterface::InitPlayMod()
@@ -268,34 +266,17 @@ void CustomShotParameterInterface::evaluateGlowDisplay()
 }
 void CustomShotParameterInterface::evaluateDialogSelection()
 {
-    dialog->exec();
-
-    if (dialog->selectedFiles().length()!=0){
-        setParamValueInShot(dialog->selectedFiles()[0]);
-        le->setText(dialog->selectedFiles()[0]);
-        cb->setChecked(true);
+    if (bt->text()=="clear"){
+        le->setText("");
+        setParamValueInShot("");
+        bt->setText("select");
     }
-}
-
-void CustomShotParameterInterface::evaluateFileCheckBox()
-{
-
-    if (getParamValueFromShot() == ""){
-        if (!cb->isChecked()){
-            cb->setChecked(false);
-        }
-        else
-        {
-            cb->setChecked(false);
-            evaluateDialogSelection();
-        }
-    }
-    else
-    {
-        if (!cb->isChecked()){
-            setParamValueInShot("");
-            le->setText("");
-            cb->setChecked(false);
+    else{
+        dialog->exec();
+        if (dialog->selectedFiles().length()!=0){
+            setParamValueInShot(dialog->selectedFiles()[0]);
+            le->setText(dialog->selectedFiles()[0]);
+            bt->setText("clear");
         }
     }
 }
@@ -326,18 +307,18 @@ void CustomShotParameterInterface::updateFloatControllersFromCs()
 {
     sd->setValue(cs->value()*param.value("stepvalue").toString().toDouble());
     foreach(Shot* current, shots){
-    if (param.value("name").toString()=="Glow Intensity")
-    {
+        if (param.value("name").toString()=="Glow Intensity")
+        {
 
-        QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(current->graphicsEffect());
-        effect->setYOffset(sd->value()*2);
-    }
-    else if(param.value("name").toString()=="Glow Power")
-    {
+            QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(current->graphicsEffect());
+            effect->setYOffset(sd->value()*2);
+        }
+        else if(param.value("name").toString()=="Glow Power")
+        {
 
-        QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(current->graphicsEffect());
-        effect->setBlurRadius(10 - sd->value());
-    }
+            QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(current->graphicsEffect());
+            effect->setBlurRadius(10 - sd->value());
+        }
     }
 }
 
@@ -345,18 +326,18 @@ void CustomShotParameterInterface::updateFloatControllersFromSd()
 {
     cs->setValue(sd->value()/param.value("stepvalue").toString().toDouble());
     foreach(Shot* current, shots){
-    if (param.value("name").toString()=="Glow Intensity")
-    {
+        if (param.value("name").toString()=="Glow Intensity")
+        {
 
-        QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(current->graphicsEffect());
-        effect->setYOffset(sd->value()*2);
-    }
-    else if(param.value("name").toString()=="Glow Power")
-    {
+            QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(current->graphicsEffect());
+            effect->setYOffset(sd->value()*2);
+        }
+        else if(param.value("name").toString()=="Glow Power")
+        {
 
-        QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(current->graphicsEffect());
-        effect->setBlurRadius(10 - sd->value());
-    }
+            QGraphicsDropShadowEffect* effect = dynamic_cast<QGraphicsDropShadowEffect*>(current->graphicsEffect());
+            effect->setBlurRadius(10 - sd->value());
+        }
     }
 }
 void CustomShotParameterInterface::focusOutEvent(QFocusEvent *event)

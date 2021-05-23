@@ -235,8 +235,10 @@ void MainWindow::createActions()
 
     saveAction = new QAction (tr("&Save"), this);
     connect (saveAction, SIGNAL(triggered(bool)), this, SLOT(saveActionTriggered()));
+
     loadAction = new QAction (tr("&Load"), this);
     connect (loadAction, SIGNAL(triggered(bool)), this, SLOT(loadActionTriggered()));
+
     exitAction = new QAction(tr("E&xit"), this);
     exitAction->setShortcuts(QKeySequence::Quit);
     connect(exitAction, &QAction::triggered, this, &QWidget::close);
@@ -247,11 +249,16 @@ void MainWindow::createActions()
     exportAction = new QAction(tr("&Export"), this);
     connect (exportAction, SIGNAL(triggered(bool)), this, SLOT(exportTriggered()));
 
+    newAction = new QAction(tr("&New"), this);
+    connect (newAction, SIGNAL(triggered(bool)), this, SLOT(newTriggered()));
+
 }
 
 void MainWindow::createMenus()
 {
+
     fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(newAction);
     fileMenu->addAction(saveAction);
     fileMenu->addAction(saveAsAction);
     fileMenu->addAction(loadAction);
@@ -292,6 +299,10 @@ void MainWindow::changeEvent(QEvent *event)
         qDebug()<<"retrieve the focus";
         validateSequenceIntegrity();
         timeline->update();
+        TreeModel->parseExpandedDir(tree->currentIndex());
+        if (shotparams!=nullptr && shotparams->shots.length()!=0){
+            shotparams->setShot(shotparams->shots);
+        }
     }
     QWidget :: changeEvent(event);
 }
@@ -688,6 +699,17 @@ void MainWindow::exportTriggered()
     }
 }
 
+void MainWindow::newTriggered()
+{
+    qDebug()<<"reached new Triggered";
+    if (!isSaved)
+    {
+        if (ProjectLoader::confirm("do you want to save modified document","unsaved modifications"))
+            saveActionTriggered();
+    }
+    newRequestExecuted();
+}
+
 void MainWindow::saveRequestExecuted(QString filepath)
 {
     qDebug()<<filepath;
@@ -746,28 +768,14 @@ void MainWindow::loadRequestExecuted(QString filepath)
             // check validity of the document
             if(isValidJsonObject(readJson))
             {
+                newRequestExecuted();
                 save = readJson.object();
                 QJsonObject obj(save.value("timeline").toObject());
-                resetUndoStack();
                 savepath = save.value("savepath").toString();
                 framerate = save.value("framerate").toInt();
-                reg->usedSequences.clear();
-                reg->corruptedSequences.clear();
-                foreach (QGraphicsItem* current, timeline->items()){
-                    Shot* sh = dynamic_cast<Shot*>(current);
-                    SoundTrack* sound = dynamic_cast<SoundTrack*>(current);
-                    if (sh){
-                        timeline->removeItem(sh);
-                        //delete(&sh);
-                    }
-                    else if(sound)
-                    {
-                        timeline->removeItem(sound);
-                    }
-                }
                 timeline->setSceneRect(0,0,obj.value("size").toInt(), 300);
                 timeline->newRect();
-                isSaved = true;
+
                 QJsonArray shots = obj.value("shots").toArray();
                 foreach (QJsonValue current, shots){
                     auto obj =  current.toObject();
@@ -806,6 +814,8 @@ void MainWindow::loadRequestExecuted(QString filepath)
 
                     timeline->addItem(soundToBeInsert);
                 }
+                timeline->validateDataIntegrity();
+                timeline->scaleViewToScene();
             }
             else
             {
@@ -902,6 +912,29 @@ void MainWindow::exportRequestExecuted(QString filepath)
             file.close();
         }
     }
+}
+
+void MainWindow::newRequestExecuted()
+{
+    initShotsParameters();
+    resetUndoStack();
+    reg->usedSequences.clear();
+    reg->corruptedSequences.clear();
+    foreach (QGraphicsItem* current, timeline->items()){
+        Shot* sh = dynamic_cast<Shot*>(current);
+        SoundTrack* sound = dynamic_cast<SoundTrack*>(current);
+        if (sh){
+            timeline->removeItem(sh);
+            //delete(&sh);
+        }
+        else if(sound)
+        {
+            timeline->removeItem(sound);
+        }
+    }
+    timeline->setSceneRect(0,0, 10000, 400);
+    isSaved = true;
+    savepath = "";
 }
 QJsonArray MainWindow::formatUtilRange(QJsonArray files, QJsonArray sequences)
 {
