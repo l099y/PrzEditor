@@ -51,7 +51,6 @@ void CustomShotParameterInterface::setShot(QList<Shot*>  shot)
         if (param.value("type").toString()=="0"){ //INT type
             sb->setValue(getParamValueFromShot().toInt());
             if (param.value("name").toString()=="Fade From Black Frame Out" || param.value("name").toString()=="Fade To Black Frame Out"){
-                qDebug()<<shots[0]->templateParams.value("Fade From Black Frame Out")<<"in setshot";
                 sb->setMaximum(shots[0]->rect().width()/10);
             }
             if (param.value("name").toString()=="Fade From Black Frame Out" || param.value("name").toString()=="Fade To Black Frame Out"){
@@ -108,7 +107,6 @@ void CustomShotParameterInterface::setShot(QList<Shot*>  shot)
                 avg+=shot->templateParams.value(paramName()).value("value").toString().toDouble();
                 evaluateGlowDisplay();
             }
-            qDebug()<<avg<<"-"<<count<<"in setShotparams float";
             sd->setValue(avg/count);
             cs->setValue(avg/count/param.value("stepvalue").toString().toDouble());
 
@@ -167,8 +165,6 @@ void CustomShotParameterInterface::InitFloat()
     sd->setMaximum(param.value("maxval").toString().toInt());
     cs->setRange(param.value("softmin").toString().toInt()/param.value("stepvalue").toString().toDouble(),
                  param.value("softmax").toString().toInt()/param.value("stepvalue").toString().toDouble());
-    qDebug()<<param.value("stepvalue").toString().toDouble()<< "stepvalue";
-
     sd->setSingleStep(param.value("stepvalue").toString().toDouble());
     sd->setMinimumWidth(50);
     cs->setMinimumWidth(150);
@@ -289,7 +285,6 @@ void CustomShotParameterInterface::setValue()
     }
     else if (param.value("type").toString()=="1"){ //FLOAT type
         updateFloatControllersFromCs();
-        qDebug()<<QString::fromStdString(std::to_string(sd->value()))<<"in setvalue float";
         setParamValueInShot(QString::fromStdString(std::to_string(sd->value())));
     }
     else if (param.value("type").toString()=="2"){ //BOOL type

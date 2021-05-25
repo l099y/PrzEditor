@@ -118,7 +118,6 @@ void AddCommand::redo()
         i++;
     }
     timeline->addItem(shot);
-    timeline->przreg->usedSequences.insert(seqs[0]->name, seqs[0]);
     shot->setXToFrame(xpos);
     shot->setRect(0, 0, length, 100);
     shot->setY(160);

@@ -170,7 +170,6 @@ void ShotParametersInterface::changedShotSize()
 void ShotParametersInterface::changedShotPosition()
 {
     if (shots.length()==1){
-        qDebug()<<shots[0]->scenePos().x() <<"- shotpos" << positionInput->value()*10 << "input pos in interface updateshotpos";
         if (shots[0]->scenePos().x()!=positionInput->value()*10)
             emit (changeShotPosition(positionInput->value()*10, "shot"));
     }

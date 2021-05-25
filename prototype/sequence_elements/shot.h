@@ -44,7 +44,6 @@ public:
 
     BoxState mod = BoxState::REGULAR;
 
-
     int frameIn = 0;
 
 

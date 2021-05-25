@@ -301,9 +301,10 @@ void MainWindow::changeEvent(QEvent *event)
 {
     if(event->type() == QEvent::ActivationChange && this->isActiveWindow()) {
         qDebug()<<"retrieve the focus";
-        if (refreshEnabled){
+        if (ValidationOnFocusEnabled){
             validateSequenceIntegrity();
             timeline->update();
+
             TreeModel->parseExpandedDir(tree->currentIndex());
             if (shotparams!=nullptr && shotparams->shots.length()!=0){
                 shotparams->setShot(shotparams->shots);
@@ -518,8 +519,6 @@ void MainWindow::insertComponentAtEndOfTimeline(QModelIndex)
     auto parent = sequencesStorageView;
     auto file = parent->selectionModel()->selectedIndexes()[0].data().toString();
     auto path =  parent->model()->headerData(0, Qt::Horizontal, 0).toString();
-
-    qDebug()<< file <<"insertcomp in main ";
     if (file.right(3)=="tbe") // this evaluation should be done differently
     {
 
@@ -659,7 +658,7 @@ void MainWindow::saveActionTriggered()
 
 void MainWindow::saveAsTriggered()
 {
-    refreshEnabled =false;
+    ValidationOnFocusEnabled =false;
 
     saveDialog = new ProjectLoader(true, "", this);
     saveDialog->setModal(true);
@@ -669,12 +668,12 @@ void MainWindow::saveAsTriggered()
         saveRequestExecuted(saveDialog->selectedFiles().at(0));
 
     }
-    refreshEnabled =true;
+    ValidationOnFocusEnabled =true;
 }
 
 void MainWindow::loadActionTriggered()
 {
-    refreshEnabled =false;
+    ValidationOnFocusEnabled =false;
     if (!isSaved)
     {
         if (ProjectLoader::confirm("do you want to save modified document","unsaved modifications"))
@@ -683,17 +682,15 @@ void MainWindow::loadActionTriggered()
     saveDialog = new ProjectLoader(false, "", this);
     saveDialog->setModal(true);
     saveDialog->exec();
-    qDebug()<<saveDialog->selectedFiles();
     if (saveDialog->result()){
         loadRequestExecuted(saveDialog->selectedFiles().at(0));
     }
-    refreshEnabled =true;
+    ValidationOnFocusEnabled =true;
 }
 
 void MainWindow::exportTriggered()
 {
-    refreshEnabled =false;
-    qDebug()<<"xport triggered";
+    ValidationOnFocusEnabled =false;
     if ( timeline->validateDataIntegrity()){
 
 
@@ -709,7 +706,7 @@ void MainWindow::exportTriggered()
     else{
         displayStatusBarMessage("movie contains corrupted sequences, it cannot be formated to play", 3000);
     }
-    refreshEnabled =true;
+    ValidationOnFocusEnabled =true;
 }
 
 void MainWindow::newTriggered()
@@ -795,16 +792,9 @@ void MainWindow::loadRequestExecuted(QString filepath)
                     Shot* shotToBeInsert = new Shot(obj);
                     foreach (QJsonValue currentseq, obj.value("sequences").toArray()){
                         auto curseq = currentseq.toObject();
-                        if (reg->usedSequences.contains(curseq.value("name").toString())){
-                            shotToBeInsert->seqs.append(reg->usedSequences.value(curseq.value("name").toString()));
-                        }
-                        else
-                        {
-                            SequenceData* sq = new SequenceData(curseq, nullptr);
-                            shotToBeInsert->seqs.append(sq);
-                            reg->usedSequences.insert(sq->name, sq);
-                        }
 
+                            SequenceData* sq = new SequenceData(curseq, nullptr);
+                            shotToBeInsert->seqs.append(sq);                    
                     }
                     timeline->addItem(shotToBeInsert);
                 }
@@ -814,15 +804,11 @@ void MainWindow::loadRequestExecuted(QString filepath)
                     auto obj =  current.toObject();
                     SoundTrack* soundToBeInsert = new SoundTrack(obj);
                     auto currentsoundfile = obj.value("soundfile").toObject();
-                    if (reg->usedSoundFiles.contains(currentsoundfile.value("name").toString())){
-                        soundToBeInsert->soundfile = new TbeSoundData(currentsoundfile);
-                    }
-                    else
-                    {
+
                         auto sf = new TbeSoundData(currentsoundfile);
                         soundToBeInsert->soundfile = sf;
                         reg->usedSoundFiles.insert(sf->filename, sf);
-                    }
+
 
 
                     timeline->addItem(soundToBeInsert);
@@ -931,7 +917,6 @@ void MainWindow::newRequestExecuted()
 {
     initShotsParameters();
     resetUndoStack();
-    reg->usedSequences.clear();
     reg->corruptedSequences.clear();
     foreach (QGraphicsItem* current, timeline->items()){
         Shot* sh = dynamic_cast<Shot*>(current);
@@ -968,7 +953,6 @@ QJsonArray MainWindow::formatUtilRange(QJsonArray files, QJsonArray sequences)
                 }
             }
         }
-        qDebug()<<set;
         foreach (QJsonValue currentf, frames){
             auto currentframe = currentf.toObject();
             if (set.contains(currentframe.value("frame").toInt()))
@@ -976,7 +960,6 @@ QJsonArray MainWindow::formatUtilRange(QJsonArray files, QJsonArray sequences)
         }
         currentFile.insert("frames", ret);
         rettt.append(currentFile);
-        qDebug()<<rettt;
     }
     return rettt;
 }
@@ -986,7 +969,6 @@ QJsonObject MainWindow::generateBlankPrz()
 {
     QFile blankframe("./blank.0000.prz");
     if (blankframe.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text)){
-        qDebug()<<blankframe.exists()<<"blank frame created"<<blankframe.fileName();
         blankframe.write("");
         blankframe.close();
     }

@@ -62,9 +62,9 @@ public:
     QString savepath = "";
     bool isSaved = true;
 
-    //flag to disable the refresh on losing focus used on certain actions
+    //flag to disable the parsing of corrupted Sequences on losing focus used on triggering an internal dialog
 
-    bool refreshEnabled = true;
+    bool ValidationOnFocusEnabled = true;
 
     // containers and layout
 
@@ -100,7 +100,6 @@ public:
     QStandardItemModel* sequencesModel = new QStandardItemModel(this);
     QTreeView* sequencesStorageView = new QTreeView(this);
 
-
     // Sequence Representation
 
     QGraphicsView *timelineView = new QGraphicsView(this);
@@ -112,14 +111,10 @@ public:
     QPushButton* dispbutton = new QPushButton();
     QPushButton* delbutton = new QPushButton();
 
-
-
-
     // toolbars elements
 
     QMenu *fileMenu = nullptr;
     QMenu *editMenu = nullptr;
-
     QAction *undoAction = nullptr;
     QAction *redoAction = nullptr;
     QAction *exitAction = nullptr;
@@ -147,28 +142,35 @@ public:
 
     //init functions
 
-
     void createUndoView();
     void bindUndoElements();
 
     void changeEvent(QEvent *event) override;
 
+    // dataseed should be in the directory of the project
+
     void generateData();
 
     inline void enableParameterInterface(bool);
 
+    // this function is used to
+
     QJsonArray formatUtilRange(QJsonArray files, QJsonArray sequences);
+
+    // used in the save JSON format
+
     QJsonObject toJSON();
 
 public slots:
+    // resizing the visible area of the timeline
+
     void scaleUpView();
     void scaleDownView();
     void scaleViewToScene();
 
-//    void displaceSelectionInTimeline();
-//    void changeSelectionSizeInTimeline();
-
     void validateSequenceIntegrity();
+
+    // used to implement the use case of exploring the treefile to display found .prz sequences
 
     void displaySequences(QString);
     void clearSequences();
@@ -207,14 +209,18 @@ public slots:
     void exportRequestExecuted(QString);
     void newRequestExecuted();
 
-
+    // those functions are used in the exportRequest.
 
     QJsonObject generateBlankPrz();
     QJsonObject generateEmptyScene(int size);
 
 
     // attempt to change the target of the parameter interface
+
     void changeSelectedShotInParametersInterface();
+
+    // error handling .. basic
+
     void displayStatusBarMessage(QString, int);
 
 private:

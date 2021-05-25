@@ -113,11 +113,13 @@ bool SequenceData::checkIntegrityAsync()
             if (current.length()>0)
             corruptedSubSequences.insert(current[0], current.length());
         }
-        corrupted = !(seqIndex==sequencelength());
-        return seqIndex==sequencelength();
+        corrupted = !(seqIndex>=sequencelength());
+        return seqIndex>=sequencelength();
     }
-    else
+    else{
+        corrupted = true;
         return false;
+    }
 }
 
 fileInf SequenceData::getReleventInfo(QString* path)

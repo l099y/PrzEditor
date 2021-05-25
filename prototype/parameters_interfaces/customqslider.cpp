@@ -12,7 +12,6 @@ CustomQSlider::CustomQSlider(QWidget* parent): QSlider(parent)
 bool CustomQSlider::event(QEvent * e)
 {
     if (e->type()==QEvent::Wheel || e->type()==QEvent::KeyPress){
-        qDebug()<<"specific event in slider triggered";
         e->ignore();
         return false;
 
@@ -23,7 +22,6 @@ bool CustomQSlider::event(QEvent * e)
 
 void CustomQSlider::mousePressEvent(QMouseEvent* event)
 {
-    qDebug()<<"slider clicked";
     if (event->button() == Qt::LeftButton)
        {
            if (orientation() == Qt::Vertical)

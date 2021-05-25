@@ -22,6 +22,8 @@
 #include <QtMath>
 #include <QGraphicsView>
 #include <QScrollBar>
+#include <QApplication>
+//#include <QtTest/QTestEventList>
 
 
 TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObject* parent): QGraphicsScene(parent), ruler(0)
@@ -140,7 +142,7 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                 }
                 if (selection->wasLeftOf(rect)){
 
-                    if  (!rect->isMyMiddlePastOrEqual(Shot::roundedTo10(e)))
+                    if  (!rect->isMyMiddlePastOrEqual(e))
                     {
                         if (rect->collidesWithItem(selection)){
                             selection->setXToFrame(rect->previousxpos-sW) ;
@@ -154,14 +156,39 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                         {
                             final? rect->setXToFrame(rect->previousxpos-sW):rect->animatedMove(rect->previousxpos-sW);
                         }
+                        if (rect->collidesWithItem(selection)){
 
-                        if (rect->collidesWithItem(selection))
+
+
+
+
+
+
+
+
+
+//                            QTestEventList *eventos = new QTestEventList();
+//                            eventos->addMouseClick(Qt::LeftButton, 0, QPoint(selection->scen, y), -1);
+
+//                            eventos->simulate(this->view);
                             selection->setXToFrame(rect->previousboxwidth+rect->previousxpos-sW);
+
+
+
+
+
+
+
+
+
+
+
+                        }
                     }
                 }
                 else
                 {
-                    if (rect->isMyMiddlePastOrEqual(Shot::roundedTo10(e)))
+                    if (rect->isMyMiddlePastOrEqual(e))
                     {
                         if (rect->collidesWithItem(selection)){
                             selection->setXToFrame(rect->previousboxwidth+rect->previousxpos);

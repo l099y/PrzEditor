@@ -30,7 +30,6 @@ void ExtendedQFileSystemModel::parseExpandedDir(QModelIndex idx){
         else if(fInfo.suffix()=="tbe")
         {
             containsTbe = true;
-            qDebug()<<currentDir<<"contains tbe";
         }
     }
         if (containsPdf){

@@ -51,7 +51,7 @@
       },
       {
          "name":"Scale",
-         "value":"0.000000",
+         "value":"1.000000",
          "type":"1",
          "default_value":"0",
          "minval":"0",
@@ -62,14 +62,14 @@
       },
       {
          "name":"CameraHeight",
-         "value":"0.000000",
+         "value":"1.75",
          "type":"1",
          "default_value":"0",
          "minval":"0",
-         "maxval":"200",
+         "maxval":"2",
          "stepvalue": "0.01",
          "softmin":"0",
-         "softmax":"200"
+         "softmax":"2"
       },
       {
          "name":"Fade From Black Frame Out",

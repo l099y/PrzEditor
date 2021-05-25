@@ -73,7 +73,6 @@ QList<TbeSoundData *> SequenceRegister::GeneratesTbeFilesFromDir(QDir *dir)
     }
     currentExpandedFolderSounds->insert(dir->absolutePath(), ret);
     printStoredSounds();
-    qDebug()<<ret<<"soundfiles found";
     return ret;
 }
 
@@ -120,9 +119,8 @@ void SequenceRegister::printStoredSounds()
     while (i != currentExpandedFolderSounds->constEnd()) {
         foreach (TbeSoundData* data, i.value())
             {
-            qDebug()<< data->filename<< "in the currentfolder";
+
         }
-        qDebug() << i.key() << ": " << i.value();
         ++i;
     }
 }
