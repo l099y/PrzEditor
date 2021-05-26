@@ -331,6 +331,7 @@ void MainWindow::generateData()
                 name = name.append(i < 10 ? "00000" : i<100 ? "0000" : i<1000? "000" : i<10000? "00": "0").append("%1").arg(i).append(".prz");
                 QFile file(path+name);
                 file.open(QIODevice::ReadWrite);
+                file.write("content.toJson()");
             }
             QFile file(path+soundlist[j].append("tbe"));
             file.open(QIODevice::ReadWrite);
@@ -794,7 +795,7 @@ void MainWindow::loadRequestExecuted(QString filepath)
                         auto curseq = currentseq.toObject();
 
                             SequenceData* sq = new SequenceData(curseq, nullptr);
-                            shotToBeInsert->seqs.append(sq);                    
+                            shotToBeInsert->seqs.append(sq);
                     }
                     timeline->addItem(shotToBeInsert);
                 }
@@ -870,12 +871,14 @@ void MainWindow::exportRequestExecuted(QString filepath)
             }
 
             int currentframewritten = 0;
+            int blanqSeqCount = 0;
             foreach (Shot* current, sortedlist){
                 if (current->scenePos().x()!=currentframewritten){
                     auto blankSeq = generateEmptyScene((current->scenePos().x()-currentframewritten)/10);
                     if (soundd != nullptr && soundd->scenePos().x() == currentframewritten)
                         blankSeq.insert("audio", 0);
                     sequences.append(blankSeq);
+                    blanqSeqCount++;
 
                 }
 
@@ -886,6 +889,7 @@ void MainWindow::exportRequestExecuted(QString filepath)
                         fileIndex =  index;
                         writtenSequences.insert(current->seqs[0], index);
                         fileToBeInserted.insert("index", index++);
+                        fileToBeInserted.insert("format", 3);
                         files.append(fileToBeInserted);
 
                     }
@@ -901,7 +905,8 @@ void MainWindow::exportRequestExecuted(QString filepath)
             }
             //we need a blank sequence if there is unsigned frames in the timeline
             files = formatUtilRange(files, sequences);
-            files.append(generateBlankPrz());
+            if (blanqSeqCount != 0)
+                files.append(generateBlankPrz());
             exportJson.insert("files",  files);
             exportJson.insert("scenes", sequences);
             exportJson.insert("audio", sound);
@@ -945,9 +950,9 @@ QJsonArray MainWindow::formatUtilRange(QJsonArray files, QJsonArray sequences)
         QSet<int> set;
         foreach (QJsonValue currents, sequences){
             auto currentSeq = currents.toObject();
-            if (fileIndex == currentSeq.value("positions").toObject().value("frames").toArray().first().toObject().value("file").toInt()){
-                int startframe = currentSeq.value("positions").toObject().value("frames").toArray().first().toObject().value("frame").toInt();
-                int endframe = currentSeq.value("positions").toObject().value("frames").toArray().last().toObject().value("frame").toInt();
+            if (fileIndex == currentSeq.value("positions").toArray().first().toObject().value("frames").toArray().first().toObject().value("file").toInt()){
+                int startframe = currentSeq.value("positions").toArray().first().toObject().value("frames").toArray().first().toObject().value("frame").toInt();
+                int endframe = currentSeq.value("positions").toArray().first().toObject().value("frames").toArray().last().toObject().value("frame").toInt();
                 for (int i = startframe; i<=endframe; i++){
                     set.insert(i);
                 }
@@ -976,6 +981,7 @@ QJsonObject MainWindow::generateBlankPrz()
     blankSequence.insert("index", 0);
     blankSequence.insert("file", "./blank");
     blankSequence.insert("padding", 4);
+    blankSequence.insert("format", 3);
     QJsonArray blankframear;
     QJsonObject blankfram;
 

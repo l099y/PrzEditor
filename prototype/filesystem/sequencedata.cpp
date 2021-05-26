@@ -1,5 +1,5 @@
 #include "sequencedata.h"
-#include "QFile"
+#include <QFile>
 #include <QtDebug>
 #include <QDir>
 #include <filesystem/sequenceregister.h>
@@ -8,6 +8,7 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QProgressDialog>
 #include <QFutureWatcher>
+#include <QFile>
 
 SequenceData::SequenceData(QObject* parent): QObject(parent)
 {
@@ -69,9 +70,18 @@ bool SequenceData::checkIntegrityAsync()
 
     QDir dir (path);
     if (dir.exists()){
-        QStringList przlist = dir.entryList(QStringList()<<"*.prz", QDir::Files);
+        QStringList przlists = dir.entryList(QStringList()<<"*.prz", QDir::Files);
+        QStringList przlist;
+        foreach (QString st, przlists){
+            QFile file (path+"/"+st);
+            QFileInfo fi (file);
+            if (fi.suffix()=="prz"){
+                przlist.append(st);
+            }
+        }
         for (int i = 0; i <przlist.size(); i ++){
             auto current =  getReleventInfo(&przlist[i]);
+            qDebug()<<current.name << current.idx;
             if (current.name == this->sequencefilename){
                 if (current.idx == this->startIdx){
                     if (current.idx == startIdx && current.idx == endIdx)
@@ -107,6 +117,10 @@ bool SequenceData::checkIntegrityAsync()
                         seqIndex++;
                     }
                 }
+                if (seqIndex==sequencelength()){
+                    corrupted = false;
+                    return true;
+                }
             }
         }
         foreach (QList<int> current, missingIndexesList){
@@ -122,27 +136,33 @@ bool SequenceData::checkIntegrityAsync()
     }
 }
 
-fileInf SequenceData::getReleventInfo(QString* path)
+fileInf SequenceData::getReleventInfo(QString* pathh)
 {
-    if (path->length() != 0){
+    if (pathh->length() != 0){
 
         fileInf ret;
         ret.padding=0;
         int posInString = 0;
-        while (path->at(posInString)!="."){
-            ret.name.append(path->at(posInString));
+        while (pathh->at(posInString)!="."){
+            ret.name.append(pathh->at(posInString));
             posInString++;
         }
         posInString++;
         QString idxString;
-        while (path->at(posInString) != "."){
-            idxString.append(path->at(posInString));
+        while (pathh->at(posInString) != "."){
+            idxString.append(pathh->at(posInString));
             posInString++;
             ret.padding++;
         }
         bool ok;
         ret.idx= idxString.toUInt(&ok, 10);
         return ret;
+    }
+    else{
+        fileInf ret;
+        ret.padding = 0;
+        ret.name = "";
+        ret.idx = -1;
     }
 }
 
@@ -174,14 +194,35 @@ QJsonArray SequenceData::generateFrames()
     QDir dir (path);
     if (dir.exists()){
         QStringList przlist = dir.entryList(QStringList()<<"*.prz", QDir::Files);
-        for (int i = 0; i <przlist.size(); i ++){
-            auto current =  getReleventInfo(&przlist[i]);
+        QStringList realfilter;
+        foreach (QString st, przlist){
+            QFile file (path+"/"+st);
+            QFileInfo fi (file);
+            if (fi.suffix()=="prz"){
+                realfilter.append(st);
+            }
+        }
+
+        foreach (QString st, realfilter){
+            auto current =  getReleventInfo(&st);
+            qDebug()<<current.name << current.idx << st <<"finename";
             if (current.name == this->sequencefilename && current.idx >= startIdx && current.idx <= endIdx){
-                QFile file (path+"/"+dir.entryList()[i]);
+                QFile file (path+"/"+st);
+
+
                 QJsonObject frame;
                 frame.insert("frame", current.idx);
+
+                if(file.open(QFile::ReadOnly| QIODevice::Text)){
+                int size = file.size();
+                file.close();
+
+
+                    qDebug()<<file.size()<< file.exists() << "in generateframe from Sequencedata" << current.name << file.errorString() << path+"/"+st  ;
+
                 frame.insert("filesize", file.size());
                 ret.append(frame);
+                }
             }
         }
     }

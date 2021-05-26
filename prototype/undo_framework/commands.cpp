@@ -99,7 +99,7 @@ void AddCommand::undo()
         sh->setPreviousToCurrent();
         i++;
     }
-    timeline->setSceneRect(0,0,timeline->sceneRect().width()-shot->rect().width(),400);
+    timeline->setSceneRect(0,0,timeline->sceneRect().width()-shot->rect().width(),50);
     timeline->setPreviousToCurrent();
     if (timeline->sceneRect().width()>10000)
     timeline->scaleViewToScene();
@@ -470,7 +470,6 @@ void ResizeShotCommand::undo()
     timeline->setSceneRect(0,0,prevscenesize,400);
     timeline->clearSelection();
     resizedShot->setSelected(true);
-    timeline->scaleViewToScene();
 }
 
 void ResizeShotCommand::redo()
@@ -498,11 +497,9 @@ void ResizeShotCommand::redo()
     resizedShot->setSize(newShotWidth);
     resizedShot->setPreviousToCurrent();
     resizedShot->update();
-    timeline->setSceneRect(0,0,currentscenesize,400);
+    timeline->setSceneRect(0,0,currentscenesize,500);
     timeline->clearSelection();
     resizedShot->setSelected(true);
-    timeline->scaleViewToScene();
-
 }
 
 changeFrameInCommand::changeFrameInCommand(Shot * shot, int newvalue, QUndoCommand *parent)

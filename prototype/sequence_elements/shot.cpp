@@ -172,14 +172,14 @@ QRectF Shot::boundingRect() const
             return this->rect();
         else{
             if (scenePos().x()<sceneEnd && scenePos().x()>=sceneStart){
-                return QRectF(0,0,sceneEnd-scenePos().x(),100);
+                return QRectF(0,-200,sceneEnd-scenePos().x(),300);
             }
             else if (scenePos().x()+rect().width()>=sceneStart && scenePos().x()+rect().width() <= sceneEnd){
-                return QRectF(rect().width()-(scenePos().x()+rect().width()-sceneStart),0, scenePos().x()+rect().width()-sceneStart, 100);
+                return QRectF(rect().width()-(scenePos().x()+rect().width()-sceneStart),-200, scenePos().x()+rect().width()-sceneStart, 300);
 
             }
             else {
-                return QRectF(sceneStart-scenePos().x(), 0, sceneWidth, 100);
+                return QRectF(sceneStart-scenePos().x(), -200, sceneWidth, 300);
             }
         }
     }
@@ -269,42 +269,83 @@ QJsonObject Shot::generateExportJson(int fileIndex)
     QJsonObject seq;
     foreach (QJsonObject param, templateParams)
     {
-        if (param.value("name").toString()=="Framerate")
-            seq.insert("framerate", param.value("value").toString().toInt());
-        else if (param.value("name").toString()=="Playmode")
-            seq.insert("playmode", param.value("value").toString().toInt());
-        else if (param.value("name").toString()=="Autoplay")
-            seq.insert("autoplay", param.value("value").toString().toInt());
-        else if (param.value("name").toString()=="Reset View")
-            seq.insert("resetView", param.value("value").toString().toInt());
-        else if (param.value("name").toString()=="Scene Rotation")
-            seq.insert("sceneRotation", param.value("value").toString().toDouble());
-        else if (param.value("name").toString()=="Scale")
-            seq.insert("scale", param.value("value").toString().toDouble());
-        else if (param.value("name").toString()=="CameraHeight")
-            seq.insert("cameraHeight", param.value("value").toString().toDouble());
+        if (param.value("name").toString()=="Framerate"){
+            if (param.value("value").toString().toInt() != param.value("default_value").toString().toInt()){
+                seq.insert("framerate", param.value("value").toString().toInt());
+            }
+        }
+        else if (param.value("name").toString()=="Playmode"){
+            if (param.value("value").toString().toInt() != param.value("default_value").toString().toInt()){
+                seq.insert("playmode", param.value("value").toString().toInt());
+            }
+        }
+        else if (param.value("name").toString()=="Autoplay"){
+            if (param.value("value").toString().toInt() != param.value("default_value").toString().toInt()){
+                seq.insert("autoplay", param.value("value").toString().toInt());
+            }
+        }
+        else if (param.value("name").toString()=="Reset View"){
+            if (param.value("value").toString().toInt() != param.value("default_value").toString().toInt()){
+                seq.insert("resetView", param.value("value").toString().toInt());
+            }
+        }
+        else if (param.value("name").toString()=="Scene Rotation"){
+            if (param.value("value").toString().toDouble() != param.value("default_value").toString().toDouble()){
+                seq.insert("sceneRotation", param.value("value").toString().toDouble());
+            }
+        }
+        else if (param.value("name").toString()=="Scale"){
+            if (param.value("value").toString().toDouble() != param.value("default_value").toString().toDouble()){
+                seq.insert("scale", param.value("value").toString().toDouble());
+            }
+        }
+        else if (param.value("name").toString()=="CameraHeight"){
+            if (param.value("value").toString().toDouble() != param.value("default_value").toString().toDouble()){
+                seq.insert("cameraHeight", param.value("value").toString().toDouble());
+            }
+        }
         else if (param.value("name").toString()=="Fade From Black Frame Out"){
-            seq.insert("fadeFromBLackFrameIn", 0);
-            seq.insert("fadeFromBlackFrameOut", param.value("value").toString().toInt());
+            if (param.value("value").toString().toInt() != 0){
+                seq.insert("fadeFromBLackFrameIn", 0);
+                seq.insert("fadeFromBlackFrameOut", param.value("value").toString().toInt());
+            }
         }
         else if (param.value("name").toString()=="Fade To Black Frame Out"){
-
-            seq.insert("fadeToBlackFrameIn", rect().width()/10-param.value("value").toString().toInt());
-            seq.insert("fadeToBlackFrameOut", rect().width()/10);
+            if (param.value("value").toString().toInt() != 0){
+                seq.insert("fadeToBlackFrameIn", rect().width()/10-param.value("value").toString().toInt());
+                seq.insert("fadeToBlackFrameOut", rect().width()/10);
+            }
         }
-        else if (param.value("name").toString()=="Glow Intensity")
-            seq.insert("glowIntensity", param.value("value").toString().toDouble());
-        else if (param.value("name").toString()=="Glow Power")
-            seq.insert("glowPower", param.value("value").toString().toDouble());
-        else if (param.value("name").toString()=="Continue Audio")
-            seq.insert("continueAudio", param.value("value").toString().toInt());
-        else if (param.value("name").toString()=="Audio Rotation")
-            seq.insert("audioRotation", param.value("value").toString().toDouble());
-        else if (param.value("name").toString()=="Background")
-            seq.insert("backgroundFile", param.value("value"));
-        else if (param.value("name").toString()=="Background Rotation")
-            seq.insert("backgroundRotation", param.value("value").toString().toDouble());
-
+        else if (param.value("name").toString()=="Glow Intensity"){
+            if (param.value("value").toString().toDouble() != param.value("default_value").toString().toDouble()){
+                seq.insert("glowIntensity", param.value("value").toString().toDouble());
+            }
+        }
+        else if (param.value("name").toString()=="Glow Power"){
+            if (param.value("value").toString().toDouble() != param.value("default_value").toString().toDouble()){
+                seq.insert("glowPower", param.value("value").toString().toDouble());
+            }
+        }
+        else if (param.value("name").toString()=="Continue Audio"){
+            if (param.value("value").toString().toInt() != param.value("default_value").toString().toInt()){
+                seq.insert("continueAudio", param.value("value").toString().toInt());
+            }
+        }
+        else if (param.value("name").toString()=="Audio Rotation"){
+            if (param.value("value").toString().toDouble() != param.value("default_value").toString().toDouble()){
+                seq.insert("audioRotation", param.value("value").toString().toDouble());
+            }
+        }
+        else if (param.value("name").toString()=="Background"){
+            if (param.value("value").toString() != param.value("default_value").toString()){
+                seq.insert("backgroundFile", param.value("value"));
+            }
+        }
+        else if (param.value("name").toString()=="Background Rotation"){
+            if (param.value("value").toString().toDouble() != param.value("default_value").toString().toDouble()){
+                seq.insert("backgroundRotation", param.value("value").toString().toDouble());
+            }
+        }
     }
     QJsonObject positions;
     positions.insert("x",0);
@@ -313,15 +354,17 @@ QJsonObject Shot::generateExportJson(int fileIndex)
 
     QJsonArray frames;
     for (int i = 0; i <rect().width()/10; i++)
-        {
+    {
         QJsonObject frame;
         frame.insert("file", fileIndex);
         frame.insert("frame", seqs[0]->startIdx+i+frameIn);
         frames.append(frame);
     }
     positions.insert("frames", frames);
+    QJsonArray container;
+    container.append(positions);
 
-    seq.insert("positions", positions);
+    seq.insert("positions", container);
     return seq;
 }
 

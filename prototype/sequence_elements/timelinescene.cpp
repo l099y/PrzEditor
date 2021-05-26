@@ -142,7 +142,7 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                 }
                 if (selection->wasLeftOf(rect)){
 
-                    if  (!rect->isMyMiddlePastOrEqual(e))
+                    if  (!rect->isMyMiddlePastOrEqual(e+selection->previousboxwidth-selection->mousePosXonClick))
                     {
                         if (rect->collidesWithItem(selection)){
                             selection->setXToFrame(rect->previousxpos-sW) ;
@@ -188,7 +188,7 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                 }
                 else
                 {
-                    if (rect->isMyMiddlePastOrEqual(e))
+                    if (rect->isMyMiddlePastOrEqual(e-selection->mousePosXonClick))
                     {
                         if (rect->collidesWithItem(selection)){
                             selection->setXToFrame(rect->previousboxwidth+rect->previousxpos);
@@ -328,6 +328,7 @@ void TimelineScene::placeInsertedShotInTimeline(float e)
                 else{
                     int decalage = (shotDropRepresentation->previousboxwidth+maxbeforeInsertMiddle)-minafterInsertMiddle;
                     shotDropRepresentation->setXToFrame(maxbeforeInsertMiddle);
+                    shotDropRepresentation->mousePosXonClick = e-shotDropRepresentation->scenePos().x();
                     if (sh && sh!= shotDropRepresentation && sh->posOfMidd()>=shotDropRepresentation->posOfMidd())
                     {
                         sh->setXToFrame(sh->previousxpos+decalage);
@@ -755,6 +756,7 @@ void TimelineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *e)
                     }
                     shotDropRepresentation->setSelected(true);
                     shotDropRepresentation->setPreviousToCurrent();
+                    shotDropRepresentation->mousePosXonClick=shotDropRepresentation->rect().width()/2;
                     shotDropRepresentation->seqs.append( current );
                     qDebug()<<current->name << "inserted in dragenter shot";
                     addItem(shotDropRepresentation);
@@ -793,6 +795,7 @@ void TimelineScene::dragMoveEvent(QGraphicsSceneDragDropEvent *e)
             if (!shotDropRepresentation->inserted){
                 generateImageOfShotsPositions();
                 shotDropRepresentation->setXToFrame(e->scenePos().x()-(shotDropRepresentation->rect().width()/2));
+                shotDropRepresentation->mousePosXonClick = e->scenePos().x()-shotDropRepresentation->scenePos().x();
                 shotDropRepresentation->scenePos().setY(160);
                 shotDropRepresentation->setPreviousToCurrent();
                 shotDropRepresentation->inserted=true;
