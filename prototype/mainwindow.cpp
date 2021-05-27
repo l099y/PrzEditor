@@ -202,6 +202,7 @@ void MainWindow::inittimelinescene(){
     timelineView->setAlignment(Qt::AlignTop|Qt::AlignLeft);
     timelineView->horizontalScrollBar()->setBackgroundRole(QPalette::Highlight);
     timelineView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    timelineView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 
     //connect(this, (SIGNAL(selectionChanged())), this, SLOT(realignSelectionOn260()));
     connect(timeline, SIGNAL(scaleUp()), this, SLOT(scaleUpView()));
@@ -306,7 +307,7 @@ void MainWindow::changeEvent(QEvent *event)
             timeline->update();
 
             TreeModel->parseExpandedDir(tree->currentIndex());
-            if (shotparams!=nullptr && shotparams->shots.length()!=0){
+            if (shotparams!=nullptr && shotparams->shots.length()!=0 && timeline->selectedItems().length()!=0){
                 shotparams->setShot(shotparams->shots);
             }
         }
@@ -615,6 +616,8 @@ void MainWindow::movedSoundtracks(TimelineScene * timeline, QVector<SoundTrack *
 
 void MainWindow::clearedTimeline(TimelineScene *timeline, QVector<Shot *> removedshots, int previtimelinesize)
 {
+    timeline->clearSelection();
+    changeSelectedShotInParametersInterface();
     QUndoCommand *clear = new ClearCommand(timeline, removedshots, previtimelinesize);
     undoStack->push(clear);
 }
@@ -776,46 +779,14 @@ void MainWindow::loadRequestExecuted(QString filepath)
             QJsonDocument readJson =  QJsonDocument::fromJson(stringContent.toUtf8());
             QJsonObject save;
 
-            // check validity of the document
             if(isValidJsonObject(readJson))
             {
                 newRequestExecuted();
                 save = readJson.object();
-                QJsonObject obj(save.value("timeline").toObject());
                 savepath = save.value("savepath").toString();
                 framerate = save.value("framerate").toInt();
-                timeline->setSceneRect(0,0,obj.value("size").toInt(), 300);
-                timeline->newRect();
+                timeline->loadJSONfromSave(save.value("timeline").toObject());
 
-                QJsonArray shots = obj.value("shots").toArray();
-                foreach (QJsonValue current, shots){
-                    auto obj =  current.toObject();
-                    Shot* shotToBeInsert = new Shot(obj);
-                    foreach (QJsonValue currentseq, obj.value("sequences").toArray()){
-                        auto curseq = currentseq.toObject();
-
-                            SequenceData* sq = new SequenceData(curseq, nullptr);
-                            shotToBeInsert->seqs.append(sq);
-                    }
-                    timeline->addItem(shotToBeInsert);
-                }
-
-                QJsonArray sounds = obj.value("soundtracks").toArray();
-                foreach (QJsonValue current, sounds){
-                    auto obj =  current.toObject();
-                    SoundTrack* soundToBeInsert = new SoundTrack(obj);
-                    auto currentsoundfile = obj.value("soundfile").toObject();
-
-                        auto sf = new TbeSoundData(currentsoundfile);
-                        soundToBeInsert->soundfile = sf;
-                        reg->usedSoundFiles.insert(sf->filename, sf);
-
-
-
-                    timeline->addItem(soundToBeInsert);
-                }
-                timeline->validateDataIntegrity();
-                timeline->scaleViewToScene();
             }
             else
             {
@@ -843,13 +814,14 @@ void MainWindow::exportRequestExecuted(QString filepath)
 
             //to not use same sequence mutliple time
             QHash<SequenceData*, int> writtenSequences;
+
             QJsonObject exportJson;
             QJsonArray files;
             QJsonArray sound;
             QJsonArray sequences;
             SoundTrack* soundd = nullptr;
-
             QVector<Shot*> sortedlist;
+
             foreach (QGraphicsItem *current, timeline->items()){
                 Shot *rec = dynamic_cast<Shot*>(current);
                 auto sd = dynamic_cast<SoundTrack*>(current);
@@ -873,6 +845,9 @@ void MainWindow::exportRequestExecuted(QString filepath)
             int currentframewritten = 0;
             int blanqSeqCount = 0;
             foreach (Shot* current, sortedlist){
+
+                //if the shots are not alligned
+
                 if (current->scenePos().x()!=currentframewritten){
                     auto blankSeq = generateEmptyScene((current->scenePos().x()-currentframewritten)/10);
                     if (soundd != nullptr && soundd->scenePos().x() == currentframewritten)
@@ -903,8 +878,12 @@ void MainWindow::exportRequestExecuted(QString filepath)
                     finalseq.insert("audio", 0);
                 sequences.append(finalseq);
             }
-            //we need a blank sequence if there is unsigned frames in the timeline
+            //now that we have parsed all the timeline to know all the required frames, we can reduce the amount of frame used in the file definition.
+
             files = formatUtilRange(files, sequences);
+
+            //we need a blank sequence if there is unassigned frames in the timeline
+
             if (blanqSeqCount != 0)
                 files.append(generateBlankPrz());
             exportJson.insert("files",  files);
@@ -939,9 +918,11 @@ void MainWindow::newRequestExecuted()
     isSaved = true;
     savepath = "";
 }
+
 QJsonArray MainWindow::formatUtilRange(QJsonArray files, QJsonArray sequences)
 {
     QJsonArray rettt;
+    qDebug()<<sequences;
     foreach (QJsonValue current, files){
         QJsonArray ret;
         auto currentFile = current.toObject();
@@ -950,14 +931,20 @@ QJsonArray MainWindow::formatUtilRange(QJsonArray files, QJsonArray sequences)
         QSet<int> set;
         foreach (QJsonValue currents, sequences){
             auto currentSeq = currents.toObject();
-            if (fileIndex == currentSeq.value("positions").toArray().first().toObject().value("frames").toArray().first().toObject().value("file").toInt()){
-                int startframe = currentSeq.value("positions").toArray().first().toObject().value("frames").toArray().first().toObject().value("frame").toInt();
-                int endframe = currentSeq.value("positions").toArray().first().toObject().value("frames").toArray().last().toObject().value("frame").toInt();
+
+            // well this would be long aswell to define all those json objects and all those arrays, if the current file is associated with this sequence, i get the starting frame
+            // and the ending frame, in the loop i write all the util range in the set
+
+            if (fileIndex == currentSeq.value("positions").toArray().first().toObject().value("frames").toArray().first().toArray().first().toObject().value("file").toInt()){
+                int startframe = currentSeq.value("positions").toArray().first().toObject().value("frames").toArray().first().toArray().first().toObject().value("frame").toInt();
+                int endframe = currentSeq.value("positions").toArray().first().toObject().value("frames").toArray().last().toArray().first().toObject().value("frame").toInt();
                 for (int i = startframe; i<=endframe; i++){
                     set.insert(i);
                 }
             }
         }
+
+        // yes, i'm rewritting a new file object.. i encountered problem using json not retaining the values i changed, maybe it was latenight, now i'm afraid
         foreach (QJsonValue currentf, frames){
             auto currentframe = currentf.toObject();
             if (set.contains(currentframe.value("frame").toInt()))

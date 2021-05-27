@@ -209,6 +209,7 @@ void ClearCommand::undo()
 
 void ClearCommand::redo()
 {
+    timeline->clearSelection();
     foreach (Shot* current, removedShots)
     {
         timeline->removeItem(current);

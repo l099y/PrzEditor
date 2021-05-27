@@ -355,14 +355,17 @@ QJsonObject Shot::generateExportJson(int fileIndex)
     QJsonArray frames;
     for (int i = 0; i <rect().width()/10; i++)
     {
+        QJsonArray framee;
         QJsonObject frame;
         frame.insert("file", fileIndex);
         frame.insert("frame", seqs[0]->startIdx+i+frameIn);
-        frames.append(frame);
+        framee.append(frame);
+        frames.append(framee);
     }
     positions.insert("frames", frames);
     QJsonArray container;
     container.append(positions);
+    seq.insert("frames", rect().width()/10);
 
     seq.insert("positions", container);
     return seq;
@@ -439,8 +442,7 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     if (isSelected()){
         setZValue(1);
         painter->setPen(QColor(Qt::yellow));
-        painter->setBrush(QColor(228,212,114));
-
+        painter->setBrush(QColor(240,220,114, 180));
     }
     else{
         setZValue(-1);

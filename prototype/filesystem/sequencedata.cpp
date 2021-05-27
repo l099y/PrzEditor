@@ -81,7 +81,6 @@ bool SequenceData::checkIntegrityAsync()
         }
         for (int i = 0; i <przlist.size(); i ++){
             auto current =  getReleventInfo(&przlist[i]);
-            qDebug()<<current.name << current.idx;
             if (current.name == this->sequencefilename){
                 if (current.idx == this->startIdx){
                     if (current.idx == startIdx && current.idx == endIdx)
@@ -149,13 +148,16 @@ fileInf SequenceData::getReleventInfo(QString* pathh)
         }
         posInString++;
         QString idxString;
-        while (pathh->at(posInString) != "."){
+        while (posInString < pathh->length() && pathh->at(posInString) != "."){
             idxString.append(pathh->at(posInString));
             posInString++;
             ret.padding++;
         }
         bool ok;
-        ret.idx= idxString.toUInt(&ok, 10);
+        if (idxString == "prz")
+            ret.idx = -1;
+        else
+            ret.idx= idxString.toUInt(&ok, 10);
         return ret;
     }
     else{
@@ -205,7 +207,6 @@ QJsonArray SequenceData::generateFrames()
 
         foreach (QString st, realfilter){
             auto current =  getReleventInfo(&st);
-            qDebug()<<current.name << current.idx << st <<"finename";
             if (current.name == this->sequencefilename && current.idx >= startIdx && current.idx <= endIdx){
                 QFile file (path+"/"+st);
 

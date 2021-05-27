@@ -89,13 +89,16 @@ inline fileInf SequenceRegister::getReleventInfo(QString* path)
         }
         posInString++;
         QString idxString;
-        while (path->at(posInString) != "."){
+        while (posInString<path->length() && path->at(posInString) != "."  ){
             idxString.append(path->at(posInString));
             posInString++;
             ret.padding++;
         }
         bool ok;
-        ret.idx= idxString.toUInt(&ok, 10);
+        if (idxString == "prz")
+            ret.idx = -1;
+        else
+            ret.idx= idxString.toUInt(&ok, 10);
         return ret;
     }
 }

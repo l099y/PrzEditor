@@ -145,6 +145,7 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                     if  (!rect->isMyMiddlePastOrEqual(e+selection->previousboxwidth-selection->mousePosXonClick))
                     {
                         if (rect->collidesWithItem(selection)){
+                            if (final)
                             selection->setXToFrame(rect->previousxpos-sW) ;
                         }
                         if (rect->scenePos().x()!=rect->previousxpos)
@@ -157,32 +158,8 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                             final? rect->setXToFrame(rect->previousxpos-sW):rect->animatedMove(rect->previousxpos-sW);
                         }
                         if (rect->collidesWithItem(selection)){
-
-
-
-
-
-
-
-
-
-
-//                            QTestEventList *eventos = new QTestEventList();
-//                            eventos->addMouseClick(Qt::LeftButton, 0, QPoint(selection->scen, y), -1);
-
-//                            eventos->simulate(this->view);
+                            if (final)
                             selection->setXToFrame(rect->previousboxwidth+rect->previousxpos-sW);
-
-
-
-
-
-
-
-
-
-
-
                         }
                     }
                 }
@@ -191,6 +168,7 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                     if (rect->isMyMiddlePastOrEqual(e-selection->mousePosXonClick))
                     {
                         if (rect->collidesWithItem(selection)){
+                            if (final)
                             selection->setXToFrame(rect->previousboxwidth+rect->previousxpos);
                         }
                         if (rect->scenePos().x()!=rect->previousxpos)
@@ -204,6 +182,7 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
 
                         }
                         if (rect->collidesWithItem(selection))
+                            if (final)
                             selection->setXToFrame(rect->previousxpos);
                     }
                 }
@@ -497,6 +476,37 @@ void TimelineScene::resetShotsDisplacedFinal()
         i++;
     }
     imageOfShotsPositions.clear();
+}
+
+void TimelineScene::loadJSONfromSave(QJsonObject obj)
+{
+    setSceneRect(0,0,obj.value("size").toInt(), 400);
+
+    QJsonArray shots = obj.value("shots").toArray();
+    foreach (QJsonValue current, shots){
+        auto obj =  current.toObject();
+        Shot* shotToBeInsert = new Shot(obj);
+        foreach (QJsonValue currentseq, obj.value("sequences").toArray()){
+            auto curseq = currentseq.toObject();
+
+                SequenceData* sq = new SequenceData(curseq, nullptr);
+                shotToBeInsert->seqs.append(sq);
+        }
+        addItem(shotToBeInsert);
+    }
+
+    QJsonArray sounds = obj.value("soundtracks").toArray();
+    foreach (QJsonValue current, sounds){
+        auto obj =  current.toObject();
+        SoundTrack* soundToBeInsert = new SoundTrack(obj);
+        auto currentsoundfile = obj.value("soundfile").toObject();
+            auto sf = new TbeSoundData(currentsoundfile);
+            soundToBeInsert->soundfile = sf;
+            przreg->usedSoundFiles.insert(sf->filename, sf);
+        addItem(soundToBeInsert);
+    }
+    validateDataIntegrity();
+    scaleViewToScene();
 }
 
 int TimelineScene::findLastXWShot()
@@ -1037,6 +1047,8 @@ void TimelineScene::dragLeaveEvent(QGraphicsSceneDragDropEvent *e)
     else if (shotDropRepresentation != nullptr){
         resetShotsDisplacedByInsertion();
         removeItem(shotDropRepresentation);
+        if (shotDropRepresentation->inserted)
+        setSceneRect(0,0, sceneRect().width() - shotDropRepresentation->rect().width(), 400);
         shotDropRepresentation=nullptr;
         resetToPrevious("shot");
     }

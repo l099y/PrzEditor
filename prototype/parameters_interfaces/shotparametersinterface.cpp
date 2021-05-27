@@ -23,8 +23,6 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
     QWidget* frameInWidget = new QWidget(this);
     QWidget* pathWidget = new QWidget(this);
 
-
-
     widthWidget->setLayout(new QHBoxLayout(this));
     posWidget->setLayout(new QHBoxLayout(this));
     frameInWidget->setLayout(new QHBoxLayout(this));
@@ -203,6 +201,7 @@ void ShotParametersInterface::changeSeqPathAndParse()
             if (!shots[0]->seqs[0]->checkIntegrity()){
                 shots[0]->seqs[0]->path = temp;
                 shots[0]->seqs[0]->checkIntegrity();
+                emit (displayError("the new path specified doesn't validate the sequence integrity", 3000));
             }
             else{
                 shots[0]->setSelected(false);

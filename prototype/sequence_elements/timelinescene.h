@@ -51,6 +51,7 @@ class TimelineScene : public QGraphicsScene
     void behaveOnSelectedShotDisplace();
     void resetShotsDisplacedByInsertion();
     void resetShotsDisplacedFinal();
+    void loadJSONfromSave(QJsonObject);
     int findLastXWShot();
     int findLastXWSound();
     float ShotXAndWBefore(Shot *rect);
