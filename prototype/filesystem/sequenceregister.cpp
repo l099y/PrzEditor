@@ -172,7 +172,7 @@ void SequenceRegister::clearSequencesInDir()
             {
             delete(data);
         }
-        ++i;
+        j++;
     }
     currentExpandedFolderSequences->clear();
     currentExpandedFolderSounds->clear();

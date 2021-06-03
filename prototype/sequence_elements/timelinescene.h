@@ -18,6 +18,7 @@ class TimelineScene : public QGraphicsScene
     Q_OBJECT
     public:
     bool isPastLimit = false;
+    bool isTryingToMultiselect;
     QGraphicsItem* selection = nullptr;
 
     TimelineScene(SequenceRegister*,QGraphicsView*, QObject* parent = nullptr);
@@ -51,11 +52,12 @@ class TimelineScene : public QGraphicsScene
     void behaveOnSelectedShotDisplace();
     void resetShotsDisplacedByInsertion();
     void resetShotsDisplacedFinal();
-    void loadJSONfromSave(QJsonObject);
+
     int findLastXWShot();
     int findLastXWSound();
     float ShotXAndWBefore(Shot *rect);
     QVector<Shot*> getMovedShots();
+
     //sound displacement functions
 
     void behaveOnSelectionSwitchPosMoveSound(float mouseXPos, bool final);
@@ -81,6 +83,10 @@ class TimelineScene : public QGraphicsScene
     bool validateInsertionSizeCap(int newRectWidth);
     QList<Shot*>getShotsPastSelection();
     QRectF getVisibleRect();
+
+    // used when project is loaded
+
+    void loadJSONfromSave(QJsonObject);
 
 public slots:
 

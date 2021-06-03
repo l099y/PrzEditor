@@ -83,6 +83,7 @@ public:
     QHBoxLayout *sublayoutsplit = new QHBoxLayout(parameters);
     QVBoxLayout *sublayoutparams1 = new QVBoxLayout(params1);
 
+
     //load the shot template and setup the parameters ui comps
 
     void initShotsParameters();
@@ -151,9 +152,11 @@ public:
 
     void generateData();
 
+    // this function should be a property
+
     inline void enableParameterInterface(bool);
 
-    // this function is used to
+    // this function is used filter the pointed files in the export format, allowing the player to load only the required prz frames
 
     QJsonArray formatUtilRange(QJsonArray files, QJsonArray sequences);
 
@@ -162,6 +165,7 @@ public:
     QJsonObject toJSON();
 
 public slots:
+
     // resizing the visible area of the timeline
 
     void scaleUpView();
@@ -185,7 +189,6 @@ public slots:
     void deleteSelection();
     void createdShot(QList<SequenceData*> seq, int xpos, int length, TimelineScene* timeline , QVector<Shot*> movedShots);
     void createdSound(SoundTrack*, TbeSoundData*, int, int, TimelineScene*, QVector<SoundTrack*>);
-    // int xpos, int length, TimelineScene* timeline,
     void movedSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int);
     void movedShots(TimelineScene*, QVector<Shot*> movedShots, int prevscenewidth, int currentscenewidth);
     void clearedTimeline(TimelineScene*, QVector<Shot*>, int);

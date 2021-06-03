@@ -38,7 +38,7 @@ public:
 
     static QList<QColor> usedColor;
 
-    QTimeLine *timer = new QTimeLine(110);
+    QTimeLine *timer = new QTimeLine(80);
 
     QGraphicsItemAnimation *animation = new QGraphicsItemAnimation;
 
@@ -82,7 +82,7 @@ public:
     inline int posOfMidd(){
         return previousxpos+(previousboxwidth/2);
     }
-    inline bool isMyMiddlePastOrEqual(float e){
+    inline bool isMyMiddBefore(float e){
         return e >= previousxpos+(rect().width())/2;
     }
     inline bool isInMyFirstHalf(float e){

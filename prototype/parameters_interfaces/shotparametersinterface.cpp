@@ -198,16 +198,9 @@ void ShotParametersInterface::changeSeqPathAndParse()
             auto savepath = dialog->selectedFiles().at(0);
             auto temp = shots[0]->seqs[0]->path;
             shots[0]->seqs[0]->path = savepath;
-            if (!shots[0]->seqs[0]->checkIntegrity()){
-                shots[0]->seqs[0]->path = temp;
-                shots[0]->seqs[0]->checkIntegrity();
-                emit (displayError("the new path specified doesn't validate the sequence integrity", 3000));
-            }
-            else{
+            shots[0]->seqs[0]->checkIntegrity();
                 shots[0]->setSelected(false);
                 shots[0]->setSelected(true);
                 shots[0]->update();
-            }
-
     }
 }

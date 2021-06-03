@@ -53,11 +53,6 @@ TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObjec
 TimelineScene::~TimelineScene(){
 }
 
-bool TimelineScene::isMultiSelectingByCtr()
-{
-    return MultiSelectingByCtrl;
-}
-
 QJsonObject TimelineScene::generateJson()
 {
     QJsonArray array;
@@ -85,7 +80,7 @@ QJsonObject TimelineScene::generateJson()
 //this functions roots to real resizing functions on the selection mod on mouse move
 
 void TimelineScene::handleSelectionMove(float e, bool final){
-    if (selectedItems().length()==1 && !MultiSelectingByCtrl){
+    if (selectedItems().length()==1 && !isTryingToMultiselect && !MultiSelectingByCtrl){
 
         Shot* shot= dynamic_cast<Shot*>(selectedItems().at(0));
         SoundTrack* sound = dynamic_cast<SoundTrack*>(selectedItems().at(0));
@@ -111,7 +106,7 @@ void TimelineScene::handleSelectionMove(float e, bool final){
         }
 
     }
-    else if (isMultiSelectingByCtr()){
+    else if (!MultiSelectingByCtrl){
         foreach(QGraphicsItem* current, selectedItems()){
             auto shot = dynamic_cast<Shot*>(current);
             if (shot)
@@ -139,51 +134,58 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                     rect->timer->stop();
                     rect->setAnimatedFalse();
                     rect->restore();
+                    rect->update();
                 }
                 if (selection->wasLeftOf(rect)){
 
-                    if  (!rect->isMyMiddlePastOrEqual(e+selection->previousboxwidth-selection->mousePosXonClick))
+                    if  (!rect->isMyMiddBefore(e+selection->previousboxwidth-selection->mousePosXonClick))
                     {
                         if (rect->collidesWithItem(selection)){
                             if (final)
-                            selection->setXToFrame(rect->previousxpos-sW) ;
+                                selection->setXToFrame(rect->previousxpos-sW) ;
                         }
-                        if (rect->scenePos().x()!=rect->previousxpos)
+                        if (!rect->animated && Shot::roundedTo10(rect->scenePos().x())!=rect->previousxpos){
                             final? rect->setXToFrame(rect->previousxpos):rect->animatedMove(rect->previousxpos);
+                        }
                     }
                     else {
 
-                        if(!rect->animated && rect->scenePos().x()!=rect->previousxpos-sW)
+                        if(!rect->animated && Shot::roundedTo10(rect->scenePos().x())!=rect->previousxpos-sW)
                         {
-                            final? rect->setXToFrame(rect->previousxpos-sW):rect->animatedMove(rect->previousxpos-sW);
+                            if (rect->previousxpos-sW > 0){
+                                final? rect->setXToFrame(rect->previousxpos-sW):rect->animatedMove(rect->previousxpos-sW);
+                            }
+                            else{
+                                final? rect->setXToFrame(0):rect->animatedMove(0);
+                            }
                         }
                         if (rect->collidesWithItem(selection)){
                             if (final)
-                            selection->setXToFrame(rect->previousboxwidth+rect->previousxpos-sW);
+                                selection->setXToFrame(rect->previousboxwidth+rect->previousxpos-sW);
                         }
                     }
                 }
                 else
                 {
-                    if (rect->isMyMiddlePastOrEqual(e-selection->mousePosXonClick))
+                    if (rect->isMyMiddBefore(e-selection->mousePosXonClick))
                     {
                         if (rect->collidesWithItem(selection)){
                             if (final)
-                            selection->setXToFrame(rect->previousboxwidth+rect->previousxpos);
+                                selection->setXToFrame(rect->previousboxwidth+rect->previousxpos);
                         }
-                        if (rect->scenePos().x()!=rect->previousxpos)
+                        if (!rect->animated && Shot::roundedTo10(rect->scenePos().x())!=rect->previousxpos)
                             final? rect->setXToFrame(rect->previousxpos):rect->animatedMove(rect->previousxpos);
                     }
 
                     else
                     {
-                        if(!rect->animated && rect->scenePos().x()!=rect->previousxpos+sW){
+                        if(!rect->animated && Shot::roundedTo10(rect->scenePos().x())!=rect->previousxpos+sW){
                             final? rect->setXToFrame(rect->previousxpos+sW):rect->animatedMove(rect->previousxpos+sW);
 
                         }
                         if (rect->collidesWithItem(selection))
                             if (final)
-                            selection->setXToFrame(rect->previousxpos);
+                                selection->setXToFrame(rect->previousxpos);
                     }
                 }
             }
@@ -274,9 +276,9 @@ void TimelineScene::placeInsertedShotInTimeline(float e)
             Shot * sh = dynamic_cast<Shot*>(current);
             if (sh && sh!= shotDropRepresentation)
             {
-                if (sh->isMyMiddlePastOrEqual(e))
+                if (sh->isMyMiddBefore(e))
                 {
-                    if (sh->collidesWithItem(shotDropRepresentation) && sh->previousxpos+sh->previousboxwidth>maxbeforeInsertMiddle)
+                    if (sh->previousxpos+sh->previousboxwidth>maxbeforeInsertMiddle)
                         maxbeforeInsertMiddle=sh->previousxpos+sh->previousboxwidth;
                 }
                 else
@@ -286,56 +288,15 @@ void TimelineScene::placeInsertedShotInTimeline(float e)
                 }
             }
         }
+        float decalage = maxbeforeInsertMiddle-shotDropRepresentation->scenePos().x() ;
 
-        // if droprepresentation has to be moved to the right because it colliding with a shot that will remain in its current pos
-
-        if (shotDropRepresentation->scenePos().x()<maxbeforeInsertMiddle){
-
-            foreach (QGraphicsItem* current, items()){
-                Shot * sh = dynamic_cast<Shot*>(current);
-                if (minafterInsertMiddle == 2000000000){
-
-
-                    //if the half of droprepresentation is before the half of current inspected shot
-
-                    if (sh && sh!= shotDropRepresentation && !sh->isMyMiddlePastOrEqual(e))
-                    {
-                        sh->setXToFrame(sh->previousxpos+shotDropRepresentation->rect().width());
-                        sh->setPreviousToCurrent();
-                    }
-                }
-                else{
-                    int decalage = (shotDropRepresentation->previousboxwidth+maxbeforeInsertMiddle)-minafterInsertMiddle;
-                    shotDropRepresentation->setXToFrame(maxbeforeInsertMiddle);
-                    shotDropRepresentation->mousePosXonClick = e-shotDropRepresentation->scenePos().x();
-                    if (sh && sh!= shotDropRepresentation && sh->posOfMidd()>=shotDropRepresentation->posOfMidd())
-                    {
-                        sh->setXToFrame(sh->previousxpos+decalage);
-                        sh->setPreviousToCurrent();
-                    }
-
-                }
-
+        foreach (QGraphicsItem* current, items()){
+            Shot * sh = dynamic_cast<Shot*>(current);
+            if (sh && sh!= shotDropRepresentation && !sh->isMyMiddBefore(e)){
+                sh->setXToFrame( decalage>0? sh->previousxpos+shotDropRepresentation->rect().width(): sh->previousxpos+shotDropRepresentation->rect().width()-decalage);
+                sh->setPreviousToCurrent();
             }
-
-
         }
-        else if (shotDropRepresentation->previousxpos+shotDropRepresentation->previousboxwidth>minafterInsertMiddle){
-            int decalage = minafterInsertMiddle-(shotDropRepresentation->previousboxwidth+shotDropRepresentation->previousxpos);
-            foreach (QGraphicsItem* current, items()){
-                Shot * sh = dynamic_cast<Shot*>(current);
-
-                //if the half of droprepresentation is before the half of current inspected shot
-
-                if (sh && sh!= shotDropRepresentation && sh->posOfMidd()>=shotDropRepresentation->posOfMidd())
-                {
-                    sh->setXToFrame(sh->previousxpos-decalage);
-                    sh->setPreviousToCurrent();
-                }
-            }
-
-        }
-        shotDropRepresentation->setPreviousToCurrent();
     }
 }
 
@@ -489,8 +450,8 @@ void TimelineScene::loadJSONfromSave(QJsonObject obj)
         foreach (QJsonValue currentseq, obj.value("sequences").toArray()){
             auto curseq = currentseq.toObject();
 
-                SequenceData* sq = new SequenceData(curseq, nullptr);
-                shotToBeInsert->seqs.append(sq);
+            SequenceData* sq = new SequenceData(curseq, nullptr);
+            shotToBeInsert->seqs.append(sq);
         }
         addItem(shotToBeInsert);
     }
@@ -500,9 +461,9 @@ void TimelineScene::loadJSONfromSave(QJsonObject obj)
         auto obj =  current.toObject();
         SoundTrack* soundToBeInsert = new SoundTrack(obj);
         auto currentsoundfile = obj.value("soundfile").toObject();
-            auto sf = new TbeSoundData(currentsoundfile);
-            soundToBeInsert->soundfile = sf;
-            przreg->usedSoundFiles.insert(sf->filename, sf);
+        auto sf = new TbeSoundData(currentsoundfile);
+        soundToBeInsert->soundfile = sf;
+        przreg->usedSoundFiles.insert(sf->filename, sf);
         addItem(soundToBeInsert);
     }
     validateDataIntegrity();
@@ -691,6 +652,7 @@ void TimelineScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
             }
         }
     }
+    isTryingToMultiselect=false;
     QGraphicsScene :: mouseReleaseEvent(e);
 }
 
@@ -730,7 +692,16 @@ void TimelineScene::resetToPrevious(QString type)
 void TimelineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *e)
 {
     auto parent = (QTreeView*)e->source();
-    e->accept();
+    QApplication::restoreOverrideCursor();
+    if (parent){
+        e->accept();
+        qDebug()<<"accepted draenter";
+    }
+    else
+    {
+        qDebug()<<"ignore draenter";
+        e->ignore();
+    }
     auto file = parent->selectionModel()->selectedIndexes()[0].data().toString();
     auto path =  parent->model()->headerData(0, Qt::Horizontal, 0).toString();
     if (file.right(3)=="tbe") // this evaluation should be done differently
@@ -766,7 +737,7 @@ void TimelineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *e)
                     }
                     shotDropRepresentation->setSelected(true);
                     shotDropRepresentation->setPreviousToCurrent();
-                    shotDropRepresentation->mousePosXonClick=shotDropRepresentation->rect().width()/2;
+                    shotDropRepresentation->mousePosXonClick=0;
                     shotDropRepresentation->seqs.append( current );
                     qDebug()<<current->name << "inserted in dragenter shot";
                     addItem(shotDropRepresentation);
@@ -790,31 +761,27 @@ void TimelineScene::dragMoveEvent(QGraphicsSceneDragDropEvent *e)
     if (shotDropRepresentation != nullptr){
         if (e->scenePos().y()<60 || e->scenePos().y()>260){
             if (shotDropRepresentation->inserted){
-                shotDropRepresentation->setXToFrame(e->scenePos().x()-(shotDropRepresentation->rect().width()/2));
                 shotDropRepresentation->inserted=false;
                 resetShotsDisplacedByInsertion();
                 ExtendSceneWidth(-shotDropRepresentation->rect().width());
-                scaleViewToScene();
 
             }
-            shotDropRepresentation->setXToFrame(e->scenePos().x()-(shotDropRepresentation->rect().width()/2));
+            shotDropRepresentation->setXToFrame(e->scenePos().x());
             shotDropRepresentation->setY(e->scenePos().y());
         }
         else
         {
             if (!shotDropRepresentation->inserted){
                 generateImageOfShotsPositions();
-                shotDropRepresentation->setXToFrame(e->scenePos().x()-(shotDropRepresentation->rect().width()/2));
-                shotDropRepresentation->mousePosXonClick = e->scenePos().x()-shotDropRepresentation->scenePos().x();
+                shotDropRepresentation->setXToFrame(e->scenePos().x());
                 shotDropRepresentation->scenePos().setY(160);
                 shotDropRepresentation->setPreviousToCurrent();
                 shotDropRepresentation->inserted=true;
                 placeInsertedShotInTimeline(e->scenePos().x());
                 ExtendSceneWidth(shotDropRepresentation->rect().width());
-                scaleViewToScene();
             }
             else{
-                shotDropRepresentation->setXToFrame(e->scenePos().x()-(shotDropRepresentation->rect().width()/2));
+                shotDropRepresentation->setXToFrame(e->scenePos().x());
                 shotDropRepresentation->scenePos().setY(160);
                 behaveOnSelectionSwitchPosMove(e->scenePos().x(), false);
             }
@@ -1048,7 +1015,7 @@ void TimelineScene::dragLeaveEvent(QGraphicsSceneDragDropEvent *e)
         resetShotsDisplacedByInsertion();
         removeItem(shotDropRepresentation);
         if (shotDropRepresentation->inserted)
-        setSceneRect(0,0, sceneRect().width() - shotDropRepresentation->rect().width(), 400);
+            setSceneRect(0,0, sceneRect().width() - shotDropRepresentation->rect().width(), 400);
         shotDropRepresentation=nullptr;
         resetToPrevious("shot");
     }
@@ -1072,8 +1039,9 @@ void TimelineScene::keyPressEvent(QKeyEvent *e)
     {
         deleteSelection();
     }
-    else if(e->key()==Qt::CTRL){
+    else if(e->key()==16777249){
         MultiSelectingByCtrl=true;
+        qDebug()<<"ctrl pressed";
     }
     else if(e->key()==16777221){
         foreach (SequenceData* seq, przreg->usedSequences)
@@ -1086,8 +1054,9 @@ void TimelineScene::keyPressEvent(QKeyEvent *e)
 
 void TimelineScene::keyReleaseEvent(QKeyEvent *e)
 {
-    if(e->key()==Qt::CTRL){
+    if(e->key()==16777249){
         MultiSelectingByCtrl=false;
+        qDebug()<<"ctrl released";
     }
 }
 
@@ -1265,6 +1234,10 @@ void TimelineScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
 {
     //qDebug()<<"mousepressed";e->ignore();
     QGraphicsScene::mousePressEvent(e);
+    if (selectedItems().length()==0){
+        qDebug()<<"trying to multiselect";
+        isTryingToMultiselect = true;
+    }
 }
 void TimelineScene :: newRect(){
     ExtendSceneWidth(0);

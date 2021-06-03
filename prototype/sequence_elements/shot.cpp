@@ -439,6 +439,9 @@ void Shot::setAnimatedFalse()
 
 void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+//    if (animated){
+//        painter->setBrush(QColor(Qt::red));
+//    }
     if (isSelected()){
         setZValue(1);
         painter->setPen(QColor(Qt::yellow));
@@ -546,11 +549,11 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     QLineF* lll = new QLineF (rect().width(), 0, rect().width(), 100);
     painter->drawLine(*lll);
 
-    //        if (visiblerectsize>pixmap->width())
-    //        painter->drawPixmap(0,0, *pixmap,0,0,100,100);
-    //        else{
-    //        painter->drawPixmap(0,0, *pixmap,0,0,visiblerectsize, 100);
-    //        }
+//            if (visiblerectsize>pixmap->width())
+//            painter->drawPixmap(0,0, *pixmap,0,0,100,100);
+//            else{
+//            painter->drawPixmap(0,0, *pixmap,0,0,visiblerectsize, 100);
+//            }
 
     painter->setPen(QColor(0,0,100));
     painter->setBrush(QColor(0,0,0));

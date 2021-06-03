@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
     createMenus();
     createUndoView();
     bindUndoElements();
-    this->setWindowTitle("Presenz movie editor");
+    this->setWindowTitle("Presenz movie editor ");
 
 
 
@@ -163,7 +163,7 @@ void MainWindow::setupTreeItem(){
     sequencesStorageView->setMaximumWidth(450);
     sequencesStorageView->setDragEnabled(true);
     sequencesStorageView->setEditTriggers(nullptr); // this disable the ability to rename the current selected row;
-    sequencesStorageView->setStyleSheet("background: rgb(120,120,120);");
+    sequencesStorageView->setStyleSheet("background: rgb(120,120,120);""border-radius:5px;""border: 0px;");
 
     TreeModel->setRootPath("");
     TreeModel->setNameFilterDisables(false);
@@ -175,7 +175,7 @@ void MainWindow::setupTreeItem(){
     tree->setColumnHidden(2, true);
     tree->setColumnHidden(3, true);
     tree->setHeaderHidden(true);
-    tree->setStyleSheet("background: rgb(120,120,120);");
+    tree->setStyleSheet("background: rgb(120,120,120);""border-radius:5px;""border: 0px;");
 
     generateData(); //well you only need to do it once...
     connect (sequencesStorageView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(insertComponentAtEndOfTimeline(QModelIndex)));
@@ -203,7 +203,7 @@ void MainWindow::inittimelinescene(){
     timelineView->horizontalScrollBar()->setBackgroundRole(QPalette::Highlight);
     timelineView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     timelineView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-
+    timelineView->setStyleSheet("border-radius:5px;");
     //connect(this, (SIGNAL(selectionChanged())), this, SLOT(realignSelectionOn260()));
     connect(timeline, SIGNAL(scaleUp()), this, SLOT(scaleUpView()));
     connect(timeline, SIGNAL(scaleDown()),this, SLOT(scaleDownView()));
@@ -513,7 +513,7 @@ void MainWindow::collapseAllAndExpand(QModelIndex index)
     tree->scrollTo(index);
     tree->setExpanded(index, true);
     connect (tree, SIGNAL(expanded(QModelIndex)), TreeModel, SLOT(parseExpandedDir(QModelIndex)));
-    //connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequencesAndCollapse(QModelIndex)));
+    connect (tree, SIGNAL(collapsed(QModelIndex)), this, SLOT(clearSequencesAndCollapse(QModelIndex)));
 }
 
 void MainWindow::insertComponentAtEndOfTimeline(QModelIndex)

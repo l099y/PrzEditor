@@ -17,6 +17,7 @@ public:
     // Parameters window elements
     QList<Shot*> shots;
     void setShot(QList<Shot*> shot);
+
     QList<CustomShotParameterInterface*> parameters;
     QLabel* title = new QLabel(this);
     QLineEdit* path = new QLineEdit(this);
