@@ -36,27 +36,6 @@ int SequenceData::sequencelength()
 
 bool SequenceData::checkIntegrity()
 {
-//    QProgressDialog progress("parsing sequence", "", 0, 0, nullptr);
-
-
-//    QFuture<bool> asyncCheck = QtConcurrent::run(this, &SequenceData::checkIntegrityAsync);
-//    QFutureWatcher<bool> watcher;
-
-
-
-//    connect(&watcher, SIGNAL(finished()), &progress, SLOT(reset()));
-//    connect(&watcher, SIGNAL(progressRangeChanged(int,int)), &progress, SLOT(setRange(int,int)));
-//    connect(&watcher, SIGNAL(progressValueChanged(int)), &progress, SLOT(setValue(int)));
-
-
-//    progress.setWindowModality(Qt::WindowModal);
-//    progress.setRange(0,10);
-//    qDebug()<<asyncCheck.progressMaximum();
-//    connect (&watcher, SIGNAL(progressValueChanged(int)), &progress, SLOT(setValue(int)));
-//    progress.setAutoClose(true);
-
-//    progress.exec();
-//    bool ret = watcher.result();
     return checkIntegrityAsync();
 }
 

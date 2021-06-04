@@ -12,6 +12,12 @@
 #include <filesystem/tbesounddata.h>
 #include <sequence_elements/soundtrack.h>
 #include <QScrollBar>
+#include <QFuture>
+#include <QThreadPool>
+#include <QThread>
+#include <QtConcurrent/QtConcurrent>
+#include <QProgressDialog>
+#include <QFutureWatcher>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -303,6 +309,7 @@ void MainWindow::changeEvent(QEvent *event)
     if(event->type() == QEvent::ActivationChange && this->isActiveWindow()) {
         qDebug()<<"retrieve the focus";
         if (ValidationOnFocusEnabled){
+
             validateSequenceIntegrity();
             timeline->update();
 
@@ -313,6 +320,14 @@ void MainWindow::changeEvent(QEvent *event)
         }
     }
     QWidget :: changeEvent(event);
+}
+
+void MainWindow::loop()
+{
+    for (int i = 0; i < 10; i++){
+        qDebug()<< "Loop"<< i << " on:"<< QThread::currentThreadId();
+    }
+
 }
 
 void MainWindow::generateData()
@@ -553,9 +568,33 @@ void MainWindow::scaleViewToScene()
 
 void MainWindow::validateSequenceIntegrity()
 {
-    timeline->validateDataIntegrity();
-}
+    ValidationOnFocusEnabled=false;
 
+
+        QProgressDialog progress;
+        progress.setLabelText("validating data...");
+
+
+        QFuture<bool> asyncCheck = QtConcurrent::run(this->timeline, &TimelineScene::validateDataIntegrity);
+        QFutureWatcher<bool> watcher;
+        connect(&watcher, SIGNAL(finished()), &progress, SLOT(reset()));
+        connect(&watcher, SIGNAL(progressRangeChanged(int,int)), &progress, SLOT(setRange(int,int)));
+        connect(&watcher, SIGNAL(progressValueChanged(int)), &progress, SLOT(setValue(int)));
+
+        watcher.setFuture(asyncCheck);
+        progress.setWindowModality(Qt::WindowModal);
+        progress.setRange(0,10);
+
+        connect (&watcher, SIGNAL(progressValueChanged(int)), &progress, SLOT(setValue(int)));
+        progress.setAutoClose(true);
+
+        progress.exec();
+        watcher.waitForFinished();
+
+   qDebug()<<"Parsed";
+      ValidationOnFocusEnabled=true;
+
+}
 
 void MainWindow::deleteSelection()
 {

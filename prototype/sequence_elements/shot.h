@@ -98,6 +98,7 @@ public:
 
     bool inXRange(int, Shot* other);
     void displayError();
+    void checkIntegrity();
 
 
 public slots:

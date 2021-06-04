@@ -147,6 +147,7 @@ public:
     void bindUndoElements();
 
     void changeEvent(QEvent *event) override;
+    void loop();
 
     // dataseed should be in the directory of the project
 

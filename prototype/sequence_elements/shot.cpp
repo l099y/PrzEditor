@@ -432,6 +432,12 @@ void Shot::displayError()
     qDebug()<<"erroranim should trigger";
 }
 
+void Shot::checkIntegrity()
+{
+    seqs[0]->checkIntegrity();
+    update();
+}
+
 void Shot::setAnimatedFalse()
 {
     animated=false;
