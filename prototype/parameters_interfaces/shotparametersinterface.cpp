@@ -8,6 +8,8 @@
 
 ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *parent) : QWidget(parent)
 {
+    // init all the required widgets
+
     auto llayout = new QVBoxLayout();
     setLayout(llayout);
     QSizePolicy a;
@@ -62,6 +64,8 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
     layout()->addWidget(posWidget);
     layout()->addWidget(frameInWidget);
 
+    // init all the customshotparameters
+
     foreach (QJsonValue val, config.value("shot").toArray()){
         CustomShotParameterInterface* param = new CustomShotParameterInterface(val.toObject());
         connect (param, SIGNAL(valueChangeRequest(QJsonObject)), this, SLOT(RequestValueChanged(QJsonObject)));
@@ -78,7 +82,7 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
 
 void ShotParametersInterface::setShot(QList<Shot *>shot)
 {
-    qDebug()<<"request setShot in main panel";
+    // set the proper values to the variables depending if selection is single or multiple
 
     this->shots=shot;
     title->setVisible(true);
@@ -114,7 +118,7 @@ void ShotParametersInterface::setShot(QList<Shot *>shot)
         path->setText("-");
     }
 
-
+    // do the same process in each custom params
 
     foreach (CustomShotParameterInterface* current, parameters){
         current->setShot(shots);
@@ -183,6 +187,8 @@ void ShotParametersInterface::RequestValueChanged(QJsonObject newparam)
 {
     emit (valueChangedRequest(shots, newparam));
 }
+
+// evaluate if the new path selected for corrupted sequence contains the missing sequence
 
 void ShotParametersInterface::changeSeqPathAndParse()
 {

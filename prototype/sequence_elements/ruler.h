@@ -11,22 +11,36 @@
 class Ruler : public QGraphicsItem
 {
 public:
-    float scale = 1;
-    QRectF *background = new QRectF(0,0,0,0);
-    QGraphicsView* view;
-//    QList<QLineF*> grades;
-//    QList<QLabel*> gradestext;
-    int frames = 0;
-    int framesize = 10;
     Ruler(float rulersize);
-    void xtand(float f);
-    void setSize(float f);
     ~Ruler();
 
+    // retaining the state of scaling, this info can be retrieved from the view
 
-    // QGraphicsItem interface
+    float scale = 1;
+
+    // rect defining the area of the ruler
+    QRectF *background = new QRectF(0,0,0,0);
+
+    // it is helpfull to have acces to the view, but the object can access its scene, and its scene its view, so it is kinda pointless, i realised it not long ago
+    QGraphicsView* view;
+
+    // determines pixel size of a frame
+    int framesize = 10;
+
+    //manipulate the size of the ruler
+
+    void xtand(float f);
+    void setSize(float f);
+
 public:
+
+    // returns the area the scene will evaluate for this object
+
     QRectF boundingRect() const;
+
+    // paint is called when the object has to be rerendered
+
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
 };
 #endif // RULER_H

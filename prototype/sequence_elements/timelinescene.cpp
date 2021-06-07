@@ -940,15 +940,13 @@ bool TimelineScene::validateDataIntegrity()
         if (sh){
             if (!sh->seqs[0]->checkIntegrity())
                 ret = false;
-            sh->update();
         }
         else if (sound){
             if (!sound->soundfile->checkIntegrity())
                 ret=false;
-
-            sound->update();
         }
     }
+    ExtendSceneWidth(0);
     return ret;
 }
 

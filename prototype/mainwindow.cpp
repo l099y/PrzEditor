@@ -137,8 +137,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
     qDebug()<<"closed";
     if (!isSaved)
     {
+        ValidationOnFocusEnabled = false;
         if (ProjectLoader::confirm("do you want to save modified document","unsaved modifications"))
             saveActionTriggered();
+
     }
 }
 void MainWindow::initwidgetsparams(){
@@ -285,7 +287,6 @@ void MainWindow::createUndoView()
 {
     undoView = new QUndoView(undoStack);
     undoView->setWindowTitle(tr("Command List"));
-    undoView->show();
     undoView->setAttribute(Qt::WA_QuitOnClose, false);
 }
 
@@ -571,29 +572,33 @@ void MainWindow::validateSequenceIntegrity()
     ValidationOnFocusEnabled=false;
 
 
-        QProgressDialog progress;
-        progress.setLabelText("validating data...");
+//        QProgressDialog progress;
+//        progress.setLabelText("validating data...");
 
 
-        QFuture<bool> asyncCheck = QtConcurrent::run(this->timeline, &TimelineScene::validateDataIntegrity);
-        QFutureWatcher<bool> watcher;
-        connect(&watcher, SIGNAL(finished()), &progress, SLOT(reset()));
-        connect(&watcher, SIGNAL(progressRangeChanged(int,int)), &progress, SLOT(setRange(int,int)));
-        connect(&watcher, SIGNAL(progressValueChanged(int)), &progress, SLOT(setValue(int)));
+//        QFuture<bool> asyncCheck = QtConcurrent::run(this->timeline, &TimelineScene::validateDataIntegrity);
+//        QFutureWatcher<bool> watcher;
+//        connect(&watcher, SIGNAL(finished()), &progress, SLOT(reset()));
+//        connect(&watcher, SIGNAL(progressRangeChanged(int,int)), &progress, SLOT(setRange(int,int)));
+//        connect(&watcher, SIGNAL(progressValueChanged(int)), &progress, SLOT(setValue(int)));
 
-        watcher.setFuture(asyncCheck);
-        progress.setWindowModality(Qt::WindowModal);
-        progress.setRange(0,10);
+//        watcher.setFuture(asyncCheck);
+//        progress.setWindowModality(Qt::ApplicationModal);
+//        progress.setRange(0,10);
 
-        connect (&watcher, SIGNAL(progressValueChanged(int)), &progress, SLOT(setValue(int)));
-        progress.setAutoClose(true);
+//        connect (&watcher, SIGNAL(progressValueChanged(int)), &progress, SLOT(setValue(int)));
 
-        progress.exec();
-        watcher.waitForFinished();
+//        progress.setCancelButton(nullptr);
+//        progress.setAutoClose(true);
+//        progress.setWindowFlags(Qt::WindowTitleHint);
+
+//        progress.exec();
+//        watcher.waitForFinished();
+    timeline->validateDataIntegrity();
 
    qDebug()<<"Parsed";
       ValidationOnFocusEnabled=true;
-
+      timeline->update();
 }
 
 void MainWindow::deleteSelection()
@@ -743,6 +748,35 @@ void MainWindow::exportTriggered()
         saveDialog->setWindowTitle("Export");
         saveDialog->exec();
         if (saveDialog->result()){
+            ValidationOnFocusEnabled=false;
+
+
+                QProgressDialog progress;
+                progress.setLabelText("exporting...");
+
+
+                QFuture<void> asyncCheck = QtConcurrent::run(this, &MainWindow::exportRequestExecuted, saveDialog->selectedFiles().at(0));
+                QFutureWatcher<void> watcher;
+                connect(&watcher, SIGNAL(finished()), &progress, SLOT(reset()));
+                connect(&watcher, SIGNAL(progressRangeChanged(int,int)), &progress, SLOT(setRange(int,int)));
+                connect(&watcher, SIGNAL(progressValueChanged(int)), &progress, SLOT(setValue(int)));
+
+                watcher.setFuture(asyncCheck);
+                progress.setWindowModality(Qt::ApplicationModal);
+                progress.setRange(0,10);
+
+                connect (&watcher, SIGNAL(progressValueChanged(int)), &progress, SLOT(setValue(int)));
+
+                progress.setCancelButton(nullptr);
+                progress.setAutoClose(true);
+                progress.setWindowFlags(Qt::WindowTitleHint);
+
+                progress.exec();
+                watcher.waitForFinished();
+
+           qDebug()<<"Parsed";
+              ValidationOnFocusEnabled=true;
+              timeline->update();
             exportRequestExecuted(saveDialog->selectedFiles().at(0));
         }
     }

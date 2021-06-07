@@ -287,7 +287,6 @@ void ChangeParameterInShotCommand::undo()
    i = newconfig.constBegin();
       while (i != newconfig.constEnd()) {
           auto  shot =i.key();
-          shot->setSelected(true);
           i++;
    }
 }
@@ -470,6 +469,7 @@ void ResizeShotCommand::undo()
     resizedShot->setPreviousToCurrent();
     timeline->setSceneRect(0,0,prevscenesize,400);
     timeline->clearSelection();
+    timeline->scaleViewToScene();
     resizedShot->setSelected(true);
 }
 
@@ -498,8 +498,9 @@ void ResizeShotCommand::redo()
     resizedShot->setSize(newShotWidth);
     resizedShot->setPreviousToCurrent();
     resizedShot->update();
-    timeline->setSceneRect(0,0,currentscenesize,500);
+    timeline->setSceneRect(0,0,currentscenesize,400);
     timeline->clearSelection();
+    timeline->scaleViewToScene();
     resizedShot->setSelected(true);
 }
 

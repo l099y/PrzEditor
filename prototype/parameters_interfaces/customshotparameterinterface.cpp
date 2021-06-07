@@ -15,6 +15,8 @@ CustomShotParameterInterface::CustomShotParameterInterface(QJsonObject data, QWi
     namelab->setMinimumWidth(300);
     layout->addWidget(namelab);
 
+    // initialising the proper components depending the type of the parameter
+
     if (param.value("type").toString()=="0"){ //INT type
         InitInt();
     }
@@ -35,6 +37,7 @@ CustomShotParameterInterface::CustomShotParameterInterface(QJsonObject data, QWi
     }
 
     //init dialog
+
     dialog  = new QFileDialog(this);
     QStringList filter;
     filter<< "*.mp4"<<"*.avi"<<"*.mkv";
@@ -44,9 +47,14 @@ CustomShotParameterInterface::CustomShotParameterInterface(QJsonObject data, QWi
     dialog->setWindowTitle("select background");
 }
 
+// when the selection is changed, depending of the count of shot selected, values are attributed in the controller
+
 void CustomShotParameterInterface::setShot(QList<Shot*>  shot)
 {
     this->shots = shot;
+
+    // if it's a single selection
+
     if (shots.length()==1){
         if (param.value("type").toString()=="0"){ //INT type
             sb->setValue(getParamValueFromShot().toInt());
@@ -220,6 +228,8 @@ void CustomShotParameterInterface::InitLabel()
     connect(le, SIGNAL(editingFinished()), this, SLOT(setValue()));
 }
 
+// retrieve the value of the param in the jsobject, works for single shot
+
 QString CustomShotParameterInterface::getParamValueFromShot()
 {
     auto json = shots[0]->templateParams.value(paramName());
@@ -243,6 +253,8 @@ QString CustomShotParameterInterface::paramName()
     return param.value("name").toString();
 }
 
+// this should be a relay function to shots functions
+
 void CustomShotParameterInterface::evaluateGlowDisplay()
 {
     foreach(Shot* current, shots){
@@ -260,6 +272,9 @@ void CustomShotParameterInterface::evaluateGlowDisplay()
         }
     }
 }
+
+// this function should be renamed, it does the proper action on bouton click depending button state
+
 void CustomShotParameterInterface::evaluateDialogSelection()
 {
     if (bt->text()=="clear"){
@@ -276,6 +291,8 @@ void CustomShotParameterInterface::evaluateDialogSelection()
         }
     }
 }
+
+// this function call the relay function that triggers the real action in the undostack, more type need more def
 
 void CustomShotParameterInterface::setValue()
 {
@@ -298,6 +315,8 @@ void CustomShotParameterInterface::setValue()
     }
 }
 
+// weird binding
+
 void CustomShotParameterInterface::updateFloatControllersFromCs()
 {
     sd->setValue(cs->value()*param.value("stepvalue").toString().toDouble());
@@ -317,6 +336,8 @@ void CustomShotParameterInterface::updateFloatControllersFromCs()
     }
 }
 
+// weird binding
+
 void CustomShotParameterInterface::updateFloatControllersFromSd()
 {
     cs->setValue(sd->value()/param.value("stepvalue").toString().toDouble());
@@ -335,6 +356,8 @@ void CustomShotParameterInterface::updateFloatControllersFromSd()
         }
     }
 }
+
+//curiosity
 void CustomShotParameterInterface::focusOutEvent(QFocusEvent *event)
 {
     qDebug()<<"i focused out a parameter widget";

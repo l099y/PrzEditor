@@ -22,17 +22,24 @@
 
 Shot::Shot(): QGraphicsRectItem()
 {
+
     QImage aaa(":/images/dv.jpg");
 
     pixmap->convertFromImage(aaa.scaled(80,80, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     QTime time = time.currentTime();
+
+    // from the static JSON file containing the parameters template
     generateParamsFromTemplate();
+
     QRandomGenerator rdm((uint)(time.msec()%10));
     QPen pen (Qt::white);
     QColor a;
     a.setRgb(rdm.bounded(0,74)+100,rdm.bounded(0,74)+180,240);
     setPen(pen);
     setBrush(a);
+
+    // setting framework flags
+
     setAcceptHoverEvents(true);
     setFlag(QGraphicsItem :: ItemIsMovable);
     setFlag(QGraphicsItem :: ItemIsSelectable);
@@ -49,6 +56,8 @@ Shot::Shot(): QGraphicsRectItem()
     animation->setTimeLine(timer);
 }
 
+// from the static JSON file containing the parameters template
+
 void Shot::generateParamsFromTemplate()
 {
     QFile file (":/templates/shot.json");
@@ -63,6 +72,7 @@ void Shot::generateParamsFromTemplate()
     }
 }
 
+// jsonshots have the same template as the static file,  on creating a shot from a json
 void Shot::generateParamsFromJsonShot(QJsonObject jsonShot)
 {
     foreach (QJsonValue val, jsonShot.value("templateParams").toArray()){
@@ -71,6 +81,8 @@ void Shot::generateParamsFromJsonShot(QJsonObject jsonShot)
 
 }
 
+
+//
 Shot::Shot(QJsonObject jsonShot)
 {
     //QImage aaa(":/images/dv.jpg");
@@ -144,10 +156,11 @@ void Shot::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
     QGraphicsRectItem :: mouseMoveEvent(e);
 }
 
+
+// this function returns the smallest rect necessery to evaluate
+
 QRectF Shot::boundingRect() const
 {
-
-
     auto timelineView = scene()->views()[0];
 
     QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
@@ -187,17 +200,6 @@ QRectF Shot::boundingRect() const
     {
         return QRectF(0,0,0,0);
     }
-
-    //    qDebug()<<( std::max(scenePos().x(), scenePos().x()+rect().width()) >= std::min(sceneStart, sceneStart+sceneWidth) && std::min(scenePos().x(),  scenePos().x()+rect().width()) <= std::max(sceneStart, sceneWidth));
-
-    //    if ( std::max(sceneStart, sceneEnd) >= std::min(scenePos().x(), scenePos().x()+rect().width()) && std::min(sceneStart, sceneEnd) <= std::max(scenePos().x(),  scenePos().x()+rect().width())){
-    //        qDebug()<<"sound in visible part of the scene with std";
-
-    //    }
-    //      qDebug()<<scenePos().x()<<"rect scenepos" << this->rect().width() ;
-    //      qDebug()<< sceneStart << "starting point of the view"<< sceneEnd << "in bounding rect";
-
-
 }
 
 void Shot::setPreviousToCurrent(){
@@ -267,7 +269,8 @@ QJsonObject Shot::generateJson()
 QJsonObject Shot::generateExportJson(int fileIndex)
 {
     QJsonObject seq;
-    foreach (QJsonObject param, templateParams)
+    foreach (QJsonObject param, templateParams) // yes it looks awefull, in the export if the value is the default value, the information has to be removed
+        // this could be done by parameter type, it would as long as there is parameters type...
     {
         if (param.value("name").toString()=="Framerate"){
             if (param.value("value").toString().toInt() != param.value("default_value").toString().toInt()){
@@ -351,6 +354,8 @@ QJsonObject Shot::generateExportJson(int fileIndex)
     positions.insert("x",0);
     positions.insert("y",0);
     positions.insert("z", 0);
+
+    // very specific to the player file format
 
     QJsonArray frames;
     for (int i = 0; i <rect().width()/10; i++)

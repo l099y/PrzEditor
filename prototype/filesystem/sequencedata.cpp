@@ -49,8 +49,13 @@ bool SequenceData::checkIntegrityAsync()
 
     QDir dir (path);
     if (dir.exists()){
+
+
         QStringList przlists = dir.entryList(QStringList()<<"*.prz", QDir::Files);
         QStringList przlist;
+
+        // i encountered crashes because the filter isnt applied, so i have to filter it after sadly
+
         foreach (QString st, przlists){
             QFile file (path+"/"+st);
             QFileInfo fi (file);
@@ -60,23 +65,23 @@ bool SequenceData::checkIntegrityAsync()
         }
         for (int i = 0; i <przlist.size(); i ++){
             auto current =  getReleventInfo(&przlist[i]);
-            if (current.name == this->sequencefilename){
-                if (current.idx == this->startIdx){
+            if (current.name == this->sequencefilename){ // if the filename without padding matches the current filename
+                if (current.idx == this->startIdx){ // if we detect the startingindex file
                     if (current.idx == startIdx && current.idx == endIdx)
-                        return true;
-                    seqIndex++;
-                    startPosInList=i;
-                }
+                        return true; // if the sequence is a unique frame
+                    seqIndex++; //looking for next index
+                    startPosInList=i; // init the variable handling decalage in the sequence
+                } //
                 else if (seqIndex == 0 && (current.idx>startIdx && current.idx<=endIdx)){
                     seqIndex++;
-                    startPosInList = i - (current.idx);
+                    startPosInList = i - (current.idx); // we have to set a decalage because the first file found isn't first frame in the sequence
                     QList<int> missingIndexes;
-                    for (int c = 0; c<(current.idx - startIdx); c++){
+                    for (int c = 0; c<(current.idx - startIdx); c++){ // creating the missing frame information, i could just take the first and the last
                         missingIndexes.append(startIdx+c);
                     }
                     missingIndexesList.append(missingIndexes);
                 }
-                else if(seqIndex != 0){
+                else if(seqIndex != 0){ // same process on the rest of the list
                     if (current.idx == (i - startPosInList) + startIdx)
                         seqIndex++;
                     else{
@@ -113,6 +118,8 @@ bool SequenceData::checkIntegrityAsync()
         return false;
     }
 }
+
+// parsing a string to get the proper info
 
 fileInf SequenceData::getReleventInfo(QString* pathh)
 {

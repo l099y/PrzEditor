@@ -62,23 +62,11 @@ public:
 
     static int roundedTo10(float x);
 
-    inline bool wasLeftOf(SoundTrack* OtherCube)
-    {
-        return  previousxpos<OtherCube->previousxpos;
-    }
+//    inline bool wasLeftOf(SoundTrack* OtherCube)
+//    {
+//        return  previousxpos<OtherCube->previousxpos;
+//    }
 
-    inline int posOfMidd(){
-        return previousxpos+(previousboxwidth/2);
-    }
-    inline bool isMyMiddlePastOrEqual(float e){
-        return e >= previousxpos+(rect().width())/2;
-    }
-    inline bool isInMyFirstHalf(float e){
-        return e>= previousxpos && e < previousxpos+(rect().width())/2;
-    }
-    inline bool isInMySecondHalf(float e){
-        return e >= previousxpos+(rect().width())/2 && e < previousxpos+rect().width();
-    }
 
     bool validateSizeChange(int);
     bool validatePosChange(int);
