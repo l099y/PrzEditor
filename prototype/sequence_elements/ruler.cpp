@@ -56,7 +56,7 @@ void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     for (int i = static_cast<int>(visible_scene_rect.x())-100000; i < static_cast<int>(visible_scene_rect.x()+visible_scene_rect.width())+100000 ; i++)
         // i have encounted a "bug" i extended the area to avoid it
     {
-        if(i>= visible_scene_rect.x()-100000 && i <= visible_scene_rect.x()+visible_scene_rect.width()+100000){
+        if(i>= visible_scene_rect.x()-10000 && i <= visible_scene_rect.x()+visible_scene_rect.width()+10000){
             //drawing lines
             if (i % framesize == 0){
                 if (scale >0.5 || (i%(framesize*10) == 0 && scale > 0.05)|| (i%(framesize*100)==0 && scale > 0.007) || i%(framesize*1000) == 0){

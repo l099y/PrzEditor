@@ -15,7 +15,7 @@
 #include <QTimer>
 #include <QResource>
 #include <QPixmap>
-
+#include <filesystem/backgroundprz.h>
 
 enum class BoxState {REGULAR, DISPLACE};
 
@@ -31,6 +31,8 @@ public:
     Shot();
     Shot(QJsonObject);
     ~Shot();
+
+    BackgroundPrz* background = nullptr;
 
     QTimer* paintTimer = new QTimer(this);
 

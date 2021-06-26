@@ -8,11 +8,12 @@ SequenceRegister::SequenceRegister(QObject* parent): QObject(parent)
 
 }
 
-// parsing a list of string to find sequences
+// parsing a list of string to find sequences and background.. background should be detected in another function for more clarity, but the files are similar so it is done here.
 
 QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir)
 {
     QList<SequenceData*> ret;
+    QList<BackgroundPrz*> backgroundlist;
 
     // getting a filtered list of .prz filenames
 

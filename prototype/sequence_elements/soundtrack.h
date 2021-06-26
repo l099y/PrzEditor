@@ -62,11 +62,6 @@ public:
 
     static int roundedTo10(float x);
 
-//    inline bool wasLeftOf(SoundTrack* OtherCube)
-//    {
-//        return  previousxpos<OtherCube->previousxpos;
-//    }
-
 
     bool validateSizeChange(int);
     bool validatePosChange(int);

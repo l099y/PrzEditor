@@ -20,19 +20,19 @@ void ExtendedQFileSystemModel::parseExpandedDir(QModelIndex idx){
     auto fileInf = fileInfo(idx);
     QDir currentDir (fileInf.filePath());
     QDirIterator it(fileInfo(idx).filePath());
-    bool containsPdf = false;
+    bool containsPrz = false;
     bool containsTbe = false;
     while (it.hasNext()) {
         it.next();
         const QFileInfo& fInfo = it.fileInfo();
         if (fInfo.suffix()=="prz")
-            containsPdf = true;
+            containsPrz = true;
         else if(fInfo.suffix()=="tbe")
         {
             containsTbe = true;
         }
     }
-        if (containsPdf){
+        if (containsPrz){
         przreg->GenerateSequencesFromDir(&currentDir);
         }
         if (containsTbe)

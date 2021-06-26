@@ -4,6 +4,7 @@
 #include <QObject>
 #include <filesystem/sequencedata.h>
 #include <filesystem/tbesounddata.h>
+#include <filesystem/backgroundprz.h>
 #include <QHash>
 #include <QSet>
 #include <QDir>
@@ -19,6 +20,7 @@ public:
 
     QHash<QString, QList<SequenceData*>>* currentExpandedFolderSequences = new QHash<QString, QList<SequenceData*>>();
     QHash<QString, QList<TbeSoundData*>>* currentExpandedFolderSounds = new QHash<QString, QList<TbeSoundData*>>();
+    QHash<QString, QList<BackgroundPrz*>>* currentExpandedFolderBackground = new QHash<QString, QList<BackgroundPrz*>>();
     QSet<QString> corruptedSequences;
 
     // those might be use later

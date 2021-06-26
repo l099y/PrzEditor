@@ -357,7 +357,6 @@ void CustomShotParameterInterface::updateFloatControllersFromSd()
     }
 }
 
-//curiosity
 void CustomShotParameterInterface::focusOutEvent(QFocusEvent *event)
 {
     qDebug()<<"i focused out a parameter widget";

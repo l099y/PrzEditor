@@ -23,6 +23,7 @@
 #include <QGraphicsView>
 #include <QScrollBar>
 #include <QApplication>
+#include <QTransform>
 //#include <QtTest/QTestEventList>
 
 
@@ -32,6 +33,10 @@ TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObjec
     przreg = reg;
     view = vview;
     ruler.setSize(10400000);
+    timerr = new QTimer(this);
+    timerr->start(40);
+    connect (timerr, SIGNAL(timeout()), this,SLOT( handleViewMoveWithMouse()));
+
     setSceneRect(0,0, 10000, 400);
     setPreviousToCurrent();
     setItemIndexMethod(QGraphicsScene::ItemIndexMethod(NoIndex));
@@ -535,6 +540,36 @@ void TimelineScene::realignSelectionOn260()
     }
 }
 
+void TimelineScene::displaceView(bool toLeft)
+{
+    qDebug()<<"trying to displace view";
+    if (this->view[0].horizontalScrollBar()->isEnabled())
+    {
+        if (toLeft)
+        this->view[0].horizontalScrollBar()->setValue(this->view[0].horizontalScrollBar()->value()-(600/(1/ruler.scale)));
+        else
+        this->view[0].horizontalScrollBar()->setValue(this->view[0].horizontalScrollBar()->value()+(600/(1/ruler.scale)));
+    }
+//    this->view[0].setTransformationAnchor(QGraphicsView::NoAnchor);
+//    if (visible_scene_rect.x()-100>=0)
+//        this->view[0].translate(100, 0);
+//    else
+//       {
+//        this->view[0].translate(visible_scene_rect.x(), 0);
+//    }
+//    this->view[0].setTransformationAnchor(QGraphicsView::AnchorViewCenter);
+
+}
+
+void TimelineScene::handleViewMoveWithMouse()
+{
+    if (moveToLeftView)
+    displaceView(true);
+    else if (moveToRightView)
+    displaceView(false);
+    //qDebug()<<"in handleViewMove()";
+}
+
 float TimelineScene::ShotXAndWBefore(Shot *rect)
 {
     QVector<Shot*> sortedlist;
@@ -620,6 +655,20 @@ void TimelineScene :: clearItems(){
 
 void TimelineScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 {
+    QRect viewport_rect(0, 0, view->viewport()->width(), view->viewport()->height());
+    QRectF visible_scene_rect = view->mapToScene(viewport_rect).boundingRect();
+    if (e->scenePos().x()>= visible_scene_rect.x() && e->scenePos().x()<visible_scene_rect.x()+visible_scene_rect.width()/20){
+        moveToLeftView = true;
+
+    }
+    else if (e->scenePos().x()< visible_scene_rect.x()+visible_scene_rect.width() && e->scenePos().x()>= (visible_scene_rect.x()+visible_scene_rect.width())-visible_scene_rect.width()/20){
+        moveToRightView = true;
+    }
+    else
+    {
+        moveToLeftView = false;
+        moveToRightView = false;
+    }
 
     if (selectedItems().length()==1 && e->buttons()==Qt::LeftButton){
         QGraphicsScene :: mouseMoveEvent (e);
@@ -1046,6 +1095,9 @@ void TimelineScene::keyPressEvent(QKeyEvent *e)
             qDebug()<<seq->name<< "name "<<seq->padding;
         foreach (TbeSoundData* seq, przreg->usedSoundFiles)
             qDebug()<<seq->filename<< "name "<<seq->path;
+    }
+    else if (e->key()==16777236){
+        displaceView(true);
     }
 
 }

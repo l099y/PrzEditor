@@ -12,6 +12,7 @@
 #include <sequence_elements/soundtrack.h>
 #include <filesystem/tbesounddata.h>
 #include <QModelIndex>
+#include <QTimer>
 
 class TimelineScene : public QGraphicsScene
 {
@@ -19,7 +20,13 @@ class TimelineScene : public QGraphicsScene
     public:
     bool isPastLimit = false;
     bool isTryingToMultiselect;
+
+    //enable view mouvement horizontataly based on the mouse position
+    bool moveToLeftView = false;
+    bool moveToRightView = false;
+
     QGraphicsItem* selection = nullptr;
+    QTimer* timerr;
 
     TimelineScene(SequenceRegister*,QGraphicsView*, QObject* parent = nullptr);
     ~TimelineScene();
@@ -72,8 +79,12 @@ class TimelineScene : public QGraphicsScene
     void generateImageOfShotsPositions();
     void generateImageOfSoundsPositions();
 
+    // temp variables used to detect what element is currently dragged in the timeline
+
     Shot* shotDropRepresentation = nullptr;
     SoundTrack* soundDropRepresentation = nullptr;
+    BackgroundPrz* backgroundDropRepresentation = nullptr;
+
     SequenceRegister* przreg;
     void setPreviousToCurrent();
 
@@ -115,6 +126,8 @@ public slots:
    void scaleViewToScene();
 
    void realignSelectionOn260();
+   void displaceView(bool);
+   void handleViewMoveWithMouse();
 
 signals:
    void scaleToViewRequest();
