@@ -34,7 +34,7 @@ TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObjec
     view = vview;
     ruler.setSize(10400000);
     timerr = new QTimer(this);
-    timerr->start(40);
+    timerr->start(30);
     connect (timerr, SIGNAL(timeout()), this,SLOT( handleViewMoveWithMouse()));
 
     setSceneRect(0,0, 10000, 400);

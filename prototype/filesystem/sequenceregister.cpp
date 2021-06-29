@@ -26,7 +26,15 @@ QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir)
 
     for (int i = 0; i <paths.size(); i ++){
         auto current =  getReleventInfo(&paths[i]);
+        if (current.idx==-1 && newSeq){
+            BackgroundPrz* bg = new BackgroundPrz();
+            bg->path = dir->path();
+            bg->filename = paths[i];
+            backgroundlist.append(bg);
+            newSeq = true;
 
+        }
+        else{
         if (newSeq){
             temp = new SequenceData(this);
             temp->sequencefilename = current.name;
@@ -38,7 +46,7 @@ QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir)
             newSeq = false;
         }
         else{
-            if (current.idx != sequenceCurrentIdx + 1 || current.name != temp->name){
+            if (current.idx == -1 || current.idx != sequenceCurrentIdx + 1 || current.name != temp->name){
                 temp->endIdx = sequenceCurrentIdx;
                 temp->name = temp->name.append(".[%1-%2]").arg(temp->startIdx).arg(temp->endIdx);
                 ret.append(temp);
@@ -49,11 +57,14 @@ QList<SequenceData*> SequenceRegister::GenerateSequencesFromDir(QDir *dir)
                 sequenceCurrentIdx = current.idx;
             }
         }
+      }
     }
+    if (!newSeq){
     temp->endIdx = sequenceCurrentIdx;
     temp->name = temp->name.append(".[%1-%2]").arg(temp->startIdx).arg(temp->endIdx);
     ret.append(temp);
-
+    }
+    currentExpandedFolderBackground->insert(dir->absolutePath(), backgroundlist);
     currentExpandedFolderSequences->insert(dir->absolutePath(), ret); // insert the found sequences in hashmap, its key is the dirpath
     return ret;
 }

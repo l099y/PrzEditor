@@ -98,7 +98,9 @@ Shot::Shot(QJsonObject jsonShot)
     setAcceptHoverEvents(true);
     setFlag(QGraphicsItem :: ItemIsMovable);
     setFlag(QGraphicsItem :: ItemIsSelectable);
-
+    if (jsonShot.contains("background")){
+        background = new BackgroundPrz(jsonShot.value("background").toObject());
+    }
 
 
     connect(timer, SIGNAL(finished()), this, SLOT(setAnimatedFalse()));
@@ -263,6 +265,9 @@ QJsonObject Shot::generateJson()
     ret.insert("bgreen", this->brush().color().green());
     ret.insert("bblue", this->brush().color().blue());
     ret.insert("templateParams", paramsarray);
+    if (background != nullptr){
+    ret.insert("background", background->generateJson());
+    }
     return ret;
 }
 
@@ -560,11 +565,11 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     QLineF* lll = new QLineF (rect().width(), 0, rect().width(), 100);
     painter->drawLine(*lll);
 
-            if (visiblerectsize>pixmap->width())
-            painter->drawPixmap(0,0, *pixmap,0,0,100,100);
-            else{
-            painter->drawPixmap(0,0, *pixmap,0,0,visiblerectsize, 100);
-            }
+//            if (visiblerectsize>pixmap->width())
+//            painter->drawPixmap(0,0, *pixmap,0,0,100,100);
+//            else{
+//            painter->drawPixmap(0,0, *pixmap,0,0,visiblerectsize, 100);
+//            }
 
     painter->setPen(QColor(0,0,100));
     painter->setBrush(QColor(0,0,0));

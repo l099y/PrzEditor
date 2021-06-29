@@ -461,11 +461,12 @@ void MainWindow::scaleDownView()
 void MainWindow::displaySequences(QString path)
 {
 
-    if (reg->currentExpandedFolderSequences->contains(path)||reg->currentExpandedFolderSounds->contains(path))
+    if (reg->currentExpandedFolderSequences->contains(path)||reg->currentExpandedFolderSounds->contains(path) || reg->currentExpandedFolderBackground->contains(path))
     {
         sequencesModel->clear();
         QList<SequenceData *> list = reg->currentExpandedFolderSequences->value(path);
         QList<TbeSoundData *> list2 =  reg->currentExpandedFolderSounds->value(path);
+        QList<BackgroundPrz*> list3 =  reg->currentExpandedFolderBackground->value(path);
         QStandardItem root (path);
         int i = 0;
 
@@ -478,6 +479,13 @@ void MainWindow::displaySequences(QString path)
         foreach (TbeSoundData* current, list2){
             QPixmap a(":/images/360.png");
             QIcon logo(a);
+            sequencesModel->insertRow(i, new QStandardItem(current->filename));
+            auto soundrep = sequencesModel->item(i,0);
+            soundrep->setData(logo, Qt::DecorationRole);
+        }
+        foreach (BackgroundPrz* current, list3){
+            QPixmap logo (10,10);
+            logo.fill(QColor(255,150,100));
             sequencesModel->insertRow(i, new QStandardItem(current->filename));
             auto soundrep = sequencesModel->item(i,0);
             soundrep->setData(logo, Qt::DecorationRole);
