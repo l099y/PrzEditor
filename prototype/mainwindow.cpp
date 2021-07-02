@@ -222,8 +222,8 @@ void MainWindow::inittimelinescene(){
     connect(timeline, SIGNAL(scaleToViewRequest()), this, SLOT(scaleViewToScene()));
     connect(hsb, SIGNAL(valueChanged(int)), timeline, SLOT(refreshRuler(int)));
     connect(hsb, SIGNAL(sliderReleased()), timeline, SLOT(update()));
-    connect(timeline, SIGNAL(addBackgroundToShot(Shot*, BackgroundPrz*)), this, SLOT(addBackground(Shot*, BackgroundPrz*)));
-    connect(timeline, SIGNAL(RemoveBackgroundFromShot(Shot*, BackgroundPrz*)), this, SLOT(removeBackground(Shot*, BackgroundPrz*)));
+    connect(timeline, SIGNAL(addBackgroundToShot(QList<Shot*>, BackgroundPrz*)), this, SLOT(addBackground(QList<Shot*>, BackgroundPrz*)));
+    connect(timeline, SIGNAL(RemoveBackgroundFromShot(QList<Shot*>, BackgroundPrz*)), this, SLOT(removeBackground(QList<Shot*>, BackgroundPrz*)));
 
 
 }
@@ -704,7 +704,7 @@ void MainWindow::changeFrameIn(Shot * sh , int val)
     undoStack->push(changeparam);
 }
 
-void MainWindow::addBackground(Shot *sh, BackgroundPrz *bg)
+void MainWindow::addBackground(QList<Shot*>sh, BackgroundPrz *bg)
 {
     qDebug()<<"in undo attempt addbackground";
     QUndoCommand *addBackground = new AddBackgroundInShotCommand(sh, bg);
@@ -712,7 +712,7 @@ void MainWindow::addBackground(Shot *sh, BackgroundPrz *bg)
     undoStack->push(addBackground);
 }
 
-void MainWindow::removeBackground(Shot *, BackgroundPrz *)
+void MainWindow::removeBackground(QList<Shot*>, BackgroundPrz *)
 {
     qDebug()<<"in undo attempt removeBackground";
 }

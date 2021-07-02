@@ -177,34 +177,31 @@ private:
     int newValue;
     int oldValue;
 };
+
 class DeleteBackgroundInShotCommand : public QUndoCommand
 {
 public:
-    explicit DeleteBackgroundInShotCommand(Shot*, BackgroundPrz*, QUndoCommand *parent = nullptr);
+    explicit DeleteBackgroundInShotCommand(QList<Shot*>, QUndoCommand *parent = nullptr);
 
     void undo() override;
     void redo() override;
 
 private:
-    Shot* shot;
-    BackgroundPrz* background;
+    QHash<Shot*, BackgroundPrz*> shots;
 };
-//! [1]
 
-//! [2]
 class AddBackgroundInShotCommand : public QUndoCommand
 {
 public:
-    AddBackgroundInShotCommand(Shot*, BackgroundPrz*,
+    AddBackgroundInShotCommand(QList<Shot*>, BackgroundPrz*,
                QUndoCommand *parent = nullptr);
 
     void undo() override;
     void redo() override;
 
 private:
-    Shot* shot;
+    QHash<Shot*, BackgroundPrz*> shots;
     BackgroundPrz* background;
-    BackgroundPrz* previousBackground = nullptr;
 };
 
 #endif // COMMANDS_H

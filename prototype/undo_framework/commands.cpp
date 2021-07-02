@@ -524,25 +524,70 @@ void changeFrameInCommand::redo()
     shot->frameIn = newValue;
 }
 
-AddBackgroundInShotCommand::AddBackgroundInShotCommand(Shot *sh, BackgroundPrz *bg, QUndoCommand *parent)
+AddBackgroundInShotCommand::AddBackgroundInShotCommand(QList<Shot*> sh, BackgroundPrz *bg, QUndoCommand *parent)
 {
-    this->shot = sh;
+    foreach (Shot* current, sh){
+        this->shots.insert(current, current->background);
+    }
+
     this->background =  new BackgroundPrz();
     this->background->filename = bg->filename;
     this->background->path = bg->path;
-    this->previousBackground = sh->background;
 }
 
 void AddBackgroundInShotCommand::undo()
 {
-
-    previousBackground != nullptr ? shot->background = previousBackground : shot->background = nullptr;
-    shot->update();
+    QHash<Shot*, BackgroundPrz*>::const_iterator i = shots.constBegin();
+    while (i != shots.constEnd()){
+        auto shot = i.key();
+        shot->background = i.value();
+        shot->tempBackground = nullptr;
+        shot->update();
+        i++;
+    }
 }
 
 void AddBackgroundInShotCommand::redo()
 {
-    shot->background = background;
-    shot->tempBackground = nullptr;
-    shot->update();
+    QHash<Shot*, BackgroundPrz*>::const_iterator i = shots.constBegin();
+    while (i != shots.constEnd()){
+        qDebug()<<"qundocreatebg";
+        auto shot = i.key();
+        shot->background = background;
+        shot->tempBackground = nullptr;
+        shot->update();
+        i++;
+    }
+}
+
+DeleteBackgroundInShotCommand::DeleteBackgroundInShotCommand(QList<Shot *> sh, QUndoCommand *parent)
+{
+    foreach (Shot* current, sh){
+        this->shots.insert(current, current->background);
+    }
+}
+
+void DeleteBackgroundInShotCommand::undo()
+{
+    QHash<Shot*, BackgroundPrz*>::const_iterator i = shots.constBegin();
+    while (i != shots.constEnd()){
+        auto shot = i.key();
+        shot->background = i.value();
+        shot->tempBackground = nullptr;
+        shot->update();
+        i++;
+    }
+
+}
+
+void DeleteBackgroundInShotCommand::redo()
+{
+    QHash<Shot*, BackgroundPrz*>::const_iterator i = shots.constBegin();
+    while (i != shots.constEnd()){
+        auto shot = i.key();
+        shot->background = nullptr;
+        shot->tempBackground = nullptr;
+        shot->update();
+        i++;
+    }
 }

@@ -142,8 +142,8 @@ signals:
    void createShot(QList<SequenceData*> seq, int xpos, int length, TimelineScene* timeline, QVector<Shot*> movedShot);
    void moveShots(TimelineScene*, QVector<Shot*>, int, int);
    void resizeShot(TimelineScene*, QVector<Shot*>,Shot*, int, int);
-   void addBackgroundToShot (Shot*, BackgroundPrz*);
-   void removeBackgroundFromShot(Shot*, BackgroundPrz*);
+   void addBackgroundToShot (QList<Shot*>, BackgroundPrz*);
+   void removeBackgroundFromShot(QList<Shot*>, BackgroundPrz*);
 
    void moveSoundtracks(TimelineScene*, QVector<SoundTrack*>, int, int);
    void resizeSound(TimelineScene*, QVector<SoundTrack*>,SoundTrack*, int, int);

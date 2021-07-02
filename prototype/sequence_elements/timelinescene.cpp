@@ -886,6 +886,7 @@ void TimelineScene::dragMoveEvent(QGraphicsSceneDragDropEvent *e)
 
 void TimelineScene::handleBackgroundDropMouvement(QGraphicsSceneDragDropEvent *e, bool final)
 {
+    bool isSelected = false;
     if (e->scenePos().y()>160 && e->scenePos().y()<260)
     {
         foreach (QGraphicsItem* current, items()){
@@ -893,10 +894,18 @@ void TimelineScene::handleBackgroundDropMouvement(QGraphicsSceneDragDropEvent *e
             if (sh){
                 if (e->scenePos().x() > sh->scenePos().x() && e->scenePos().x() < sh->scenePos().x()+sh->rect().width()){
                     if (final){
-                        emit(addBackgroundToShot(sh, backgroundDropRepresentation));
+                         if (sh->isSelected()){
+                             isSelected = true;
+                         }
+                         else
+                        emit(addBackgroundToShot({sh}, backgroundDropRepresentation));
                     }
                     else
                     {
+                        if (sh->isSelected()){
+                            isSelected = true;
+                        }
+                        else
                         sh->tempBackground = backgroundDropRepresentation;
                     }
 
@@ -905,6 +914,28 @@ void TimelineScene::handleBackgroundDropMouvement(QGraphicsSceneDragDropEvent *e
                     sh->tempBackground = nullptr;
                 }
                  sh->update();
+            }
+        }
+        if (isSelected){
+            if (final){
+                QList<Shot*> changedBgShots;
+                foreach (QGraphicsItem* current, selectedItems())
+                {
+                    Shot* sh = dynamic_cast<Shot*>(current);
+                    if (sh){
+                        changedBgShots.append(sh);
+                    }
+                }
+                emit (addBackgroundToShot(changedBgShots, backgroundDropRepresentation));
+            }
+            else{
+                foreach (QGraphicsItem* current, selectedItems())
+                {
+                    Shot* sh = dynamic_cast<Shot*>(current);
+                    if (sh){
+                        sh->tempBackground=backgroundDropRepresentation;
+                    }
+                }
             }
         }
     }
