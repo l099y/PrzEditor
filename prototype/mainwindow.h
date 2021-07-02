@@ -197,6 +197,8 @@ public slots:
     void resizedSound(TimelineScene*, QVector<SoundTrack*>, SoundTrack* ,int, int, int);
     void changeParameterInAShot(QList<Shot*>, QJsonObject);
     void changeFrameIn(Shot*, int);
+    void addBackground(Shot*, BackgroundPrz*);
+    void removeBackground(Shot*, BackgroundPrz*);
 
     // Saving and Loading projet related slots
 

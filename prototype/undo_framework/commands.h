@@ -177,5 +177,34 @@ private:
     int newValue;
     int oldValue;
 };
+class DeleteBackgroundInShotCommand : public QUndoCommand
+{
+public:
+    explicit DeleteBackgroundInShotCommand(Shot*, BackgroundPrz*, QUndoCommand *parent = nullptr);
+
+    void undo() override;
+    void redo() override;
+
+private:
+    Shot* shot;
+    BackgroundPrz* background;
+};
+//! [1]
+
+//! [2]
+class AddBackgroundInShotCommand : public QUndoCommand
+{
+public:
+    AddBackgroundInShotCommand(Shot*, BackgroundPrz*,
+               QUndoCommand *parent = nullptr);
+
+    void undo() override;
+    void redo() override;
+
+private:
+    Shot* shot;
+    BackgroundPrz* background;
+    BackgroundPrz* previousBackground = nullptr;
+};
 
 #endif // COMMANDS_H

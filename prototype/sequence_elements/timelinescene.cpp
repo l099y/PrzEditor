@@ -1,4 +1,4 @@
-#include "timelinescene.h"
+﻿#include "timelinescene.h"
 #include <QGraphicsScene>
 #include <qdebug.h>
 #include <QGraphicsSceneMouseEvent>
@@ -24,6 +24,7 @@
 #include <QScrollBar>
 #include <QApplication>
 #include <QTransform>
+#include <QGraphicsEllipseItem>
 //#include <QtTest/QTestEventList>
 
 
@@ -145,7 +146,7 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
 
                     if  (!rect->isMyMiddBefore(e+selection->previousboxwidth-selection->mousePosXonClick))
                     {
-                        if (rect->collidesWithItem(selection)){
+                        if (rect->isInMyFirstHalf(e+selection->previousboxwidth-selection->mousePosXonClick)){
                             if (final)
                                 selection->setXToFrame(rect->previousxpos-sW) ;
                         }
@@ -164,7 +165,7 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                                 final? rect->setXToFrame(0):rect->animatedMove(0);
                             }
                         }
-                        if (rect->collidesWithItem(selection)){
+                        if (rect->isInMySecondHalf(e+selection->previousboxwidth-selection->mousePosXonClick)){
                             if (final)
                                 selection->setXToFrame(rect->previousboxwidth+rect->previousxpos-sW);
                         }
@@ -174,7 +175,7 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                 {
                     if (rect->isMyMiddBefore(e-selection->mousePosXonClick))
                     {
-                        if (rect->collidesWithItem(selection)){
+                        if (rect->isInMySecondHalf(e-selection->mousePosXonClick)){
                             if (final)
                                 selection->setXToFrame(rect->previousboxwidth+rect->previousxpos);
                         }
@@ -188,7 +189,7 @@ void TimelineScene::behaveOnSelectionSwitchPosMove(float e, bool final)
                             final? rect->setXToFrame(rect->previousxpos+sW):rect->animatedMove(rect->previousxpos+sW);
 
                         }
-                        if (rect->collidesWithItem(selection))
+                        if (rect->isInMyFirstHalf(e-selection->mousePosXonClick))
                             if (final)
                                 selection->setXToFrame(rect->previousxpos);
                     }
@@ -526,6 +527,8 @@ void TimelineScene::generateImageOfSoundsPositions()
     }
 }
 
+
+
 void TimelineScene::setPreviousToCurrent()
 {
     previousSceneWidth = sceneRect().width();
@@ -542,7 +545,6 @@ void TimelineScene::realignSelectionOn260()
 
 void TimelineScene::displaceView(bool toLeft)
 {
-    qDebug()<<"trying to displace view";
     if (this->view[0].horizontalScrollBar()->isEnabled())
     {
         if (toLeft)
@@ -670,7 +672,7 @@ void TimelineScene::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
         moveToRightView = false;
     }
 
-    if (selectedItems().length()==1 && e->buttons()==Qt::LeftButton){
+    if (selectedItems().length()==1 && e->buttons()==Qt::LeftButton && !MultiSelectingByCtrl){
         QGraphicsScene :: mouseMoveEvent (e);
         handleSelectionMove(e->scenePos().x(), false);
     }
@@ -773,6 +775,16 @@ void TimelineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *e)
             }
         }
     }
+    else if (file.right(3)=="prz"){
+        auto list = przreg->currentExpandedFolderBackground->value(path);
+        foreach (BackgroundPrz* current, list){
+            if(current->filename == file){
+                backgroundDropRepresentation = current;
+                qDebug()<<current->filename << "inserted in dragenter sound" << current->path;
+            }
+        }
+        qDebug()<<"trying to insert background";
+    }
     else{
         auto list = przreg->currentExpandedFolderSequences->value(path);
         foreach (SequenceData* current, list){
@@ -865,8 +877,52 @@ void TimelineScene::dragMoveEvent(QGraphicsSceneDragDropEvent *e)
             }
         }
     }
+    else if (backgroundDropRepresentation != nullptr)
+    {
+        handleBackgroundDropMouvement(e, false);
+    }
 
 }
+
+void TimelineScene::handleBackgroundDropMouvement(QGraphicsSceneDragDropEvent *e, bool final)
+{
+    if (e->scenePos().y()>160 && e->scenePos().y()<260)
+    {
+        foreach (QGraphicsItem* current, items()){
+            Shot* sh = dynamic_cast<Shot*>(current);
+            if (sh){
+                if (e->scenePos().x() > sh->scenePos().x() && e->scenePos().x() < sh->scenePos().x()+sh->rect().width()){
+                    if (final){
+                        emit(addBackgroundToShot(sh, backgroundDropRepresentation));
+                    }
+                    else
+                    {
+                        sh->tempBackground = backgroundDropRepresentation;
+                    }
+
+                }
+                else {
+                    sh->tempBackground = nullptr;
+                }
+                 sh->update();
+            }
+        }
+    }
+    else{
+        foreach (QGraphicsItem* current, items()){
+            Shot* sh = dynamic_cast<Shot*>(current);
+            if (sh){
+                 sh->tempBackground = nullptr;
+                 sh->update();
+
+            }
+        }
+    }
+    if (final)
+        backgroundDropRepresentation = nullptr;
+}
+
+
 QVector<Shot *> TimelineScene::getMovedShots()
 {
     QVector<Shot*> ret;
@@ -1047,6 +1103,9 @@ void TimelineScene::dropEvent(QGraphicsSceneDragDropEvent *e)
 
         }
     }
+    else if (backgroundDropRepresentation != nullptr){
+        handleBackgroundDropMouvement(e, true);
+    }
     QGraphicsScene :: dropEvent(e);
 }
 
@@ -1065,6 +1124,9 @@ void TimelineScene::dragLeaveEvent(QGraphicsSceneDragDropEvent *e)
             setSceneRect(0,0, sceneRect().width() - shotDropRepresentation->rect().width(), 400);
         shotDropRepresentation=nullptr;
         resetToPrevious("shot");
+    }
+    else if (backgroundDropRepresentation != nullptr){
+        backgroundDropRepresentation = nullptr;
     }
 }
 

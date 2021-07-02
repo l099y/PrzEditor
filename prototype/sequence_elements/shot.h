@@ -33,6 +33,7 @@ public:
     ~Shot();
 
     BackgroundPrz* background = nullptr;
+    BackgroundPrz* tempBackground =  nullptr;
 
     QTimer* paintTimer = new QTimer(this);
 

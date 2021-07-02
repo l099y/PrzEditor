@@ -523,3 +523,26 @@ void changeFrameInCommand::redo()
 {
     shot->frameIn = newValue;
 }
+
+AddBackgroundInShotCommand::AddBackgroundInShotCommand(Shot *sh, BackgroundPrz *bg, QUndoCommand *parent)
+{
+    this->shot = sh;
+    this->background =  new BackgroundPrz();
+    this->background->filename = bg->filename;
+    this->background->path = bg->path;
+    this->previousBackground = sh->background;
+}
+
+void AddBackgroundInShotCommand::undo()
+{
+
+    previousBackground != nullptr ? shot->background = previousBackground : shot->background = nullptr;
+    shot->update();
+}
+
+void AddBackgroundInShotCommand::redo()
+{
+    shot->background = background;
+    shot->tempBackground = nullptr;
+    shot->update();
+}

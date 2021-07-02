@@ -16,7 +16,7 @@
 #include <QScrollBar>
 #include <sequence_elements/timelinescene.h>
 #include <QImage>
-
+#include <filesystem/backgroundprz.h>
 
 
 
@@ -476,6 +476,8 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 
     painter->drawRoundedRect(rect(),5,5);
 
+
+
     // Drawing corrupted sequences
 
     if (seqs[0]->corrupted)
@@ -493,6 +495,10 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
         }
     }
 
+    if (background != nullptr || tempBackground != nullptr){
+        painter->setBrush(QColor(100,200,255, isSelected()? 90 : 255));
+        painter->drawRect(5,85,rect().width()-5,15);
+    }
     // Drawing the fadin / fadeout triangles;
 
     int val =  templateParams.value("Fade From Black Frame Out").value("value").toString().toInt();
@@ -574,8 +580,13 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->setPen(QColor(0,0,100));
     painter->setBrush(QColor(0,0,0));
     QString qs = templateParams.value("Shot designation").value("value").toString();
+    QString qs2 = tempBackground != nullptr ? tempBackground->filename :  background != nullptr ? background->filename : "";
     if (qs.length()*6.5<visiblerectsize){
-        painter->drawText(5, 92, qs);
+        painter->drawText(5, (background == nullptr && tempBackground == nullptr)?90:78, qs);
+        this->setToolTip("");
+    }
+    if (qs2.length()*6.5<visiblerectsize && qs2 != ""){
+        painter->drawText(5, 95, qs2);
         this->setToolTip("");
     }
     else{
@@ -584,6 +595,7 @@ void Shot::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     delete(ll);
     delete(lll);
     painter->restore();
+
 }
 
 
