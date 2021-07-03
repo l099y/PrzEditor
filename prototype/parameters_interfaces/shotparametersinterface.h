@@ -30,10 +30,12 @@ public:
 
     QLabel* title = new QLabel(this);
     QLineEdit* path = new QLineEdit(this);
+    QLineEdit* bgPath = new QLineEdit(this);
     QSpinBox* widthInput = new QSpinBox(this);
     QSpinBox* positionInput = new QSpinBox(this);
     QSpinBox* frameInInput = new QSpinBox(this);
     QPushButton* validateSeq = new QPushButton(this);
+    QPushButton* clearBackgroundPrz = new QPushButton(this);
 
 signals:
     // call to create the proper action in qundostack
@@ -43,12 +45,14 @@ signals:
     void changeShotPosition(int, QString);
     void changeFrameIn(Shot*, int);
     void displayError(QString, int);
+    void clearBackgrounds(QList <Shot*>);
 
 public slots:
 
     //on controllers input change, those are triggered
 
     void updateShotPos();
+    void clearBackgrounds();
     void changedShotSize();
     void changedShotPosition();
     void changedFrameInValue();

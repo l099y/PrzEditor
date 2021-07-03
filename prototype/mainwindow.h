@@ -198,7 +198,7 @@ public slots:
     void changeParameterInAShot(QList<Shot*>, QJsonObject);
     void changeFrameIn(Shot*, int);
     void addBackground(QList<Shot*>, BackgroundPrz*);
-    void removeBackground(QList<Shot*>, BackgroundPrz*);
+    void removeBackground(QList<Shot*>);
 
     // Saving and Loading projet related slots
 

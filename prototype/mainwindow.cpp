@@ -223,7 +223,7 @@ void MainWindow::inittimelinescene(){
     connect(hsb, SIGNAL(valueChanged(int)), timeline, SLOT(refreshRuler(int)));
     connect(hsb, SIGNAL(sliderReleased()), timeline, SLOT(update()));
     connect(timeline, SIGNAL(addBackgroundToShot(QList<Shot*>, BackgroundPrz*)), this, SLOT(addBackground(QList<Shot*>, BackgroundPrz*)));
-    connect(timeline, SIGNAL(RemoveBackgroundFromShot(QList<Shot*>, BackgroundPrz*)), this, SLOT(removeBackground(QList<Shot*>, BackgroundPrz*)));
+    connect(timeline, SIGNAL(removeBackgroundFromShot(QList<Shot*>, BackgroundPrz*)), this, SLOT(removeBackground(QList<Shot*>)));
 
 
 }
@@ -710,11 +710,16 @@ void MainWindow::addBackground(QList<Shot*>sh, BackgroundPrz *bg)
     QUndoCommand *addBackground = new AddBackgroundInShotCommand(sh, bg);
     isSaved = false;
     undoStack->push(addBackground);
+    this->changeSelectedShotInParametersInterface();
 }
 
-void MainWindow::removeBackground(QList<Shot*>, BackgroundPrz *)
+void MainWindow::removeBackground(QList<Shot*> sh)
 {
     qDebug()<<"in undo attempt removeBackground";
+    QUndoCommand *removeBackground = new DeleteBackgroundInShotCommand(sh);
+    isSaved = false;
+    undoStack->push(removeBackground);
+    this->changeSelectedShotInParametersInterface();
 }
 
 void MainWindow::saveActionTriggered()
@@ -860,6 +865,7 @@ void MainWindow::initShotsParameters()
         enableParameterInterface(false);
         connect(shotparams, SIGNAL(valueChangedRequest(QList<Shot*>, QJsonObject)), this, SLOT(changeParameterInAShot(QList<Shot*>, QJsonObject)));
         connect(shotparams, SIGNAL(changeFrameIn(Shot*, int)), this, SLOT(changeFrameIn(Shot*, int)));
+        connect(shotparams, SIGNAL(clearBackgrounds(QList<Shot*>)), this, SLOT(removeBackground(QList<Shot*>)));
     }
 
 }

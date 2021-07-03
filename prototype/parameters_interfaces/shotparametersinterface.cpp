@@ -5,6 +5,7 @@
 #include <QGraphicsScene>
 #include <sequence_elements/timelinescene.h>
 #include <QJsonObject>
+#include <QSet>
 
 ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *parent) : QWidget(parent)
 {
@@ -24,16 +25,19 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
     QWidget* posWidget = new QWidget(this);
     QWidget* frameInWidget = new QWidget(this);
     QWidget* pathWidget = new QWidget(this);
+    QWidget* clearPrzBg =  new QWidget(this);
 
     widthWidget->setLayout(new QHBoxLayout(this));
     posWidget->setLayout(new QHBoxLayout(this));
     frameInWidget->setLayout(new QHBoxLayout(this));
     pathWidget->setLayout(new QHBoxLayout(this));
+    clearPrzBg->setLayout(new QHBoxLayout(this));
 
     widthWidget->layout()->setAlignment(Qt::AlignLeft);
     posWidget->layout()->setAlignment(Qt::AlignLeft);
     frameInWidget->layout()->setAlignment(Qt::AlignLeft);
     pathWidget->layout()->setAlignment(Qt::AlignLeft);
+    clearPrzBg->layout()->setAlignment(Qt::AlignLeft);
 
     QLabel* wlab = new QLabel("frame length");
     wlab->setMinimumWidth(300);
@@ -56,10 +60,18 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
     pathWidget->layout()->addWidget(path);
     pathWidget->layout()->addWidget(validateSeq);
 
+    bgPath->setMaximumWidth(300);
+    bgPath->setReadOnly(true);
+    clearBackgroundPrz->setText("clear background");
+    clearBackgroundPrz->setMaximumWidth(150);
+    clearPrzBg->layout()->addWidget(clearBackgroundPrz);
+    clearPrzBg->layout()->addWidget(bgPath);
+
     validateSeq->setText("Change source");
     validateSeq->setMaximumWidth(200);
 
     layout()->addWidget(pathWidget);
+    layout()->addWidget(clearPrzBg);
     layout()->addWidget(widthWidget);
     layout()->addWidget(posWidget);
     layout()->addWidget(frameInWidget);
@@ -77,6 +89,7 @@ ShotParametersInterface::ShotParametersInterface(QJsonObject config, QWidget *pa
     connect (widthInput, SIGNAL(editingFinished()), this, SLOT(changedShotSize()));
     connect (frameInInput, SIGNAL(editingFinished()), this, SLOT(changedFrameInValue()));
     connect (validateSeq, SIGNAL(clicked(bool)), this, SLOT(changeSeqPathAndParse()));
+    connect (clearBackgroundPrz, SIGNAL(clicked(bool)), this, SLOT(clearBackgrounds()));
 }
 
 
@@ -147,14 +160,38 @@ void ShotParametersInterface::setShot(QList<Shot *>shot)
         widthInput->setEnabled(false);
         frameInInput->setEnabled(false);
     }
+    QSet<BackgroundPrz*> encounteredBgs;
+    foreach (Shot* sh, shots){
+        if (sh->background != nullptr){
+                encounteredBgs.insert(sh->background);
+        }
+    }
+    if (encounteredBgs.size()==0){
+        bgPath->setVisible(false);
+        clearBackgroundPrz->setVisible(false);
+    }
+    else if (encounteredBgs.size()==1){
+        bgPath->setVisible(true);
+        clearBackgroundPrz->setVisible(true);
+        bgPath->setText(encounteredBgs.values()[0]->path+"/"+encounteredBgs.values()[0]->filename);
 
-
+    }
+    else if (encounteredBgs.size()>1){
+        bgPath->setVisible(true);
+        clearBackgroundPrz->setVisible(true);
+        bgPath->setText("multiple bgs");
+    }
 }
 
 void ShotParametersInterface::updateShotPos()
 {
     if (shots.length()==1)
         positionInput->setValue(shots[0]->scenePos().x()/10);
+}
+
+void ShotParametersInterface::clearBackgrounds()
+{
+    emit(clearBackgrounds(shots));
 }
 
 void ShotParametersInterface::changedShotSize()
