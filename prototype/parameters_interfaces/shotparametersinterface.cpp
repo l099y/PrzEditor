@@ -160,10 +160,11 @@ void ShotParametersInterface::setShot(QList<Shot *>shot)
         widthInput->setEnabled(false);
         frameInInput->setEnabled(false);
     }
-    QSet<BackgroundPrz*> encounteredBgs;
+    QSet<QString> encounteredBgs;
     foreach (Shot* sh, shots){
         if (sh->background != nullptr){
-                encounteredBgs.insert(sh->background);
+                if (!encounteredBgs.contains(sh->background->path+"/"+sh->background->filename))
+                encounteredBgs.insert(sh->background->path+"/"+sh->background->filename);
         }
     }
     if (encounteredBgs.size()==0){
@@ -173,7 +174,7 @@ void ShotParametersInterface::setShot(QList<Shot *>shot)
     else if (encounteredBgs.size()==1){
         bgPath->setVisible(true);
         clearBackgroundPrz->setVisible(true);
-        bgPath->setText(encounteredBgs.values()[0]->path+"/"+encounteredBgs.values()[0]->filename);
+        bgPath->setText(encounteredBgs.values()[0]);
 
     }
     else if (encounteredBgs.size()>1){

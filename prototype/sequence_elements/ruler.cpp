@@ -31,7 +31,6 @@ QRectF Ruler::boundingRect() const
     auto timelineView = scene()->views()[0];
 
     QRect viewport_rect(0, 0, timelineView->viewport()->width(), timelineView->viewport()->height());
-    QRectF visible_scene_rect = timelineView->mapToScene(viewport_rect).boundingRect();
     auto timeline = dynamic_cast<TimelineScene*>(scene());
 
     // setting the bounding rect in relation with displayed part of the scene

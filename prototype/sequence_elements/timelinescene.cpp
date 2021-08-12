@@ -35,7 +35,7 @@ TimelineScene::TimelineScene(SequenceRegister* reg, QGraphicsView* vview, QObjec
     view = vview;
     ruler.setSize(10400000);
     timerr = new QTimer(this);
-    timerr->start(30);
+    timerr->start(20);
     connect (timerr, SIGNAL(timeout()), this,SLOT( handleViewMoveWithMouse()));
 
     setSceneRect(0,0, 10000, 400);
@@ -755,8 +755,10 @@ void TimelineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *e)
     }
     auto file = parent->selectionModel()->selectedIndexes()[0].data().toString();
     auto path =  parent->model()->headerData(0, Qt::Horizontal, 0).toString();
+
     if (file.right(3)=="tbe") // this evaluation should be done differently
     {
+            clearSelection();
         auto list = przreg->currentExpandedFolderSounds->value(path);
         foreach (TbeSoundData* current, list){
             if(current->filename == file){
@@ -786,6 +788,7 @@ void TimelineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *e)
         qDebug()<<"trying to insert background";
     }
     else{
+            clearSelection();
         auto list = przreg->currentExpandedFolderSequences->value(path);
         foreach (SequenceData* current, list){
             if(current->name == file){
@@ -1190,8 +1193,10 @@ void TimelineScene::keyPressEvent(QKeyEvent *e)
             qDebug()<<seq->filename<< "name "<<seq->path;
     }
     else if (e->key()==16777236){
-        displaceView(true);
+        displaceView(false);
     }
+    else if (e->key()==16777234)
+        displaceView(true);
 
 }
 

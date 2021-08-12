@@ -16,6 +16,7 @@ public:
     bool corrupted = false;
     bool checkIntegrity();
     QJsonObject generateJson();
+    bool operator==(const BackgroundPrz &other) { return filename == other.filename && path == other.path; }
 signals:
 
 };
